@@ -1,0 +1,4 @@
+mcp_servers:
+  flight_search:
+    transport: "streamable_http"
+    url: "http://127.0.0.1:8000/flight_search/mcp/"

@@ -1,0 +1,344 @@
+{
+  "search_metadata": {
+    "id": "6823937280c9636a40254d62",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/034473d11888be6e/6823937280c9636a40254d62.json",
+    "created_at": "2025-05-13 18:46:10 UTC",
+    "processed_at": "2025-05-13 18:46:10 UTC",
+    "google_flights_url": "https://www.google.com/travel/flights?hl=en&gl=in&curr=INR&tfs=CBwQAhpgEgoyMDI1LTA2LTAyIh8KA0JPTRIKMjAyNS0wNi0wMhoDSEtHKgJDWDIDNjYwIh8KA0hLRxIKMjAyNS0wNi0wMhoDSE5EKgJDWDIDNTQyagcIARIDQk9NcgcIARIDSE5EGh4SCjIwMjUtMDYtMTRqBwgBEgNITkRyBwgBEgNCT01CBwEBAQEBAQFIAXABmAEB&tfu=EgIIAQ",
+    "raw_html_file": "https://serpapi.com/searches/034473d11888be6e/6823937280c9636a40254d62.html",
+    "prettify_html_file": "https://serpapi.com/searches/034473d11888be6e/6823937280c9636a40254d62.prettify",
+    "total_time_taken": 1.39
+  },
+  "search_parameters": {
+    "engine": "google_flights",
+    "hl": "en",
+    "gl": "in",
+    "type": "1",
+    "departure_id": "BOM",
+    "arrival_id": "HND",
+    "outbound_date": "2025-06-02",
+    "return_date": "2025-06-14",
+    "travel_class": 1,
+    "adults": 7,
+    "children": 0,
+    "infants_in_seat": 0,
+    "infants_on_lap": 0,
+    "departure_token": "WyJDalJJUlZWQlVuSkZjMGhCVnpSQlFXc3RXSGRDUnkwdExTMHRMUzB0TFc5clltbDZPRUZCUVVGQlIyZHFhbW8wU1UxQ2RVVkJFZ3REV0RZMk1IeERXRFUwTWhvTENOeU5GeEFBR2dOSlRsSTRISENya3hzPSIsW1siQk9NIiwiMjAyNS0wNi0wMiIsIkhLRyIsbnVsbCwiQ1giLCI2NjAiXSxbIkhLRyIsIjIwMjUtMDYtMDIiLCJITkQiLG51bGwsIkNYIiwiNTQyIl1dXQ==",
+    "currency": "INR",
+    "deep_search": true,
+    "sort_by": "1"
+  },
+  "other_flights": [
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Haneda Airport",
+            "id": "HND",
+            "time": "2025-06-14 10:05"
+          },
+          "arrival_airport": {
+            "name": "Hong Kong International Airport",
+            "id": "HKG",
+            "time": "2025-06-14 13:50"
+          },
+          "duration": 285,
+          "airplane": "Boeing 777",
+          "airline": "Cathay Pacific",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/CX.png",
+          "travel_class": "Economy",
+          "flight_number": "CX 543",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 1337 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        },
+        {
+          "departure_airport": {
+            "name": "Hong Kong International Airport",
+            "id": "HKG",
+            "time": "2025-06-14 17:55"
+          },
+          "arrival_airport": {
+            "name": "Chhatrapati Shivaji Maharaj International Airport Mumbai",
+            "id": "BOM",
+            "time": "2025-06-14 21:25"
+          },
+          "duration": 360,
+          "airplane": "Boeing 777",
+          "airline": "Cathay Pacific",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/CX.png",
+          "travel_class": "Economy",
+          "flight_number": "CX 685",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 2338 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 245,
+          "name": "Hong Kong International Airport",
+          "id": "HKG"
+        }
+      ],
+      "total_duration": 890,
+      "carbon_emissions": {
+        "this_flight": 3675000,
+        "typical_for_this_route": 4154000,
+        "difference_percent": -12
+      },
+      "price": 377895,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/CX.png",
+      "booking_token": "WyJDalJJT0VkNk5GcEJaVTF6YjFGQlJGVlVjbWRDUnkwdExTMHRMUzB0TFc5clltZG9OVUZCUVVGQlIyZHFhek5KVDJsa1JXOUJFZ3REV0RVME0zeERXRFk0TlJvTENLZUlGeEFBR2dOSlRsSTRISEQ5akJzPSIsW1siQk9NIiwiMjAyNS0wNi0wMiIsIkhLRyIsbnVsbCwiQ1giLCI2NjAiXSxbIkhLRyIsIjIwMjUtMDYtMDIiLCJITkQiLG51bGwsIkNYIiwiNTQyIl1dLFtbIkhORCIsIjIwMjUtMDYtMTQiLCJIS0ciLG51bGwsIkNYIiwiNTQzIl0sWyJIS0ciLCIyMDI1LTA2LTE0IiwiQk9NIixudWxsLCJDWCIsIjY4NSJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Haneda Airport",
+            "id": "HND",
+            "time": "2025-06-14 16:20"
+          },
+          "arrival_airport": {
+            "name": "Hong Kong International Airport",
+            "id": "HKG",
+            "time": "2025-06-14 20:00"
+          },
+          "duration": 280,
+          "airplane": "Boeing 777",
+          "airline": "Cathay Pacific",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/CX.png",
+          "travel_class": "Economy",
+          "flight_number": "CX 549",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 1723 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Hong Kong International Airport",
+            "id": "HKG",
+            "time": "2025-06-15 20:45"
+          },
+          "arrival_airport": {
+            "name": "Chhatrapati Shivaji Maharaj International Airport Mumbai",
+            "id": "BOM",
+            "time": "2025-06-16 00:20"
+          },
+          "duration": 365,
+          "airplane": "Boeing 777",
+          "airline": "Cathay Pacific",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/CX.png",
+          "travel_class": "Economy",
+          "flight_number": "CX 663",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 2338 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 1485,
+          "name": "Hong Kong International Airport",
+          "id": "HKG",
+          "overnight": true
+        }
+      ],
+      "total_duration": 2130,
+      "carbon_emissions": {
+        "this_flight": 4061000,
+        "typical_for_this_route": 4154000,
+        "difference_percent": -2
+      },
+      "price": 449526,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/CX.png",
+      "booking_token": "WyJDalJJT0VkNk5GcEJaVTF6YjFGQlJGVlVjbWRDUnkwdExTMHRMUzB0TFc5clltZG9OVUZCUVVGQlIyZHFhek5KVDJsa1JXOUJFZ3REV0RVME9YeERXRFkyTXhvTENQYTNHeEFBR2dOSlRsSTRISERFbmlBPSIsW1siQk9NIiwiMjAyNS0wNi0wMiIsIkhLRyIsbnVsbCwiQ1giLCI2NjAiXSxbIkhLRyIsIjIwMjUtMDYtMDIiLCJITkQiLG51bGwsIkNYIiwiNTQyIl1dLFtbIkhORCIsIjIwMjUtMDYtMTQiLCJIS0ciLG51bGwsIkNYIiwiNTQ5Il0sWyJIS0ciLCIyMDI1LTA2LTE1IiwiQk9NIixudWxsLCJDWCIsIjY2MyJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Haneda Airport",
+            "id": "HND",
+            "time": "2025-06-14 08:05"
+          },
+          "arrival_airport": {
+            "name": "Chubu Centrair International Airport",
+            "id": "NGO",
+            "time": "2025-06-14 09:00"
+          },
+          "duration": 55,
+          "airplane": "Boeing 737",
+          "airline": "JAL",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/JL.png",
+          "travel_class": "Economy",
+          "flight_number": "JL 201",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Some seats with power outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 476 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Chubu Centrair International Airport",
+            "id": "NGO",
+            "time": "2025-06-14 10:10"
+          },
+          "arrival_airport": {
+            "name": "Hong Kong International Airport",
+            "id": "HKG",
+            "time": "2025-06-14 13:25"
+          },
+          "duration": 255,
+          "airplane": "Airbus A321neo",
+          "airline": "Cathay Pacific",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/CX.png",
+          "travel_class": "Economy",
+          "flight_number": "CX 563",
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 1329 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        },
+        {
+          "departure_airport": {
+            "name": "Hong Kong International Airport",
+            "id": "HKG",
+            "time": "2025-06-14 17:55"
+          },
+          "arrival_airport": {
+            "name": "Chhatrapati Shivaji Maharaj International Airport Mumbai",
+            "id": "BOM",
+            "time": "2025-06-14 21:25"
+          },
+          "duration": 360,
+          "airplane": "Boeing 777",
+          "airline": "Cathay Pacific",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/CX.png",
+          "travel_class": "Economy",
+          "flight_number": "CX 685",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 2338 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 70,
+          "name": "Chubu Centrair International Airport",
+          "id": "NGO"
+        },
+        {
+          "duration": 270,
+          "name": "Hong Kong International Airport",
+          "id": "HKG"
+        }
+      ],
+      "total_duration": 1010,
+      "carbon_emissions": {
+        "this_flight": 4144000,
+        "typical_for_this_route": 4154000,
+        "difference_percent": 0
+      },
+      "price": 550928,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "booking_token": "WyJDalJJT0VkNk5GcEJaVTF6YjFGQlJGVlVjbWRDUnkwdExTMHRMUzB0TFc5clltZG9OVUZCUVVGQlIyZHFhek5KVDJsa1JXOUJFaEZLVERJd01YeERXRFUyTTN4RFdEWTROUm9MQ0pEUUlSQUFHZ05KVGxJNEhIQ3d3U2M9IixbWyJCT00iLCIyMDI1LTA2LTAyIiwiSEtHIixudWxsLCJDWCIsIjY2MCJdLFsiSEtHIiwiMjAyNS0wNi0wMiIsIkhORCIsbnVsbCwiQ1giLCI1NDIiXV0sW1siSE5EIiwiMjAyNS0wNi0xNCIsIk5HTyIsbnVsbCwiSkwiLCIyMDEiXSxbIk5HTyIsIjIwMjUtMDYtMTQiLCJIS0ciLG51bGwsIkNYIiwiNTYzIl0sWyJIS0ciLCIyMDI1LTA2LTE0IiwiQk9NIixudWxsLCJDWCIsIjY4NSJdXV0="
+    }
+  ],
+  "airports": [
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "BOM",
+            "name": "Chhatrapati Shivaji Maharaj International Airport Mumbai"
+          },
+          "city": "Mumbai",
+          "country": "India",
+          "country_code": "IN",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTJ5Q0R5IIxjWsuWKt6lnlBIOlNfNwTqC8yBtOP_uMdzFrluYmn3jZ-6dyEWo6AbIH3x57scrUgF3gvWA",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRMqVWevN4qkQ8u4HrxtHbv2Oy7UigPckL8bgZUJQWQgjvmJxG7oggYxd2Rw5MwjiBYzZFpr939opSbON9CxkwdD-7DK9it3TPq1ea8pxU"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "HND",
+            "name": "Haneda Airport"
+          },
+          "city": "Tokyo",
+          "country": "Japan",
+          "country_code": "JP",
+          "image": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTqHkzEeI2bSglPzmSGZL7bxXmn0wJgOn2ZtEN8I47uBnzY1CnHzGtD-YseJXqyexcAcw_uJp-D5HTkCg",
+          "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRLnIToEgwiM_jV3cbw5eQZoUAIg6XqdrJAiClDyyg0w-JBSRN5ZeOT-iFb3SvwkwP1uoBCmT-gKE5VcyCYf-xq4guL4NAFICSaNyOnYOA"
+        }
+      ]
+    },
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "HND",
+            "name": "Haneda Airport"
+          },
+          "city": "Tokyo",
+          "country": "Japan",
+          "country_code": "JP",
+          "image": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTqHkzEeI2bSglPzmSGZL7bxXmn0wJgOn2ZtEN8I47uBnzY1CnHzGtD-YseJXqyexcAcw_uJp-D5HTkCg",
+          "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRLnIToEgwiM_jV3cbw5eQZoUAIg6XqdrJAiClDyyg0w-JBSRN5ZeOT-iFb3SvwkwP1uoBCmT-gKE5VcyCYf-xq4guL4NAFICSaNyOnYOA"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "BOM",
+            "name": "Chhatrapati Shivaji Maharaj International Airport Mumbai"
+          },
+          "city": "Mumbai",
+          "country": "India",
+          "country_code": "IN",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTJ5Q0R5IIxjWsuWKt6lnlBIOlNfNwTqC8yBtOP_uMdzFrluYmn3jZ-6dyEWo6AbIH3x57scrUgF3gvWA",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRMqVWevN4qkQ8u4HrxtHbv2Oy7UigPckL8bgZUJQWQgjvmJxG7oggYxd2Rw5MwjiBYzZFpr939opSbON9CxkwdD-7DK9it3TPq1ea8pxU"
+        }
+      ]
+    }
+  ]
+}
