@@ -1,6 +1,6 @@
 import contextlib
 from fastapi import FastAPI
-from tools.flight_search import mcp as flight_search_mcp
+from .flight_search import mcp as flight_search_mcp
 import uvicorn
 
 # Create a combined lifespan to manage both session managers
