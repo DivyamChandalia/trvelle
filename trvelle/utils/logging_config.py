@@ -65,6 +65,13 @@ def configure_logging(
         console_handler.setFormatter(formatter)
         root_logger.addHandler(console_handler)
 
+    # Suppress noisy HTTP and MCP logs
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("mcp.client.streamable_http").setLevel(logging.WARNING)
+    logging.getLogger("mcp.client").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("requests").setLevel(logging.WARNING)
+
     root_logger.info(f"Logging configured. Log file: {log_file}")
 
 

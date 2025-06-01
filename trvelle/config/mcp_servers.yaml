@@ -2,3 +2,12 @@ mcp_servers:
   flight_search:
     transport: "streamable_http"
     url: "http://127.0.0.1:8000/flight_search/mcp/"
+  itinerary:
+    transport: "streamable_http"
+    url: "http://127.0.0.1:8000/itinerary_tool/mcp/"
+  reseracher_agent:
+    transport: "streamable_http"
+    url: "http://127.0.0.1:8000/researcher_agent_tool/mcp/"
+  trip_segment:
+    transport: "streamable_http"
+    url: "http://127.0.0.1:8000/trip_segment_tool/mcp/"

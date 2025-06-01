@@ -12,10 +12,10 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import AIMessage, SystemMessage, ToolMessage, HumanMessage, BaseMessage
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from langchain_tavily import TavilySearch
 from ..utils import get_logger, load_environment, configure_logging
 from ..prompts import SUPERVISOR_INSTRUCTIONS, RESEARCHER_INSTRUCTIONS
 from ..database import DBHandler
-from ..tools import FlightSearchInput, FlightLeg
 import uuid
 load_environment()
 configure_logging()
@@ -28,74 +28,98 @@ class Orchestrator:
         self.supervisor = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17")
         self.researcher = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17")
         self.mcp_config = self.load_mcp_config()
+        self.mcp_client = MultiServerMCPClient(self.mcp_config['mcp_servers'])
+        self.tavily_search = TavilySearch(api_key=os.getenv("TAVILY_API_KEY"))
         self.sequential_researchers = True
-        self.chat_history = []  # In-memory chat history
+        self.tools_by_agent = {
+            "supervisor": ["flight_search", "researcher_agent", "itinerary_tool", "tavily_search"],
+            "researcher": ["trip_segment", "hotel_search", "tavily_search"],
+            "system": ["flight_search", "researcher_agent", "itinerary_tool", "tavily_search", "trip_segment", "hotel_search"]
+        }
+        self.chat_history = {} # In-memory chat history
 
     def load_mcp_config(self) -> Dict[str, Any]:
         with open("trvelle/config/mcp_servers.yaml", 'r') as f:
             mcp_config = yaml.safe_load(f)
         return mcp_config
     
-    async def get_tools(self):
-        client = MultiServerMCPClient(self.mcp_config['mcp_servers'])
-        tools = await client.get_tools()
-        return tools, {tool.name: tool for tool in tools}
+    async def get_tools(self, requester: str):
+        
+        tools = await self.mcp_client.get_tools()
+        tools.append(self.tavily_search)
+        tools_to_requester = []
+        for tool in tools:
+            if tool.name in self.tools_by_agent[requester]:
+                tools_to_requester.append(tool)
+
+        return tools_to_requester, {tool.name: tool for tool in tools_to_requester}
 
     def load_chat_history(self, config: Dict[str, Any]) -> None:
         """Load chat history from database into memory once."""
         user_id = config.get("user_id")
         chat_id = config.get("chat_id")
-        
-        if user_id and chat_id:
-            self.chat_history = self.db_handler.load_chat_history(user_id, chat_id)
+        researcher_id = uuid.UUID(config.get("researcher_id")) if config.get("researcher_id") else None
+        segment_number = config.get("segment_number") if config.get("segment_number") else None
+        if user_id and chat_id and researcher_id:
+            self.chat_history[config.get("researcher_id")] = self.db_handler.load_chat_history(user_id, chat_id, researcher_id, segment_number)
+            logger.info(f"Loaded {len(self.chat_history)} messages from database for user {user_id} and chat {chat_id}")
+        elif user_id and chat_id:
+            self.chat_history[config.get("chat_id")] = self.db_handler.load_chat_history(user_id, chat_id)
             logger.info(f"Loaded {len(self.chat_history)} messages from database")
         else:
             self.chat_history = []
-            logger.warning("No user_id or chat_id provided, starting with empty history")
+            logger.warning("No user_id or chat_id provided, starting with empty history") 
 
     @db_handler.save_user_input()
     def get_message(self, query: str, config: Optional[Dict[str, Any]] = None) -> HumanMessage:
         """Create a human message and add it to history."""
         message = HumanMessage(content=query)
-        self.chat_history.append(message)
+        id = config.get("researcher_id") if config and config.get("researcher_id") else config.get("chat_id")
+        self.chat_history[id].append(message)
         return message
     
-    @db_handler.save_supervisor_output()
+    @db_handler.save_output()
     async def call_supervisor_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         logger.info(f"Calling supervisor with message history length: {len(self.chat_history)}")
         
-        # Prepare messages for supervisor (full history + current input)
-        all_messages = self.chat_history.copy()
+        all_messages = self.chat_history[config.get("chat_id")]
         
         prompt_template = ChatPromptTemplate.from_messages([
             SystemMessage(content=SUPERVISOR_INSTRUCTIONS, name="Supervisor_System_Message"),
             MessagesPlaceholder(variable_name="message")
         ])
         formatted_prompt = prompt_template.format_prompt(message=all_messages)
-        tools, tools_by_name = await self.get_tools()
+        tools, tools_by_name = await self.get_tools(requester="supervisor")
         response = await self.supervisor.bind_tools(tools).ainvoke(formatted_prompt)
         response.name = "Supervisor_Agent"
         
-        # Add supervisor response to history
-        self.chat_history.append(response)
+        self.chat_history[config.get("chat_id")].append(response)
         
         return response
     
-    async def call_researcher_llm(self, message: List[BaseMessage], config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    @db_handler.save_output()
+    async def call_researcher_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        logger.info(f"Calling researcher with message history length: {len(self.chat_history)}")
+
+        all_messages = self.chat_history[config.get("researcher_id")]
+
         prompt_template = ChatPromptTemplate.from_messages([
             SystemMessage(content=RESEARCHER_INSTRUCTIONS, name="Researcher_System_Message"),
             MessagesPlaceholder(variable_name="message")
         ])
-        formatted_prompt = prompt_template.format_prompt(message=message)
-        tools, tools_by_name = await self.get_tools()
+        formatted_prompt = prompt_template.format_prompt(message=all_messages)
+        tools, tools_by_name = await self.get_tools(requester="researcher")
         response = await self.researcher.bind_tools(tools).ainvoke(formatted_prompt)
-        response.name = "Researcher_Agent"
+        response.name = "Researcher_Agent_"+str(config.get("segment_number"))
+
+        self.chat_history[config.get("researcher_id")].append(response)
+
         return response
     
     @db_handler.save_tools_output()
     async def handle_tools(self, tool_calls: List[Dict[str, Any]], config: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         logger.info(f"Handling tool calls: {tool_calls}")
-        _, tools = await self.get_tools()
+        _, tools = await self.get_tools("system")
         messages = []
         raw_messages = []
         
@@ -117,63 +141,78 @@ class Orchestrator:
                 tool_call_id=tool_call.get("id"),
                 name=tool_name)
             
-            # Add tool message to history
-            self.chat_history.append(message)
-            
             raw_messages.append(raw)
             messages.append(message)
-        self.chat_history.extend(messages)
+
+        id = config.get("researcher_id") if config and config.get("researcher_id") else config.get("chat_id")
+        self.chat_history[id].extend(messages)
         return messages, raw_messages
     
-    async def handover(self, tool_results: List[BaseMessage], config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Check if message requires handover to researcher."""
-        logger.info(f"Handover tool results: {tool_results}")
-        research_results = []
-        for tool_result in tool_results:
-            if hasattr(tool_result, "research_segments") and tool_result.get("research_segments"):
-                research_result = await self.run_research_tasks(tool_result["research_segments"], config)
-                research_results.append(research_result)
-        return research_results
-    
+    @db_handler.save_tools_output()
     async def run_research_tasks(self, research_segments: List[Dict[str, Any]], config: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         logger.info(f"Running research tasks for segments: {research_segments}")
         research_results = []
-        for i, research_segment in enumerate(research_segments):
-            message = HumanMessage(content=f"Plan this trip segment: {research_segment}")
-            segment_number = research_segment.get("segment_number", i)
-            segment_config = config.copy() if config else {}
-            segment_config['chat_id'] = f'{config['chat_id']}-{segment_number}'
-            
+        for i, research_segment in enumerate(research_segments): # TODO: validate reserach_agent_tool schema
+            message = f"Plan this trip segment: {research_segment['args']}"
+            config["segment_number"] = research_segment["args"]["segment_number"]
+            config["researcher_id"] = research_segment.get("id")
             if self.sequential_researchers:
-                research_results.append(await self.call_researcher_llm([message], segment_config))
+                research_results.append(await self.orchestrate_research(message, config))
             else:
-                research_results.append(self.call_researcher_llm([message], segment_config))
-        
+                research_results.append(self.orchestrate_research(message, config))
+
         if self.sequential_researchers:
-            return research_results
+            research_results =  research_results
         else:
-            return await asyncio.gather(*research_results)
+            research_results = await asyncio.gather(*research_results)
+        messages = []
+        for result, segment in zip(research_results, research_segments):
+            message = ToolMessage(
+                content=result,
+                tool_call_id=segment.get("id"),
+                name="Researcher_Agent_"+str(segment["args"]["segment_number"])
+            )
+            messages.append(message)
+        self.chat_history[config.get("chat_id")].extend(messages)
+        return messages, [None] * len(messages)  # Assuming no raw results for now
+        
+    async def orchestrate_research(self, query: str, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Orchestrate the research process with in-memory history management."""
+        if config:
+            self.load_chat_history(config)
+        message = self.get_message(query, config)
+        researcher_response = await self.call_researcher_llm(config)
+        while researcher_response.tool_calls:
+            tool_calls = researcher_response.tool_calls
+            tool_results = await self.handle_tools(tool_calls, config)
+            if "trip_segment" in str(tool_results):
+                return tool_results
+            researcher_response = await self.call_researcher_llm(config)
+
+        return researcher_response
 
     async def orchestrate(self, query: str, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Main orchestration method with in-memory history management."""
-        # Load chat history from database once at the beginning
+
         if config:
             self.load_chat_history(config)
-        
-        # Create and add human message to history
         message = self.get_message(query, config)
-        
-        # Call supervisor with full history context
-        supervisor_response = await self.call_supervisor_llm( config)
-        
-        # Handle tool calls and continue conversation
+        supervisor_response = await self.call_supervisor_llm(config)
         while supervisor_response.tool_calls:
             tool_calls = supervisor_response.tool_calls
+
+            handover = []
+            for tool_call in tool_calls:
+                if tool_call["name"] == "researcher_agent":
+                    print(f"Handing over tool call {tool_call['name']} to researcher agent")
+                    handover.append(tool_call)
+                    tool_calls.remove(tool_call)
+
             tool_results = await self.handle_tools(tool_calls, config)
             if "final_itinerary" in str(tool_results): 
                 return tool_results["final_itinerary"]
             
-            research_results = await self.handover(tool_results, config)
+            research_results = await self.run_research_tasks(handover, config)
             supervisor_response = await self.call_supervisor_llm(config)
 
         return supervisor_response
