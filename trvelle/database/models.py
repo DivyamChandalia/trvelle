@@ -53,7 +53,7 @@ class ChatSession(Base):
     # Relationships
     user = relationship("User", back_populates="chat_sessions")
     messages = relationship("Message", back_populates="chat_session", cascade="all, delete-orphan")
-    tool_calls = relationship("ToolCall", back_populates="chat_session", cascade="all, delete-orphan")
+    tool_calls = relationship("ToolExecution", back_populates="chat_session", cascade="all, delete-orphan")
     final_itineraries = relationship("FinalItinerary", back_populates="chat_session", cascade="all, delete-orphan")
     researcher_agents = relationship("ResearcherAgent", back_populates="chat_session", cascade="all, delete-orphan")
     
@@ -74,10 +74,9 @@ class Message(Base):
     message_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     chat_id = Column(UUID(as_uuid=True), ForeignKey('chat_sessions.chat_id'), nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.user_id'), nullable=False)
-    message_type = Column(String(50), nullable=False)  # 'Human', 'AI', 'System', 'Tool'
+    type = Column(String(50), nullable=False)  # 'human', 'ai', 'system', 'tool'
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    message_order = Column(Integer, nullable=False)  # Order within the chat session
     message_name = Column(String(255), nullable=True)  # e.g., 'Supervisor_Agent_Response'
     additional_kwargs = Column(JSONB, nullable=True)  # Additional metadata for the message
 
@@ -92,90 +91,50 @@ class Message(Base):
     # Relationships
     chat_session = relationship("ChatSession", back_populates="messages")
     user = relationship("User")
-    tool_calls = relationship("ToolCall", back_populates="message", cascade="all, delete-orphan")
+    tool_execution = relationship("ToolExecution", back_populates="message", uselist=False)  # One-to-one
     
     # Indexes
     __table_args__ = (
         Index('idx_messages_chat_id', 'chat_id'),
         Index('idx_messages_user_id', 'user_id'),
         Index('idx_messages_created_at', 'created_at'),
-        Index('idx_messages_order', 'chat_id', 'message_order'),
     )
     
     def __repr__(self):
-        return f"<Message(message_id={self.message_id}, type={self.message_type})>"
+        return f"<Message(message_id={self.message_id}, type={self.type})>"
 
 
-class ToolCall(Base):
-    """Tool calls table to store information about tool invocations"""
-    __tablename__ = 'tool_calls'
+class ToolExecution(Base):
+    """Tool execution metadata table to store detailed tool invocation data"""
+    __tablename__ = 'tool_executions'
     
-    tool_call_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    message_id = Column(UUID(as_uuid=True), ForeignKey('messages.message_id'), primary_key=True)
     chat_id = Column(UUID(as_uuid=True), ForeignKey('chat_sessions.chat_id'), nullable=False)
-    message_id = Column(UUID(as_uuid=True), ForeignKey('messages.message_id'), nullable=True)
+    
+    # Tool identification
+    tool_name = Column(String(255), nullable=False)
     
     # Tool call details
-    tool_name = Column(String(255), nullable=False)
-    tool_call_args = Column(JSONB, nullable=False)  # Arguments passed to the tool
     created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
+    execution_time_ms = Column(Integer, nullable=True)  # Total execution time in milliseconds
     
-    # Execution tracking
-    execution_status = Column(String(50), default='pending', nullable=False)  # 'pending', 'success', 'error'
-    execution_time_ms = Column(Integer, nullable=True)  # Execution time in milliseconds
-    error_message = Column(Text, nullable=True)  # Store error messages if execution fails
+    # Results
+    raw_response = Column(JSONB, nullable=True)  # Raw API response
+    unique_identifier = Column(String(255), nullable=True)  # Unique identifier for the tool call
     
     # Relationships
-    chat_session = relationship("ChatSession", back_populates="tool_calls")
-    message = relationship("Message", back_populates="tool_calls")
-    tool_responses = relationship("ToolResponse", back_populates="tool_call", cascade="all, delete-orphan")
+    message = relationship("Message", back_populates="tool_execution")
+    chat_session = relationship("ChatSession")
     
     # Indexes
     __table_args__ = (
-        Index('idx_tool_calls_chat_id', 'chat_id'),
-        Index('idx_tool_calls_tool_name', 'tool_name'),
-        Index('idx_tool_calls_created_at', 'created_at'),
-        Index('idx_tool_calls_status', 'execution_status'),
+        Index('idx_tool_executions_message_id', 'message_id'),
+        Index('idx_tool_executions_chat_id', 'chat_id'),
+        Index('idx_tool_executions_tool_name', 'tool_name'),
     )
     
     def __repr__(self):
-        return f"<ToolCall(tool_call_id={self.tool_call_id}, tool_name={self.tool_name})>"
-
-
-class ToolResponse(Base):
-    """Tool responses table to store tool execution results"""
-    __tablename__ = 'tool_responses'
-    
-    response_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    tool_call_id = Column(UUID(as_uuid=True), ForeignKey('tool_calls.tool_call_id'), nullable=False)
-    
-    # Response details
-    response_content = Column(Text, nullable=True)  # Main response content
-    response_data = Column(JSONB, nullable=True)  # Structured response data
-    response_type = Column(String(50), nullable=False)  # 'success', 'error', 'partial'
-    created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    
-    # Processing metadata
-    processing_time_ms = Column(Integer, nullable=True)
-    raw_response = Column(JSONB, nullable=True)  # Store raw API responses for debugging
-    parsed_response = Column(JSONB, nullable=True)  # Store parsed/processed responses
-    
-    # Unique identifiers for external resources
-    unique_identifier = Column(String(255), nullable=True)  # e.g., flight UID, hotel UID
-    
-    # Relationships
-    tool_call = relationship("ToolCall", back_populates="tool_responses")
-    
-    # Indexes
-    __table_args__ = (
-        Index('idx_tool_responses_tool_call_id', 'tool_call_id'),
-        Index('idx_tool_responses_type', 'response_type'),
-        Index('idx_tool_responses_created_at', 'created_at'),
-        Index('idx_tool_responses_uid', 'unique_identifier'),
-    )
-    
-    def __repr__(self):
-        return f"<ToolResponse(response_id={self.response_id}, type={self.response_type})>"
-
+        return f"<ToolExecution(execution_id={self.execution_id}, tool_name={self.tool_name}, status={self.execution_status})>"
 
 class FinalItinerary(Base):
     """Final itineraries table to store completed travel plans"""

@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Import all your models from the models.py file
-from .models import Base, User, ChatSession, Message, ToolCall, ToolResponse, FinalItinerary, ResearcherAgent
+from .models import Base, User, ChatSession, Message, ToolExecution, FinalItinerary, ResearcherAgent
 
 def create_tables():
     """
@@ -34,5 +34,18 @@ def create_tables():
         print("Please ensure PostgreSQL is running and the database/user exist and are accessible.")
         print("Also check your DATABASE_URL connection string.")
 
+def delete_tables():
+    """
+    Deletes all tables defined in Base.metadata.
+    Use with caution as this will remove all data in the tables.
+    """
+    DATABASE_URL = os.getenv("DB_URI")
+    engine = create_engine(DATABASE_URL)
+    
+    # Drop all tables
+    Base.metadata.drop_all(engine)
+    print("All tables have been deleted.")
+
 if __name__ == "__main__":
+    delete_tables()
     create_tables()

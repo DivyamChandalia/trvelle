@@ -6,9 +6,8 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 import json
 from serpapi import GoogleSearch
-import logging
-
-logging.basicConfig(filename='my_simple_log.log', level=logging.INFO)
+# from ..utils import get_logger
+# logger = get_logger(__name__)
 
 mcp = FastMCP("FlightSearch")
 
@@ -160,7 +159,7 @@ async def flight_search(search_params: FlightSearchInput):
         search_params_dict = search_params.model_dump()
     else:
         search_params_dict = search_params
-    logging.info(search_params_dict)
+
     results = searcher.flight_search(search_params_dict)
     return results
 
