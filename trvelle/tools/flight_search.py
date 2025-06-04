@@ -57,7 +57,7 @@ class FlightSearch:
             total_duration_hours = option['total_duration'] // 60
             total_duration_minutes = option['total_duration'] % 60
             output.append(f"The total travel time is about {total_duration_hours} hours and {total_duration_minutes} minutes.")
-            print(option)
+            
             outbound_flights = option['flights'] # Assuming outbound is the first part before the first layover
             for i, flight in enumerate(outbound_flights):
                 output.append(f"- Flight {i + 1}:")

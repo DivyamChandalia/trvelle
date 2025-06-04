@@ -125,7 +125,7 @@ async def main():
         "information": "Budget: $800, prefer walking tours",
         "query": None
     }
-    print(await trip_segment_tool(**sample_segment))
+    print(await trip_segment(**sample_segment))
 
 # if __name__ == "__main__":
 #     import asyncio

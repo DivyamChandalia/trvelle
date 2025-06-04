@@ -58,10 +58,17 @@ class Orchestrator:
         """Load chat history from database into memory once."""
         user_id = config.get("user_id")
         chat_id = config.get("chat_id")
-        researcher_id = uuid.UUID(config.get("researcher_id")) if config.get("researcher_id") else None
         segment_number = config.get("segment_number") if config.get("segment_number") else None
-        if user_id and chat_id and researcher_id:
-            self.chat_history[config.get("researcher_id")] = self.db_handler.load_chat_history(user_id, chat_id, researcher_id, segment_number)
+        # Check if chat history is already loaded
+        if config.get("chat_id") in self.chat_history and segment_number is None:
+            logger.info(f"Chat history for chat_id {config.get('chat_id')} already loaded, skipping database load")
+            return
+        elif str(config.get("chat_id"))+str(segment_number) in self.chat_history and segment_number is not None:
+            logger.info(f"Chat history for chat_id {config.get('chat_id')} and segment {segment_number} already loaded, skipping database load")
+            return
+        
+        if user_id and chat_id and segment_number:
+            self.chat_history[str(config.get("chat_id"))+str(segment_number)] = self.db_handler.load_chat_history(user_id, chat_id, segment_number)
             logger.info(f"Loaded {len(self.chat_history)} messages from database for user {user_id} and chat {chat_id}")
         elif user_id and chat_id:
             self.chat_history[config.get("chat_id")] = self.db_handler.load_chat_history(user_id, chat_id)
@@ -74,7 +81,7 @@ class Orchestrator:
     def get_message(self, query: str, config: Optional[Dict[str, Any]] = None) -> HumanMessage:
         """Create a human message and add it to history."""
         message = HumanMessage(content=query)
-        id = config.get("researcher_id") if config and config.get("researcher_id") else config.get("chat_id")
+        id = str(config.get("chat_id"))+str(config.get("segment_number")) if config and config.get("segment_number") else config.get("chat_id")
         self.chat_history[id].append(message)
         return message
     
@@ -90,7 +97,13 @@ class Orchestrator:
         ])
         formatted_prompt = prompt_template.format_prompt(message=all_messages)
         tools, tools_by_name = await self.get_tools(requester="supervisor")
-        response = await self.supervisor.bind_tools(tools).ainvoke(formatted_prompt)
+        while retry:
+            try:
+                response = await self.researcher.bind_tools(tools).ainvoke(formatted_prompt)
+                if len(response.content)>0:
+                    retry = False
+            except Exception as e:
+                await asyncio.sleep(60)  # Retry after a short delay
         response.name = "Supervisor_Agent"
         
         self.chat_history[config.get("chat_id")].append(response)
@@ -101,7 +114,7 @@ class Orchestrator:
     async def call_researcher_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         logger.info(f"Calling researcher with message history length: {len(self.chat_history)}")
 
-        all_messages = self.chat_history[config.get("researcher_id")]
+        all_messages = self.chat_history[str(config.get("chat_id"))+str(config.get("segment_number"))]
 
         prompt_template = ChatPromptTemplate.from_messages([
             SystemMessage(content=RESEARCHER_INSTRUCTIONS, name="Researcher_System_Message"),
@@ -109,16 +122,24 @@ class Orchestrator:
         ])
         formatted_prompt = prompt_template.format_prompt(message=all_messages)
         tools, tools_by_name = await self.get_tools(requester="researcher")
-        response = await self.researcher.bind_tools(tools).ainvoke(formatted_prompt)
-        response.name = "Researcher_Agent_"+str(config.get("segment_number"))
+        retry = True
+        while retry:
+            try:
+                response = await self.researcher.bind_tools(tools).ainvoke(formatted_prompt)
+                if len(response.content)>0:
+                    retry = False
+            except Exception as e:
+                await asyncio.sleep(60)  # Retry after a short delay
 
-        self.chat_history[config.get("researcher_id")].append(response)
+        response.name = "Researcher_Agent_"+str(config.get("segment_number"))
+        print(f"Response from researcher: {response}")
+        self.chat_history[str(config.get("chat_id"))+str(config.get("segment_number"))].append(response)
 
         return response
     
     @db_handler.save_tools_output()
     async def handle_tools(self, tool_calls: List[Dict[str, Any]], config: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        logger.info(f"Handling tool calls: {tool_calls}")
+        logger.info(f"Handling tool calls: {[tool_call['name'] for tool_call in tool_calls]}")
         _, tools = await self.get_tools("system")
         messages = []
         raw_messages = []
@@ -144,13 +165,14 @@ class Orchestrator:
             raw_messages.append(raw)
             messages.append(message)
 
-        id = config.get("researcher_id") if config and config.get("researcher_id") else config.get("chat_id")
+        id = str(config.get("chat_id"))+str(config.get("segment_number")) if config and config.get("segment_number") else config.get("chat_id")
         self.chat_history[id].extend(messages)
         return messages, raw_messages
     
     @db_handler.save_tools_output()
     async def run_research_tasks(self, research_segments: List[Dict[str, Any]], config: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        logger.info(f"Running research tasks for segments: {research_segments}")
+        logger.info(f"Running research tasks for segments: {[research_segment['args']['city'] for research_segment in research_segments]}")
+        config = config.copy()
         research_results = []
         for i, research_segment in enumerate(research_segments): # TODO: validate reserach_agent_tool schema
             message = f"Plan this trip segment: {research_segment['args']}"
@@ -167,8 +189,9 @@ class Orchestrator:
             research_results = await asyncio.gather(*research_results)
         messages = []
         for result, segment in zip(research_results, research_segments):
+            print(f'result: {result}, segment: {segment}')
             message = ToolMessage(
-                content=result,
+                content=result.content,
                 tool_call_id=segment.get("id"),
                 name="Researcher_Agent_"+str(segment["args"]["segment_number"])
             )
@@ -199,15 +222,18 @@ class Orchestrator:
         message = self.get_message(query, config)
         supervisor_response = await self.call_supervisor_llm(config)
         while supervisor_response.tool_calls:
-            tool_calls = supervisor_response.tool_calls
+            function_calls = supervisor_response.tool_calls
 
             handover = []
-            for tool_call in tool_calls:
+            tool_calls = []
+            for tool_call in function_calls:
                 if tool_call["name"] == "researcher_agent":
-                    print(f"Handing over tool call {tool_call['name']} to researcher agent")
+                    logger.info(f"Handing over tool call {tool_call['name']} to researcher agent")
                     handover.append(tool_call)
-                    tool_calls.remove(tool_call)
+                else:
+                    tool_calls.append(tool_call)
 
+            logger.info(f'Tool calls: {[tool["name"] for tool in tool_calls]}, Handover calls: {[tool["name"] for tool in handover]}')
             tool_results = await self.handle_tools(tool_calls, config)
             if "final_itinerary" in str(tool_results): 
                 return tool_results["final_itinerary"]

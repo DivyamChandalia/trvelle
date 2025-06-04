@@ -91,7 +91,6 @@ class Message(Base):
     # Relationships
     chat_session = relationship("ChatSession", back_populates="messages")
     user = relationship("User")
-    tool_execution = relationship("ToolExecution", back_populates="message", uselist=False)  # One-to-one
     
     # Indexes
     __table_args__ = (
@@ -108,7 +107,7 @@ class ToolExecution(Base):
     """Tool execution metadata table to store detailed tool invocation data"""
     __tablename__ = 'tool_executions'
     
-    message_id = Column(UUID(as_uuid=True), ForeignKey('messages.message_id'), primary_key=True)
+    message_id = Column(UUID(as_uuid=True), primary_key=True)
     chat_id = Column(UUID(as_uuid=True), ForeignKey('chat_sessions.chat_id'), nullable=False)
     
     # Tool identification
@@ -123,7 +122,6 @@ class ToolExecution(Base):
     unique_identifier = Column(String(255), nullable=True)  # Unique identifier for the tool call
     
     # Relationships
-    message = relationship("Message", back_populates="tool_execution")
     chat_session = relationship("ChatSession")
     
     # Indexes
@@ -190,7 +188,7 @@ class ResearcherAgent(Base):
     __tablename__ = 'researcher_agents'
     
     # Primary identifier for this researcher execution
-    agent_execution_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    message_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     
     # Links to parent supervisor message that triggered this researcher
     parent_message_id = Column(UUID(as_uuid=True), nullable=False) # TODO: link this using foreign key currently not possible as this table is populated before messages table

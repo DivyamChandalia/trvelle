@@ -75,7 +75,7 @@ class ResearcherAgent:
                 "details": e.errors()
             }
 
-researcher_agent = ResearcherAgent()
+researcher_agent_instance = ResearcherAgent()
 
 @mcp.tool()
 async def researcher_agent(
@@ -108,7 +108,7 @@ async def researcher_agent(
         feedback (Optional[str]): Feedback for modifying the trip segment.
     """
     try:
-        result = researcher_agent.process_trip_segment(
+        result = researcher_agent_instance.process_trip_segment(
             city=city,
             content=content,
             arrival_datetime=arrival_datetime,
@@ -138,7 +138,7 @@ async def main():
         "information": "Budget: $1500, prefer central location",
         "feedback": None
     }
-    print(await researcher_agent_tool(**sample_segment))
+    print(await researcher_agent(**sample_segment))
 
 # if __name__ == "__main__":
 #     import asyncio

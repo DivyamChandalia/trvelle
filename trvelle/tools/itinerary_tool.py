@@ -4,6 +4,7 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field, field_validator, model_validator
 from datetime import datetime, date
 import logging
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -115,9 +116,6 @@ class Itinerary(BaseModel):
             expected_day += 1
         return daily_plan
 
-class ItineraryStructuredOutput(BaseModel):
-    itinerary: Itinerary
-
 class ItineraryValidator:
     def __init__(self):
         pass
@@ -130,31 +128,30 @@ class ItineraryValidator:
         
         try:
             # If the input already has the 'itinerary' wrapper, use it directly
-            if 'itinerary' in itinerary_data:
-                model = ItineraryStructuredOutput.model_validate(itinerary_data)
-            else:
-                # If not, wrap it in the expected structure
-                model = ItineraryStructuredOutput.model_validate({'itinerary': itinerary_data})
+
+            model = Itinerary.model_validate(itinerary_data)
             
-            return model.model_dump()
+            return yaml.dump(model.model_dump())
         except Exception as e:
             logger.error(f"Error validating itinerary: {e}")
-            raise ValueError(f"Invalid itinerary format: {e}")
+            return {"error": str(e), "message": "Failed to validate itinerary"}
 
 validator = ItineraryValidator()
 
 @mcp.tool()
-async def itinerary_tool(itinerary: ItineraryStructuredOutput) -> Dict[str, Any]:
+async def itinerary_tool(itinerary: Itinerary) -> Dict[str, Any]:
     """
     Validate and structure a trip itinerary according to the Itinerary schema.
-    Input must be a JSON object matching ItineraryStructuredOutput (with top-level 'itinerary').
+    Input must be a JSON object matching Itinerary (with top-level 'itinerary').
     
     Args:
-        itinerary (ItineraryStructuredOutput) -> Dict[str, Any]: The itinerary data to validate and format
+        itinerary (Itinerary) -> Dict[str, Any]: The itinerary data to validate and format
     """
     try:
         result = validator.validate_and_format_itinerary(itinerary)
-        return result
+        if "error" in result:
+            return {"error": result["error"], "message": "Failed to validate itinerary"}
+        return  f"Itinerary displayed too the user!", result
     except Exception as e:
         return {"error": str(e), "message": "Failed to validate itinerary"}
 

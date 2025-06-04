@@ -268,6 +268,18 @@ wheels = [
 ]
 
 [[package]]
+name = "eralchemy"
+version = "1.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sqlalchemy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/19/05/5f69930e83a02360d9ed16660bdd58d9d501bffabd43d7dbbe8c14269143/eralchemy-1.5.0.tar.gz", hash = "sha256:fa66a3cd324abd27ad8e65908d7af48d8198c0c185aeb22189cf40516de25941", size = 24847, upload-time = "2024-09-17T11:34:32.651Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/10/ba/3cdc8433aa3d4afc95dd302c2a21611b90cc5b3ebbff5a4889bf6b2e3bdd/eralchemy-1.5.0-py3-none-any.whl", hash = "sha256:c87099aa1a4ac313df690cbe4eb642b596a635fc6b578f7963ce9570994dccc8", size = 19301, upload-time = "2024-09-17T11:34:31.211Z" },
+]
+
+[[package]]
 name = "fastapi"
 version = "0.115.12"
 source = { registry = "https://pypi.org/simple" }
@@ -504,6 +516,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d2/86/6684afe8691b024200fdc8983924f04b5f76bb401b9c700e5752a23595a0/gradio_client-1.10.2.tar.gz", hash = "sha256:bf71ba95714784fa77ca0cfb20189ad91c55e563c2dc71722d023a97f1815d7f", size = 321294, upload-time = "2025-05-30T13:59:55.756Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9b/1b/b372308c263379ae3ebc440512432979458330113bdee26cef86c89bf48e/gradio_client-1.10.2-py3-none-any.whl", hash = "sha256:6de67b6224123d264c7887caa0586b2a9e2c369ec32ca38927cf8a841694edcd", size = 323311, upload-time = "2025-05-30T13:59:54.555Z" },
+]
+
+[[package]]
+name = "graphviz"
+version = "0.20.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fa/83/5a40d19b8347f017e417710907f824915fba411a9befd092e52746b63e9f/graphviz-0.20.3.zip", hash = "sha256:09d6bc81e6a9fa392e7ba52135a9d49f1ed62526f96499325930e87ca1b5925d", size = 256455, upload-time = "2024-03-21T07:50:45.772Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/00/be/d59db2d1d52697c6adc9eacaf50e8965b6345cc143f671e1ed068818d5cf/graphviz-0.20.3-py3-none-any.whl", hash = "sha256:81f848f2904515d8cd359cc611faba817598d2feaac4027b266aa3eda7b3dde5", size = 47126, upload-time = "2024-03-21T07:50:43.091Z" },
 ]
 
 [[package]]
@@ -1466,6 +1487,12 @@ wheels = [
 ]
 
 [[package]]
+name = "pygraphviz"
+version = "1.14"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/66/ca/823d5c74a73d6b8b08e1f5aea12468ef334f0732c65cbb18df2a7f285c87/pygraphviz-1.14.tar.gz", hash = "sha256:c10df02377f4e39b00ae17c862f4ee7e5767317f1c6b2dfd04cea6acc7fc2bea", size = 106003, upload-time = "2024-09-29T18:31:12.471Z" }
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 source = { registry = "https://pypi.org/simple" }
@@ -1744,30 +1771,36 @@ name = "trvelle"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "eralchemy" },
     { name = "fastapi" },
     { name = "google-search-results" },
     { name = "gradio" },
+    { name = "graphviz" },
     { name = "langchain-google-genai" },
     { name = "langchain-mcp-adapters" },
     { name = "langchain-tavily" },
     { name = "langgraph" },
     { name = "mcp", extra = ["cli"] },
     { name = "psycopg2" },
+    { name = "pygraphviz" },
     { name = "pyyaml" },
     { name = "sqlalchemy" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "eralchemy", specifier = ">=1.5.0" },
     { name = "fastapi", specifier = ">=0.115.12" },
     { name = "google-search-results", specifier = ">=2.4.2" },
     { name = "gradio", specifier = ">=5.32.0" },
+    { name = "graphviz", specifier = ">=0.20.3" },
     { name = "langchain-google-genai", specifier = ">=2.1.4" },
     { name = "langchain-mcp-adapters", specifier = ">=0.1.1" },
     { name = "langchain-tavily", specifier = ">=0.2.0" },
     { name = "langgraph", specifier = ">=0.4.7" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.9.1" },
     { name = "psycopg2", specifier = ">=2.9.10" },
+    { name = "pygraphviz", specifier = ">=1.14" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "sqlalchemy", specifier = ">=2.0.41" },
 ]
