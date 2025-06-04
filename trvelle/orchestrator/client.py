@@ -25,8 +25,8 @@ class Orchestrator:
     db_handler = DBHandler()
     
     def __init__(self):
-        self.supervisor = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17")
-        self.researcher = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17")
+        self.supervisor = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
+        self.researcher = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
         self.mcp_config = self.load_mcp_config()
         self.mcp_client = MultiServerMCPClient(self.mcp_config['mcp_servers'])
         self.tavily_search = TavilySearch(api_key=os.getenv("TAVILY_API_KEY"))
@@ -97,12 +97,17 @@ class Orchestrator:
         ])
         formatted_prompt = prompt_template.format_prompt(message=all_messages)
         tools, tools_by_name = await self.get_tools(requester="supervisor")
+        retry = True
         while retry:
             try:
                 response = await self.researcher.bind_tools(tools).ainvoke(formatted_prompt)
-                if len(response.content)>0:
+                if len(response.content)>0 or response.tool_calls:
                     retry = False
+                else:
+                    logger.info(f"Supervisor response: {response}")
+                    await asyncio.sleep(60)  # Retry after a short delay
             except Exception as e:
+                logger.error(f"Error calling supervisor: {e}")
                 await asyncio.sleep(60)  # Retry after a short delay
         response.name = "Supervisor_Agent"
         
@@ -126,13 +131,15 @@ class Orchestrator:
         while retry:
             try:
                 response = await self.researcher.bind_tools(tools).ainvoke(formatted_prompt)
-                if len(response.content)>0:
+                if len(response.content)>0 or response.tool_calls:
                     retry = False
+                else:
+                    logger.info(f"Supervisor response: {response}")
+                    await asyncio.sleep(60)  # Retry after a short delay
             except Exception as e:
+                logger.error(f"Error calling supervisor: {e}")
                 await asyncio.sleep(60)  # Retry after a short delay
-
         response.name = "Researcher_Agent_"+str(config.get("segment_number"))
-        print(f"Response from researcher: {response}")
         self.chat_history[str(config.get("chat_id"))+str(config.get("segment_number"))].append(response)
 
         return response
@@ -189,7 +196,6 @@ class Orchestrator:
             research_results = await asyncio.gather(*research_results)
         messages = []
         for result, segment in zip(research_results, research_segments):
-            print(f'result: {result}, segment: {segment}')
             message = ToolMessage(
                 content=result.content,
                 tool_call_id=segment.get("id"),
@@ -208,8 +214,9 @@ class Orchestrator:
         while researcher_response.tool_calls:
             tool_calls = researcher_response.tool_calls
             tool_results = await self.handle_tools(tool_calls, config)
-            if "trip_segment" in str(tool_results):
-                return tool_results
+            for tool_result in tool_results:
+                if tool_result.name == "trip_segment":
+                    return tool_result
             researcher_response = await self.call_researcher_llm(config)
 
         return researcher_response
@@ -235,9 +242,6 @@ class Orchestrator:
 
             logger.info(f'Tool calls: {[tool["name"] for tool in tool_calls]}, Handover calls: {[tool["name"] for tool in handover]}')
             tool_results = await self.handle_tools(tool_calls, config)
-            if "final_itinerary" in str(tool_results): 
-                return tool_results["final_itinerary"]
-            
             research_results = await self.run_research_tasks(handover, config)
             supervisor_response = await self.call_supervisor_llm(config)
 

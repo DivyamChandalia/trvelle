@@ -2,7 +2,7 @@
 PostgreSQL Database Models for PlanIt Travel Assistant
 
 This module contains all the database models for storing user interactions,
-chat sessions, messages, tool calls, tool responses, final itineraries, 
+chat sessions, messages, tool executions
 and researcher agent history.
 """
 
@@ -32,7 +32,6 @@ class User(Base):
     
     # Relationships
     chat_sessions = relationship("ChatSession", back_populates="user", cascade="all, delete-orphan")
-    final_itineraries = relationship("FinalItinerary", back_populates="user", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<User(user_id={self.user_id}, username={self.username})>"
@@ -54,7 +53,6 @@ class ChatSession(Base):
     user = relationship("User", back_populates="chat_sessions")
     messages = relationship("Message", back_populates="chat_session", cascade="all, delete-orphan")
     tool_calls = relationship("ToolExecution", back_populates="chat_session", cascade="all, delete-orphan")
-    final_itineraries = relationship("FinalItinerary", back_populates="chat_session", cascade="all, delete-orphan")
     researcher_agents = relationship("ResearcherAgent", back_populates="chat_session", cascade="all, delete-orphan")
     
     # Indexes
@@ -134,54 +132,6 @@ class ToolExecution(Base):
     def __repr__(self):
         return f"<ToolExecution(execution_id={self.execution_id}, tool_name={self.tool_name}, status={self.execution_status})>"
 
-class FinalItinerary(Base):
-    """Final itineraries table to store completed travel plans"""
-    __tablename__ = 'final_itineraries'
-    
-    itinerary_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    chat_id = Column(UUID(as_uuid=True), ForeignKey('chat_sessions.chat_id'), nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.user_id'), nullable=False)
-    
-    # Itinerary details
-    trip_name = Column(String(255), nullable=True)
-    trip_description = Column(Text, nullable=True)
-    itinerary_data = Column(JSONB, nullable=False)  # Complete itinerary structure
-    created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc), nullable=False)
-    
-    # Trip metadata
-    start_date = Column(DateTime, nullable=True)
-    end_date = Column(DateTime, nullable=True)
-    destination = Column(String(255), nullable=True)
-    travelers_count = Column(Integer, nullable=True)
-    budget_range = Column(String(100), nullable=True)
-    trip_vibe = Column(String(255), nullable=True)
-    
-    # Status and validation
-    is_validated = Column(Boolean, default=False, nullable=False)
-    validation_errors = Column(JSONB, nullable=True)
-    is_active = Column(Boolean, default=True, nullable=False)
-    
-    # Unique identifier for sharing/referencing
-    unique_identifier = Column(String(255), nullable=True, unique=True)
-    
-    # Relationships
-    chat_session = relationship("ChatSession", back_populates="final_itineraries")
-    user = relationship("User", back_populates="final_itineraries")
-    
-    # Indexes
-    __table_args__ = (
-        Index('idx_final_itineraries_chat_id', 'chat_id'),
-        Index('idx_final_itineraries_user_id', 'user_id'),
-        Index('idx_final_itineraries_created_at', 'created_at'),
-        Index('idx_final_itineraries_dates', 'start_date', 'end_date'),
-        Index('idx_final_itineraries_destination', 'destination'),
-    )
-    
-    def __repr__(self):
-        return f"<FinalItinerary(itinerary_id={self.itinerary_id}, trip_name={self.trip_name})>"
-
-
 
 class ResearcherAgent(Base):
     """Researcher agents table to store researcher agent execution history and message chains"""
@@ -222,8 +172,3 @@ class ResearcherAgent(Base):
         Index('idx_researcher_agents_segment', 'parent_message_id', 'segment_number'),
         Index('idx_researcher_agents_created_at', 'created_at'),
     )
-
-
-
-# Add any additional indexes for performance optimization
-Index('idx_final_itineraries_uid', FinalItinerary.unique_identifier)

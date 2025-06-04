@@ -131,7 +131,7 @@ class ItineraryValidator:
 
             model = Itinerary.model_validate(itinerary_data)
             
-            return yaml.dump(model.model_dump())
+            return yaml.dump(model.model_dump(), default_flow_style=False)
         except Exception as e:
             logger.error(f"Error validating itinerary: {e}")
             return {"error": str(e), "message": "Failed to validate itinerary"}
