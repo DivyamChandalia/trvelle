@@ -98,10 +98,10 @@ class FlightSearch:
             if os.path.exists(cache_file):
                 with open(cache_file, "r") as f:
                     return json.load(f)
-        # print(params)
+
         search = GoogleSearch(params)
         results = search.get_dict()
-        # print(results)
+
         if self.use_cache:
             with open(cache_file, "w") as f:
                 json.dump(results, f, indent=2)
