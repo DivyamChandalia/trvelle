@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Import all your models from the models.py file
-from .models import Base, User, ChatSession, Message, ToolExecution, FinalItinerary, ResearcherAgent
+from .models import Base, User, ChatSession, Message, ToolExecution, ResearcherAgent
 
 def create_tables():
     """

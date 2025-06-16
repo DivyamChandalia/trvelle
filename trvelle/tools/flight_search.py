@@ -109,12 +109,15 @@ class FlightSearch:
 
     def handle_search(self, params):
         """Fetch outbound then inbound for each token."""
+        
         raw = self._fetch_results(params, "cache/two_way.json")
+        raw_list = [raw]
         first_leg = self._extract_flight_list(raw)
         all_returns = [first_leg]
         while first_leg.get("departure_token") is not None:
             params["departure_token"] = first_leg["departure_token"]
             inbound = self._fetch_results(params, "cache/return_way.json")
+            raw_list.append(inbound)
             return_flights = self._extract_flight_list(inbound)
             if not return_flights:
                 break

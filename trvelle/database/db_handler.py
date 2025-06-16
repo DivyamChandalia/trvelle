@@ -1,4 +1,4 @@
-from .models import Base, User, ChatSession, Message, ToolExecution, FinalItinerary, ResearcherAgent
+from .models import Base, User, ChatSession, Message, ToolExecution, ResearcherAgent
 from typing import List, Dict, Any, Optional
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, ToolMessage
 import datetime

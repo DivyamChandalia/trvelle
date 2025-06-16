@@ -1,5 +1,5 @@
 from mcp import ClientSession
-from typing import Optional, List
+from typing import Optional, List, AsyncGenerator
 import yaml
 from langchain_mcp_adapters.client import MultiServerMCPClient
 import asyncio
@@ -43,6 +43,15 @@ class Orchestrator:
             mcp_config = yaml.safe_load(f)
         return mcp_config
     
+    def _get_chat_history_key(self, config: Dict[str, Any]) -> str:
+        """Generate a consistent chat history key from config."""
+        chat_id = config.get("chat_id")
+        segment_number = config.get("segment_number")
+        
+        if segment_number is not None:
+            return f"{chat_id}#{segment_number}"
+        return str(chat_id)
+    
     async def get_tools(self, requester: str):
         
         tools = await self.mcp_client.get_tools()
@@ -58,38 +67,39 @@ class Orchestrator:
         """Load chat history from database into memory once."""
         user_id = config.get("user_id")
         chat_id = config.get("chat_id")
-        segment_number = config.get("segment_number") if config.get("segment_number") else None
+        segment_number = config.get("segment_number")
+        
+        history_key = self._get_chat_history_key(config)
+        
         # Check if chat history is already loaded
-        if config.get("chat_id") in self.chat_history and segment_number is None:
-            logger.info(f"Chat history for chat_id {config.get('chat_id')} already loaded, skipping database load")
-            return
-        elif str(config.get("chat_id"))+str(segment_number) in self.chat_history and segment_number is not None:
-            logger.info(f"Chat history for chat_id {config.get('chat_id')} and segment {segment_number} already loaded, skipping database load")
+        if history_key in self.chat_history:
+            logger.info(f"Chat history for key '{history_key}' already loaded, skipping database load")
             return
         
-        if user_id and chat_id and segment_number:
-            self.chat_history[str(config.get("chat_id"))+str(segment_number)] = self.db_handler.load_chat_history(user_id, chat_id, segment_number)
-            logger.info(f"Loaded {len(self.chat_history)} messages from database for user {user_id} and chat {chat_id}")
-        elif user_id and chat_id:
-            self.chat_history[config.get("chat_id")] = self.db_handler.load_chat_history(user_id, chat_id)
-            logger.info(f"Loaded {len(self.chat_history)} messages from database")
+        # Load chat history from database
+        if user_id and chat_id:
+            self.chat_history[history_key] = self.db_handler.load_chat_history(user_id, chat_id, segment_number)
+            segment_info = f" and segment {segment_number}" if segment_number is not None else ""
+            logger.info(f"Loaded {len(self.chat_history[history_key])} messages from database for user {user_id}, chat {chat_id}{segment_info}")
         else:
-            self.chat_history = []
+            self.chat_history[history_key] = []
             logger.warning("No user_id or chat_id provided, starting with empty history") 
 
     @db_handler.save_user_input()
     def get_message(self, query: str, config: Optional[Dict[str, Any]] = None) -> HumanMessage:
         """Create a human message and add it to history."""
         message = HumanMessage(content=query)
-        id = str(config.get("chat_id"))+str(config.get("segment_number")) if config and config.get("segment_number") else config.get("chat_id")
-        self.chat_history[id].append(message)
+        if config:
+            history_key = self._get_chat_history_key(config)
+            self.chat_history[history_key].append(message)
         return message
     
     @db_handler.save_output()
     async def call_supervisor_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         logger.info(f"Calling supervisor with message history length: {len(self.chat_history)}")
         
-        all_messages = self.chat_history[config.get("chat_id")]
+        history_key = self._get_chat_history_key(config)
+        all_messages = self.chat_history[history_key]
         
         prompt_template = ChatPromptTemplate.from_messages([
             SystemMessage(content=SUPERVISOR_INSTRUCTIONS, name="Supervisor_System_Message"),
@@ -111,7 +121,7 @@ class Orchestrator:
                 await asyncio.sleep(60)  # Retry after a short delay
         response.name = "Supervisor_Agent"
         
-        self.chat_history[config.get("chat_id")].append(response)
+        self.chat_history[history_key].append(response)
         
         return response
     
@@ -119,7 +129,8 @@ class Orchestrator:
     async def call_researcher_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         logger.info(f"Calling researcher with message history length: {len(self.chat_history)}")
 
-        all_messages = self.chat_history[str(config.get("chat_id"))+str(config.get("segment_number"))]
+        history_key = self._get_chat_history_key(config)
+        all_messages = self.chat_history[history_key]
 
         prompt_template = ChatPromptTemplate.from_messages([
             SystemMessage(content=RESEARCHER_INSTRUCTIONS, name="Researcher_System_Message"),
@@ -140,7 +151,7 @@ class Orchestrator:
                 logger.error(f"Error calling supervisor: {e}")
                 await asyncio.sleep(60)  # Retry after a short delay
         response.name = "Researcher_Agent_"+str(config.get("segment_number"))
-        self.chat_history[str(config.get("chat_id"))+str(config.get("segment_number"))].append(response)
+        self.chat_history[history_key].append(response)
 
         return response
     
@@ -172,23 +183,24 @@ class Orchestrator:
             raw_messages.append(raw)
             messages.append(message)
 
-        id = str(config.get("chat_id"))+str(config.get("segment_number")) if config and config.get("segment_number") else config.get("chat_id")
-        self.chat_history[id].extend(messages)
+        if config:
+            history_key = self._get_chat_history_key(config)
+            self.chat_history[history_key].extend(messages)
         return messages, raw_messages
     
     @db_handler.save_tools_output()
     async def run_research_tasks(self, research_segments: List[Dict[str, Any]], config: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         logger.info(f"Running research tasks for segments: {[research_segment['args']['city'] for research_segment in research_segments]}")
-        config = config.copy()
+        researcher_config = config.copy()
         research_results = []
         for i, research_segment in enumerate(research_segments): # TODO: validate reserach_agent_tool schema
             message = f"Plan this trip segment: {research_segment['args']}"
-            config["segment_number"] = research_segment["args"]["segment_number"]
-            config["researcher_id"] = research_segment.get("id")
+            researcher_config["segment_number"] = research_segment["args"]["segment_number"]
+            researcher_config["researcher_id"] = research_segment.get("id")
             if self.sequential_researchers:
-                research_results.append(await self.orchestrate_research(message, config))
+                research_results.append(await self.orchestrate_research(message, researcher_config))
             else:
-                research_results.append(self.orchestrate_research(message, config))
+                research_results.append(self.orchestrate_research(message, researcher_config))
 
         if self.sequential_researchers:
             research_results =  research_results
@@ -202,7 +214,10 @@ class Orchestrator:
                 name="Researcher_Agent_"+str(segment["args"]["segment_number"])
             )
             messages.append(message)
-        self.chat_history[config.get("chat_id")].extend(messages)
+        
+        # Add messages to the main chat history (without segment number)
+        history_key = self._get_chat_history_key(config)
+        self.chat_history[history_key].extend(messages)
         return messages, [None] * len(messages)  # Assuming no raw results for now
         
     async def orchestrate_research(self, query: str, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -246,6 +261,58 @@ class Orchestrator:
             supervisor_response = await self.call_supervisor_llm(config)
 
         return supervisor_response
+    
+    async def orchestrate_stream(self, query: str, config: Optional[Dict[str, Any]] = None) -> AsyncGenerator[str, None]:
+        """Main orchestration method with streaming support."""
+        if config:
+            self.load_chat_history(config)
+        
+        message = self.get_message(query, config)
+        
+        # Stream initial processing message
+        yield "🤔 Processing your request...\n\n"
+        
+        supervisor_response = await self.call_supervisor_llm(config)
+        
+        # Stream the initial response content
+        if hasattr(supervisor_response, 'content') and supervisor_response.content:
+            content_lines = supervisor_response.content.split('\n')
+            for line in content_lines:
+                if line.strip():
+                    yield line + '\n'
+                    await asyncio.sleep(0.1)
+        
+        # Handle tool calls if present
+        while supervisor_response.tool_calls:
+            yield "\n🔧 Using tools to gather more information...\n\n"
+            
+            function_calls = supervisor_response.tool_calls
+            handover = []
+            tool_calls = []
+            
+            for tool_call in function_calls:
+                if tool_call["name"] == "researcher_agent":
+                    handover.append(tool_call)
+                else:
+                    tool_calls.append(tool_call)
+
+            if tool_calls:
+                yield "🔍 Searching for information...\n\n"
+                await self.handle_tools(tool_calls, config)
+            
+            if handover:
+                yield "👥 Consulting specialized researchers...\n\n"
+                await self.run_research_tasks(handover, config)
+            
+            # Get next response and stream it
+            supervisor_response = await self.call_supervisor_llm(config)
+            
+            if hasattr(supervisor_response, 'content') and supervisor_response.content:
+                content_lines = supervisor_response.content.split('\n')
+                for line in content_lines:
+                    if line.strip():
+                        yield line + '\n'
+                        await asyncio.sleep(0.1)
     
 if __name__ == "__main__":
 

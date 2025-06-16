@@ -693,6 +693,18 @@ wheels = [
 ]
 
 [[package]]
+name = "human-id"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4a/59/ef55a878f44a339b401b3d4c4d83b145f99e200abeddf61359a24dd3c40d/human_id-0.2.0.tar.gz", hash = "sha256:19768373c96685f8dcd35da7f747e37e7483bb9c2c5383612a2a072d90542422", size = 4132, upload-time = "2022-03-24T23:59:02.488Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a3/fb/ee29329b25ffea61994b98f72f4efdefcca5703de4d9d37d89871b7ddc53/human_id-0.2.0-py3-none-any.whl", hash = "sha256:d2c7f0fea0244114a3a6e9b30343733515522031c6948bfdf3e0294a7d76335e", size = 4466, upload-time = "2022-03-24T23:59:00.422Z" },
+]
+
+[[package]]
 name = "idna"
 version = "3.10"
 source = { registry = "https://pypi.org/simple" }
@@ -1776,6 +1788,7 @@ dependencies = [
     { name = "google-search-results" },
     { name = "gradio" },
     { name = "graphviz" },
+    { name = "human-id" },
     { name = "langchain-google-genai" },
     { name = "langchain-mcp-adapters" },
     { name = "langchain-tavily" },
@@ -1794,6 +1807,7 @@ requires-dist = [
     { name = "google-search-results", specifier = ">=2.4.2" },
     { name = "gradio", specifier = ">=5.32.0" },
     { name = "graphviz", specifier = ">=0.20.3" },
+    { name = "human-id", specifier = ">=0.2.0" },
     { name = "langchain-google-genai", specifier = ">=2.1.4" },
     { name = "langchain-mcp-adapters", specifier = ">=0.1.1" },
     { name = "langchain-tavily", specifier = ">=0.2.0" },
