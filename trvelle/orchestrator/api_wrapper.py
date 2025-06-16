@@ -1,10 +1,10 @@
 from trvelle.orchestrator import Orchestrator
 from trvelle.database import DBHandler
 from trvelle.utils import get_logger, load_environment
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Query, Header
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-from typing import List, Optional, AsyncGenerator
+from typing import List, Optional, AsyncGenerator, Dict, Any
 import uuid
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,6 +36,38 @@ class ChatResponse(BaseModel):
     message_id: str
     user_id: str
     chat_id: str
+
+class ChatHistoryMessage(BaseModel):
+    message_id: str
+    type: str
+    content: str
+    message_name: Optional[str] = None
+    created_at: str
+    input_tokens: Optional[int] = None
+    output_tokens: Optional[int] = None
+    total_tokens: Optional[int] = None
+
+class ChatHistoryResponse(BaseModel):
+    messages: List[ChatHistoryMessage]
+    user_id: str
+    chat_id: str
+    total_messages: int
+
+class ChatSummary(BaseModel):
+    chat_id: str
+    session_name: Optional[str] = None
+    created_at: str
+    updated_at: str
+    is_active: bool
+    message_count: int
+    last_message_content: Optional[str] = None
+    last_message_type: Optional[str] = None
+    last_message_time: Optional[str] = None
+
+class UserChatsResponse(BaseModel):
+    chats: List[ChatSummary]
+    user_id: str
+    total_chats: int
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
@@ -89,6 +121,78 @@ async def stream_chat_response(message: str, config: dict) -> AsyncGenerator[str
     except Exception as e:
         logger.error(f"Error in stream_chat_response: {e}")
         yield f"Error: {str(e)}\n"
+
+@app.get("/chat")
+async def get_chat_history(
+    user_id: str = Query(..., description="User ID"),
+    chat_id: str = Query(..., description="Chat ID")
+):
+    """
+    Get filtered chat history containing all human messages and all supervisor agent messages.
+    
+    Returns all human messages and all supervisor AI responses in chronological order.
+    This filters out tool calls, researcher agents, and other intermediate messages.
+    """
+    try:
+        # Convert string IDs to UUIDs
+        user_uuid = uuid.UUID(user_id)
+        chat_uuid = uuid.UUID(chat_id)
+        
+        # Get filtered chat history from database
+        messages = db_handler.get_filtered_chat_history(user_uuid, chat_uuid)
+        
+        # Convert to response format
+        chat_history_messages = [
+            ChatHistoryMessage(**message) for message in messages
+        ]
+        
+        return ChatHistoryResponse(
+            messages=chat_history_messages,
+            user_id=user_id,
+            chat_id=chat_id,
+            total_messages=len(chat_history_messages)
+        )
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error retrieving chat history: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/chats")
+async def get_user_chats(
+    user_id: str = Header(..., description="User ID from authorization header")
+):
+    """
+    Get all chat sessions for a given user.
+    
+    Returns a list of all chat sessions for the specified user, ordered by most recently updated.
+    Includes metadata such as message count, last message preview, and session details.
+    User ID should be provided in the 'user-id' header.
+    """
+    try:
+        # Convert string ID to UUID
+        user_uuid = uuid.UUID(user_id)
+        
+        # Get user chats from database
+        chats = db_handler.get_user_chats(user_uuid)
+        
+        # Convert to response format
+        chat_summaries = [
+            ChatSummary(**chat) for chat in chats
+        ]
+        
+        return UserChatsResponse(
+            chats=chat_summaries,
+            user_id=user_id,
+            total_chats=len(chat_summaries)
+        )
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error retrieving user chats: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 if __name__ == "__main__":

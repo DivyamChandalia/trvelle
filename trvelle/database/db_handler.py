@@ -206,3 +206,80 @@ class DBHandler:
                 return messages
             return wrapper
         return decorator
+    
+    @classmethod
+    def get_filtered_chat_history(cls, user_id: UUID, chat_id: UUID) -> List[Dict[str, Any]]:
+        """Get chat history with all human messages and all supervisor agent messages."""
+        db = cls.db_session()
+        
+        try:
+            # Get all messages for this chat ordered by creation time
+            messages = db.query(Message).filter(
+                Message.user_id == user_id,
+                Message.chat_id == chat_id
+            ).order_by(Message.created_at.asc()).all()
+            
+            filtered_messages = []
+            
+            for message in messages:
+                # Include human messages and supervisor agent messages
+                if (message.type == "human" or 
+                    (message.type == "ai" and message.message_name == "Supervisor_Agent" and message.content is not None)):
+                    
+                    filtered_messages.append({
+                        "message_id": str(message.message_id),
+                        "type": message.type,
+                        "content": message.content,
+                        "message_name": message.message_name,
+                        "created_at": message.created_at.isoformat(),
+                        "input_tokens": message.input_tokens,
+                        "output_tokens": message.output_tokens,
+                        "total_tokens": message.total_tokens
+                    })
+            
+            return filtered_messages
+            
+        finally:
+            db.close()
+    
+    @classmethod
+    def get_user_chats(cls, user_id: UUID) -> List[Dict[str, Any]]:
+        """Get all chat sessions for a given user with basic metadata."""
+        db = cls.db_session()
+        
+        try:
+            # Get all chat sessions for this user
+            chat_sessions = db.query(ChatSession).filter(
+                ChatSession.user_id == user_id
+            ).order_by(ChatSession.updated_at.desc()).all()
+            
+            user_chats = []
+            for chat in chat_sessions:
+                # Get the count of messages in this chat
+                message_count = db.query(Message).filter(
+                    Message.chat_id == chat.chat_id,
+                    Message.user_id == user_id
+                ).count()
+                
+                # Get the last message for preview
+                last_message = db.query(Message).filter(
+                    Message.chat_id == chat.chat_id,
+                    Message.user_id == user_id
+                ).order_by(Message.created_at.desc()).first()
+                
+                user_chats.append({
+                    "chat_id": str(chat.chat_id),
+                    "session_name": chat.session_name,
+                    "created_at": chat.created_at.isoformat(),
+                    "updated_at": chat.updated_at.isoformat(),
+                    "is_active": chat.is_active,
+                    "message_count": message_count,
+                    "last_message_content": last_message.content if last_message else None,
+                    "last_message_type": last_message.type if last_message else None,
+                    "last_message_time": last_message.created_at.isoformat() if last_message else None
+                })
+            
+            return user_chats
+            
+        finally:
+            db.close()
