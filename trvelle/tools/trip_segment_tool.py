@@ -11,7 +11,7 @@ mcp = FastMCP("TripSegmentTool")
 class TripSegmentInput(BaseModel):
     """Input schema for the Trip Segment Planner tool."""
     city: str = Field(..., description="The city for the trip segment.")
-    content: str = Field(..., description="The detailed plan for this trip segment")
+    content: str = Field(..., description="The detailed plan for this trip segment include information about chosen hotels(including UUID), activities, etc.")
     arrival_datetime: str = Field(..., description="Arrival datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).")
     departure_datetime: str = Field(..., description="Departure datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).")
     adults: int = Field(1, description="Number of adults.")

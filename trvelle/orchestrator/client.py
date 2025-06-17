@@ -289,12 +289,19 @@ class Orchestrator:
             function_calls = supervisor_response.tool_calls
             handover = []
             tool_calls = []
+            itinerary = []
             
             for tool_call in function_calls:
                 if tool_call["name"] == "researcher_agent":
                     handover.append(tool_call)
+                elif tool_call["name"] == "itinerary_tool":
+                    itinerary.append(tool_call)
                 else:
                     tool_calls.append(tool_call)
+
+            if itinerary:
+                itinerary = await self.handle_tools(itinerary, config)
+                return f'itinerary: "{itinerary.tool_call_id}"'
 
             if tool_calls:
                 yield "🔍 Searching for information...\n\n"

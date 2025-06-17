@@ -6,6 +6,7 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 import json
 from serpapi import GoogleSearch
+from human_id import generate_id
 # from ..utils import get_logger
 # logger = get_logger(__name__)
 
@@ -126,8 +127,10 @@ class FlightSearch:
 
         all_returns[-1]["currency"] = params.get("currency", "USD")
         output = self.format_flight_data_simple(all_returns)
-
-        return output, raw
+        choose_uid = generate_id()
+        output.append(f'The UID to choose this flight is: "{choose_uid}"')
+        raw_list.append({"choose_uid": choose_uid})
+        return output, raw_list
     
 
     def flight_search(self, search_params: FlightSearchInput):

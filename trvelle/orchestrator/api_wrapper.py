@@ -193,6 +193,35 @@ async def get_user_chats(
     except Exception as e:
         logger.error(f"Error retrieving user chats: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+    
+@app.get("/tool_call")
+async def get_itinerary(
+    chat_id: str = Header(..., description="Chat ID from authorization header"),
+    message_id: str = Header(..., description="Itinerary ID from authorization header")
+):
+    """
+    Get the itinerary for a specific chat session.
+    
+    Returns the structured itinerary data for the specified chat session.
+    User ID and chat ID should be provided in the 'user-id' and 'chat-id' headers.
+    """
+    try:
+        # Convert string IDs to UUIDs
+        chat_uuid = uuid.UUID(chat_uuid)
+        
+        # Get itinerary from database
+        itinerary = db_handler.get_itinerary(chat_uuid, message_id)
+        
+        if not itinerary:
+            raise HTTPException(status_code=404, detail="Itinerary not found")
+        
+        return itinerary
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error retrieving itinerary: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 if __name__ == "__main__":

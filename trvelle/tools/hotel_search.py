@@ -6,6 +6,7 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 import json
 from serpapi import GoogleSearch
+from human_id import generate_id
 # from ..utils import get_logger
 # logger = get_logger(__name__)
 
@@ -83,6 +84,7 @@ class HotelSearch:
         
         for i, hotel in enumerate(hotels, 1):
             output.append(f"**Hotel {i}: {hotel['name']}**")
+            output.append(f'The UID to choose this hotel is: "{hotel.get("choose_uid", "N/A")}"')
             
             # Basic info
             if 'description' in hotel:
@@ -189,6 +191,8 @@ class HotelSearch:
         # Limit results
         max_results = min(max_results, len(hotels))  # SerpAPI max is 20 results
         hotels = hotels[:max_results]
+        for hotel in hotels:
+            hotel['choose_uid'] = generate_id()
         
         # Format output
         formatted_output = self.format_hotel_data_simple(hotels)
