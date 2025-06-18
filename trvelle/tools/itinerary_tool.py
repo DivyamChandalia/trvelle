@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from datetime import datetime, date
 import logging
 import yaml
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -149,9 +150,11 @@ async def itinerary_tool(itinerary: Itinerary) -> Dict[str, Any]:
     """
     try:
         result = validator.validate_and_format_itinerary(itinerary)
+        itinerary_uid = str(uuid.uuid4())
+        result["itinerary_uid"] = itinerary_uid
         if "error" in result:
             return {"error": result["error"], "message": "Failed to validate itinerary"}
-        return  f"Itinerary displayed too the user!", result
+        return  f"Itinerary displayed with UID:{itinerary_uid}", result
     except Exception as e:
         return {"error": str(e), "message": "Failed to validate itinerary"}
 

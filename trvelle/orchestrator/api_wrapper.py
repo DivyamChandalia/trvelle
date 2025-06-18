@@ -27,8 +27,6 @@ db_handler = DBHandler()
 
 class ChatRequest(BaseModel):
     message: str = Field(..., description="User message")
-    user_id: Optional[str] = Field(None, description="User ID (will be generated if not provided)")
-    chat_id: Optional[str] = Field(None, description="Chat ID (will be generated if not provided)")
     stream: bool = Field(True, description="Whether to stream the response")
 
 class ChatResponse(BaseModel):
@@ -41,11 +39,7 @@ class ChatHistoryMessage(BaseModel):
     message_id: str
     type: str
     content: str
-    message_name: Optional[str] = None
     created_at: str
-    input_tokens: Optional[int] = None
-    output_tokens: Optional[int] = None
-    total_tokens: Optional[int] = None
 
 class ChatHistoryResponse(BaseModel):
     messages: List[ChatHistoryMessage]
@@ -70,11 +64,15 @@ class UserChatsResponse(BaseModel):
     total_chats: int
 
 @app.post("/chat")
-async def chat(request: ChatRequest):
-    print(f"Received request: {request}")
+async def chat(
+    request: ChatRequest,
+    user_id: Optional[str] = Header(None, description="User ID from authorization header"),
+    chat_id: Optional[str] = Query(None, description="Chat ID from authorization header")
+):
+    print(f"Received request: {request} with user_id: {user_id} and chat_id: {chat_id}")
     config = {
-        "user_id": uuid.UUID(request.user_id) if request.user_id else uuid.uuid4(),
-        "chat_id": uuid.UUID(request.chat_id) if request.chat_id else uuid.uuid4(),
+        "user_id": uuid.UUID(user_id) if user_id else uuid.uuid4(),
+        "chat_id": uuid.UUID(chat_id) if chat_id else uuid.uuid4(),
     }
 
     if request.stream:
@@ -120,11 +118,13 @@ async def stream_chat_response(message: str, config: dict) -> AsyncGenerator[str
             
     except Exception as e:
         logger.error(f"Error in stream_chat_response: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         yield f"Error: {str(e)}\n"
 
 @app.get("/chat")
 async def get_chat_history(
-    user_id: str = Query(..., description="User ID"),
+    user_id: str = Header(..., description="User ID"),
     chat_id: str = Query(..., description="Chat ID")
 ):
     """
@@ -196,6 +196,7 @@ async def get_user_chats(
     
 @app.get("/tool_call")
 async def get_itinerary(
+    user_id: str = Header(..., description="User ID authorization header"),
     chat_id: str = Header(..., description="Chat ID from authorization header"),
     message_id: str = Header(..., description="Itinerary ID from authorization header")
 ):
@@ -206,16 +207,25 @@ async def get_itinerary(
     User ID and chat ID should be provided in the 'user-id' and 'chat-id' headers.
     """
     try:
-        # Convert string IDs to UUIDs
+        user_id = uuid.UUID(user_id)
         chat_uuid = uuid.UUID(chat_uuid)
+
+        try:
+            message_id = uuid.UUID(message_id)
+
+            itinerary = db_handler.get_itinerary(user_id, chat_uuid, message_id)
+            if not itinerary:
+                raise HTTPException(status_code=404, detail="Itinerary not found")
+            
+            return itinerary
         
-        # Get itinerary from database
-        itinerary = db_handler.get_itinerary(chat_uuid, message_id)
+        except ValueError:
+            tool_response = db_handler.get_tool_response(user_id, chat_uuid, message_id)
+            if not tool_response:
+                raise HTTPException(status_code=404, detail="Tool response not found")
+            return tool_response
+
         
-        if not itinerary:
-            raise HTTPException(status_code=404, detail="Itinerary not found")
-        
-        return itinerary
         
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")

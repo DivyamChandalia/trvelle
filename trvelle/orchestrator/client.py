@@ -96,9 +96,9 @@ class Orchestrator:
     
     @db_handler.save_output()
     async def call_supervisor_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        logger.info(f"Calling supervisor with message history length: {len(self.chat_history)}")
         
         history_key = self._get_chat_history_key(config)
+        logger.info(f"Calling supervisor with message history length: {len(self.chat_history[history_key])}")
         all_messages = self.chat_history[history_key]
         
         prompt_template = ChatPromptTemplate.from_messages([
@@ -127,9 +127,9 @@ class Orchestrator:
     
     @db_handler.save_output()
     async def call_researcher_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        logger.info(f"Calling researcher with message history length: {len(self.chat_history)}")
 
         history_key = self._get_chat_history_key(config)
+        logger.info(f"Calling researcher with message history length: {len(self.chat_history[history_key])}")
         all_messages = self.chat_history[history_key]
 
         prompt_template = ChatPromptTemplate.from_messages([
@@ -301,7 +301,7 @@ class Orchestrator:
 
             if itinerary:
                 itinerary = await self.handle_tools(itinerary, config)
-                return f'itinerary: "{itinerary.tool_call_id}"'
+                yield f'itinerary: "{itinerary.tool_call_id}"'
 
             if tool_calls:
                 yield "🔍 Searching for information...\n\n"

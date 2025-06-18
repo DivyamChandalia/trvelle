@@ -230,11 +230,7 @@ class DBHandler:
                         "message_id": str(message.message_id),
                         "type": message.type,
                         "content": message.content,
-                        "message_name": message.message_name,
                         "created_at": message.created_at.isoformat(),
-                        "input_tokens": message.input_tokens,
-                        "output_tokens": message.output_tokens,
-                        "total_tokens": message.total_tokens
                     })
             
             return filtered_messages
@@ -284,7 +280,7 @@ class DBHandler:
         finally:
             db.close()
 
-    def get_itinerary(self, chat_id: UUID, itinerary_id: UUID) -> Dict[str, Any]:
+    def get_itinerary(self, user_id: UUID, chat_id: UUID, itinerary_id: UUID) -> Dict[str, Any]:
         """Retrieve a specific itinerary by ID."""
         db = self.db_session()
         
@@ -312,6 +308,39 @@ class DBHandler:
                 return {"error": "Itinerary not found"}
             
             return itinerary.model_dump()
+        
+        finally:
+            db.close()
+
+    def get_tool_response(self, user_id: UUID, chat_id: UUID, human_id: str) -> Dict[str, Any]:
+        """Retrieve a specific tool response by ID."""
+        db = self.db_session()
+        
+        try:
+            # Ensure user exists
+            existing_user = db.query(User).filter(User.user_id == user_id).first()
+            if not existing_user:
+                return {"error": "User not found"}
+            
+            # Ensure chat session exists
+            chat_session = db.query(ChatSession).filter(
+                ChatSession.user_id == user_id,
+                ChatSession.chat_id == chat_id
+            ).first()
+            if not chat_session:
+                return {"error": "Chat session not found"}
+            
+            # Retrieve the tool execution
+            tool_execution = db.query(ToolExecution).filter(
+                ToolExecution.chat_id == chat_id,
+                ToolExecution.raw_response.like(f"%{human_id}%")
+            ).first()
+
+            
+            if not tool_execution:
+                return {"error": "Tool response not found"}
+            
+            return tool_execution.model_dump()
         
         finally:
             db.close()
