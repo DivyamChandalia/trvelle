@@ -145,6 +145,8 @@ async def get_chat_history(
         chat_history_messages = [
             ChatHistoryMessage(**message) for message in messages
         ]
+
+        db_handler.update_chat_session(chat_uuid)
         
         return ChatHistoryResponse(
             messages=chat_history_messages,

@@ -280,6 +280,14 @@ class DBHandler:
         finally:
             db.close()
 
+    @classmethod
+    def update_chat_session(cls, chat_id: UUID):
+        """Update the updated_at field of the chat session."""
+        db = cls.db_session()
+        db.query(ChatSession).filter(ChatSession.chat_id == chat_id).update({"updated_at": datetime.datetime.now(datetime.timezone.utc)})
+        db.commit()
+        db.close()
+
     def get_itinerary(self, user_id: UUID, chat_id: UUID, itinerary_id: UUID) -> Dict[str, Any]:
         """Retrieve a specific itinerary by ID."""
         db = self.db_session()
