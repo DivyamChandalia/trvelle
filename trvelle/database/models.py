@@ -130,7 +130,7 @@ class ToolExecution(Base):
     )
     
     def __repr__(self):
-        return f"<ToolExecution(execution_id={self.execution_id}, tool_name={self.tool_name}, status={self.execution_status})>"
+        return f"<ToolExecution(execution_id={self.message_id}, tool_name={self.tool_name})>"
 
 
 class ResearcherAgent(Base):

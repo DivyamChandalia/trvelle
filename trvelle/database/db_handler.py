@@ -12,6 +12,8 @@ import os
 from .init_db import create_tables
 from ..utils import get_logger
 import uuid
+import json
+import yaml
 logger = get_logger(__name__)
 load_environment()
 
@@ -103,7 +105,12 @@ class DBHandler:
         db = cls.db_session()
         msg_to_db = cls.get_message_from_response(message, config)
         db.add(msg_to_db)
+        db.query(ChatSession).filter(
+            ChatSession.chat_id == config.get("chat_id"),
+            ChatSession.user_id == config.get("user_id")
+        ).update({"updated_at": datetime.datetime.now(datetime.timezone.utc)})
         db.commit()
+        db.close()
     
     @classmethod
     def get_message_from_response(cls, response: Dict[str, Any], config: Dict) -> Message:
@@ -197,12 +204,16 @@ class DBHandler:
                                 chat_id=config.get("chat_id"),
                                 message_id=msg_to_db.message_id,
                                 tool_name=message.name,
-                                raw_response=raw,
+                                raw_response=json.dump(raw),
                                 created_at=datetime.datetime.now(datetime.timezone.utc)
                             )
                             db.add(tool_execution)
+                    db.query(ChatSession).filter(
+                        ChatSession.chat_id == config.get("chat_id"),
+                        ChatSession.user_id == config.get("user_id")
+                    ).update({"updated_at": datetime.datetime.now(datetime.timezone.utc)})
                     db.commit()
-                
+                    db.close()
                 return messages
             return wrapper
         return decorator
@@ -230,6 +241,12 @@ class DBHandler:
                         "message_id": str(message.message_id),
                         "type": message.type,
                         "content": message.content,
+                        "created_at": message.created_at.isoformat(),
+                    })
+                elif message.type == "tool" and message.message_name == "itinerary_tool":
+                    filtered_messages.append({
+                        "message_id": str(message.message_id),
+                        "type": message.type,
                         "created_at": message.created_at.isoformat(),
                     })
             
@@ -280,14 +297,6 @@ class DBHandler:
         finally:
             db.close()
 
-    @classmethod
-    def update_chat_session(cls, chat_id: UUID):
-        """Update the updated_at field of the chat session."""
-        db = cls.db_session()
-        db.query(ChatSession).filter(ChatSession.chat_id == chat_id).update({"updated_at": datetime.datetime.now(datetime.timezone.utc)})
-        db.commit()
-        db.close()
-
     def get_itinerary(self, user_id: UUID, chat_id: UUID, itinerary_id: UUID) -> Dict[str, Any]:
         """Retrieve a specific itinerary by ID."""
         db = self.db_session()
@@ -299,23 +308,27 @@ class DBHandler:
                 return {"error": "User not found"}
             
             # Ensure chat session exists
+            print(f"Retrieving chat session for user_id: {user_id}, chat_id: {chat_id}".encode())
             chat_session = db.query(ChatSession).filter(
                 ChatSession.user_id == user_id,
                 ChatSession.chat_id == chat_id
             ).first()
+            print(f"Chat session: {chat_session}")
             if not chat_session:
                 return {"error": "Chat session not found"}
             
             # Retrieve the itinerary
+            print(f"Retrieving itinerary for chat_id: {chat_id}, itinerary_id: {itinerary_id}".encode())
             itinerary = db.query(ToolExecution).filter(
-                ToolExecution.chat_id == chat_id,
+                # ToolExecution.chat_id == chat_id,
                 ToolExecution.message_id == itinerary_id
             ).first()
             
+            print(f"Itinerary: {itinerary}")
             if not itinerary:
                 return {"error": "Itinerary not found"}
             
-            return itinerary.model_dump()
+            return itinerary
         
         finally:
             db.close()
@@ -343,7 +356,6 @@ class DBHandler:
                 ToolExecution.chat_id == chat_id,
                 ToolExecution.raw_response.like(f"%{human_id}%")
             ).first()
-
             
             if not tool_execution:
                 return {"error": "Tool response not found"}

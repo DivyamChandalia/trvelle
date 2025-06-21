@@ -270,7 +270,7 @@ class Orchestrator:
         message = self.get_message(query, config)
         
         # Stream initial processing message
-        yield "🤔 Processing your request...\n\n"
+        yield  {'progress': "🤔 Processing your request...\n\n"}
         
         supervisor_response = await self.call_supervisor_llm(config)
         
@@ -280,11 +280,11 @@ class Orchestrator:
             for line in content_lines:
                 if line.strip():
                     yield line + '\n'
-                    await asyncio.sleep(0.1)
+                    await asyncio.sleep(0.1)  # Simulate streaming delay
         
         # Handle tool calls if present
         while supervisor_response.tool_calls:
-            yield "\n🔧 Using tools to gather more information...\n\n"
+            yield {'progress': "\n🔧 Using tools to gather more information...\n\n"}
             
             function_calls = supervisor_response.tool_calls
             handover = []
@@ -301,14 +301,14 @@ class Orchestrator:
 
             if itinerary:
                 itinerary = await self.handle_tools(itinerary, config)
-                yield f'itinerary: "{itinerary.tool_call_id}"'
+                yield {'itinerary': f'{itinerary.tool_call_id}'}
 
             if tool_calls:
-                yield "🔍 Searching for information...\n\n"
+                yield {'progress': "🔍 Searching for information...\n\n"}
                 await self.handle_tools(tool_calls, config)
             
             if handover:
-                yield "👥 Consulting specialized researchers...\n\n"
+                yield {'progress': "👥 Consulting specialized researchers...\n\n"}
                 await self.run_research_tasks(handover, config)
             
             # Get next response and stream it
@@ -319,7 +319,7 @@ class Orchestrator:
                 for line in content_lines:
                     if line.strip():
                         yield line + '\n'
-                        await asyncio.sleep(0.1)
+                        await asyncio.sleep(0.1)  # Simulate streaming delay
     
 if __name__ == "__main__":
 

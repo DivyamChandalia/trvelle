@@ -66,12 +66,14 @@ class UserChatsResponse(BaseModel):
 @app.post("/chat")
 async def chat(
     request: ChatRequest,
-    user_id: Optional[str] = Header(None, description="User ID from authorization header"),
+    user_id: str = Header(None, description="User ID from authorization header"),
     chat_id: Optional[str] = Query(None, description="Chat ID from authorization header")
 ):
     print(f"Received request: {request} with user_id: {user_id} and chat_id: {chat_id}")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID is required")
     config = {
-        "user_id": uuid.UUID(user_id) if user_id else uuid.uuid4(),
+        "user_id": uuid.UUID(user_id),
         "chat_id": uuid.UUID(chat_id) if chat_id else uuid.uuid4(),
     }
 
@@ -105,22 +107,29 @@ async def stream_chat_response(message: str, config: dict) -> AsyncGenerator[str
     try:
         message_id = str(uuid.uuid4())
         
-        # First: Send the message ID as a JSON chunk
-        yield json.dumps({"messageId": message_id}) + "\n"
+        # Send metadata as SSE event
+        yield f"event: user_id\ndata: {config['user_id']}\n\n"
+        yield f"event: chat_id\ndata: {config["chat_id"]}\n\n"
+        yield f"event: message_id\ndata: {message_id}\n\n"
         
-        # Add a small delay to simulate the example
-        await asyncio.sleep(0.5)
-        
-        # Then: Stream the response content
+        # Stream the response content as message events
         async for chunk in orchestrator.orchestrate_stream(query=message, config=config):
-            yield chunk
-            await asyncio.sleep(0.1)  # Small delay between chunks
+            # print(f"Streaming chunk: {chunk}".encode())
+            if isinstance(chunk, str):
+                yield f"event: message\ndata: {chunk}\n\n"
+            elif isinstance(chunk, dict) and "progress" in chunk:
+                yield f"event: progress\ndata: {chunk["progress"]}\n\n"
+            elif isinstance(chunk, dict) and "itinerary" in chunk:
+                yield f"event: itinerary_id\ndata: {chunk["itinerary"]}\n\n"
+        
+        # Send itinerary ID as separate event
+        yield f"event: itinerary_id\ndata: {'3b53f560-a08d-461e-86ba-8357b1ac1fbb'}\n\n"
             
     except Exception as e:
         logger.error(f"Error in stream_chat_response: {e}")
         import traceback
         logger.error(traceback.format_exc())
-        yield f"Error: {str(e)}\n"
+        yield f"event: error\ndata: {str(e)}\n\n"
 
 @app.get("/chat")
 async def get_chat_history(
@@ -145,8 +154,6 @@ async def get_chat_history(
         chat_history_messages = [
             ChatHistoryMessage(**message) for message in messages
         ]
-
-        db_handler.update_chat_session(chat_uuid)
         
         return ChatHistoryResponse(
             messages=chat_history_messages,
@@ -197,32 +204,32 @@ async def get_user_chats(
         raise HTTPException(status_code=500, detail="Internal server error")
     
 @app.get("/tool_call")
-async def get_itinerary(
+async def get_tool_response(
     user_id: str = Header(..., description="User ID authorization header"),
-    chat_id: str = Header(..., description="Chat ID from authorization header"),
-    message_id: str = Header(..., description="Itinerary ID from authorization header")
+    chat_id: str = Query(..., description="Chat ID from authorization header"),
+    tool_call_id: str = Header(..., description="tool_response ID from authorization header")
 ):
     """
-    Get the itinerary for a specific chat session.
+    Get the tool_response for a specific chat session.
     
-    Returns the structured itinerary data for the specified chat session.
+    Returns the structured tool_response data for the specified chat session.
     User ID and chat ID should be provided in the 'user-id' and 'chat-id' headers.
     """
     try:
         user_id = uuid.UUID(user_id)
-        chat_uuid = uuid.UUID(chat_uuid)
+        chat_id = uuid.UUID(chat_id)
 
         try:
-            message_id = uuid.UUID(message_id)
+            tool_call_id = uuid.UUID(tool_call_id)
 
-            itinerary = db_handler.get_itinerary(user_id, chat_uuid, message_id)
+            itinerary = db_handler.get_itinerary(user_id, chat_id, tool_call_id)
             if not itinerary:
                 raise HTTPException(status_code=404, detail="Itinerary not found")
             
             return itinerary
         
         except ValueError:
-            tool_response = db_handler.get_tool_response(user_id, chat_uuid, message_id)
+            tool_response = db_handler.get_tool_response(user_id, chat_id, tool_call_id)
             if not tool_response:
                 raise HTTPException(status_code=404, detail="Tool response not found")
             return tool_response
