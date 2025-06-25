@@ -11,6 +11,9 @@ from .datetime_string import datetime_string
 DEFAULT_LOG_FORMAT = "[%(asctime)s] %(name)s %(levelname)s: %(message)s"
 DEFAULT_LOG_LEVEL = logging.INFO
 
+def is_debug_mode() -> bool:
+    """Check if the application is running in debug mode."""
+    return os.getenv("DEBUG", False).lower() in (True, "true", "1", "yes", "on")
 
 def get_log_file_path() -> Path:
     """Get the path to the log file."""
@@ -37,7 +40,11 @@ class SymlinkUpdateHandler(logging.FileHandler):
 
 
 def configure_logging(
-    log_file: Optional[Path] = None, log_level: int = DEFAULT_LOG_LEVEL, log_format: str = DEFAULT_LOG_FORMAT, console_output: bool = True
+    log_file: Optional[Path] = None, 
+    log_level: int = DEFAULT_LOG_LEVEL, 
+    log_format: str = DEFAULT_LOG_FORMAT, 
+    console_output: bool = True,
+    force_enable: bool = False
 ) -> None:
     """
     Configure logging for the application.
@@ -47,7 +54,15 @@ def configure_logging(
         log_level: Logging level to use.
         log_format: Format string for log messages.
         console_output: Whether to also output logs to console.
+        force_enable: Force enable logging even in production.
     """
+
+    if not force_enable and not is_debug_mode():
+        # Set root logger to CRITICAL to effectively disable all logging
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.CRITICAL)
+        root_logger.handlers.clear()
+        return
     log_file = log_file or get_log_file_path()
     formatter = logging.Formatter(log_format)
 

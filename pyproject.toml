@@ -17,7 +17,6 @@ dependencies = [
     "langgraph>=0.4.7",
     "mcp[cli]>=1.9.1",
     "psycopg2>=2.9.10",
-    "pygraphviz>=1.14",
     "pyyaml>=6.0.2",
     "sqlalchemy>=2.0.41",
 ]

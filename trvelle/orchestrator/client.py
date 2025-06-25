@@ -1,22 +1,17 @@
-from mcp import ClientSession
-from typing import Optional, List, AsyncGenerator
+from typing import Optional, List, AsyncGenerator, Any, Dict
 import yaml
 from langchain_mcp_adapters.client import MultiServerMCPClient
 import asyncio
-import json
-from datetime import datetime
-from typing import Any, Dict, List
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import AIMessage, SystemMessage, ToolMessage, HumanMessage, BaseMessage
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
+from langchain_core.messages import SystemMessage, ToolMessage, HumanMessage
 from langchain_tavily import TavilySearch
 from ..utils import get_logger, load_environment, configure_logging
 from ..prompts import SUPERVISOR_INSTRUCTIONS, RESEARCHER_INSTRUCTIONS
-from ..database import DBHandler
+from ..database import DBHandler, InMemoryChatManager
 import uuid
+
 load_environment()
 configure_logging()
 logger = get_logger(__name__)
@@ -24,7 +19,7 @@ logger = get_logger(__name__)
 class Orchestrator:
     db_handler = DBHandler()
     
-    def __init__(self):
+    def __init__(self, chat_cleanup_interval_minutes: int = 30, chat_expiry_minutes: int = 60):
         self.supervisor = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
         self.researcher = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
         self.mcp_config = self.load_mcp_config()
@@ -36,7 +31,13 @@ class Orchestrator:
             "researcher": ["trip_segment", "hotel_search", "tavily_search"],
             "system": ["flight_search", "researcher_agent", "itinerary_tool", "tavily_search", "trip_segment", "hotel_search"]
         }
-        self.chat_history = {} # In-memory chat history
+        # Initialize the in-memory chat manager
+        self.chat_manager = InMemoryChatManager(
+            chat_cleanup_interval_minutes=chat_cleanup_interval_minutes,
+            chat_expiry_minutes=chat_expiry_minutes
+        )
+        # Start the cleanup task
+        self.chat_manager.start_cleanup_task()
 
     def load_mcp_config(self) -> Dict[str, Any]:
         with open("trvelle/config/mcp_servers.yaml", 'r') as f:
@@ -62,7 +63,7 @@ class Orchestrator:
                 tools_to_requester.append(tool)
 
         return tools_to_requester, {tool.name: tool for tool in tools_to_requester}
-
+    
     def load_chat_history(self, config: Dict[str, Any]) -> None:
         """Load chat history from database into memory once."""
         user_id = config.get("user_id")
@@ -72,34 +73,35 @@ class Orchestrator:
         history_key = self._get_chat_history_key(config)
         
         # Check if chat history is already loaded
-        if history_key in self.chat_history:
+        if self.chat_manager.chat_exists(history_key):
             logger.info(f"Chat history for key '{history_key}' already loaded, skipping database load")
             return
         
         # Load chat history from database
         if user_id and chat_id:
-            self.chat_history[history_key] = self.db_handler.load_chat_history(user_id, chat_id, segment_number)
+            messages = self.db_handler.load_chat_history(user_id, chat_id, segment_number)
+            self.chat_manager.set_chat_history(history_key, messages)
             segment_info = f" and segment {segment_number}" if segment_number is not None else ""
-            logger.info(f"Loaded {len(self.chat_history[history_key])} messages from database for user {user_id}, chat {chat_id}{segment_info}")
+            logger.info(f"Loaded {len(messages)} messages from database for user {user_id}, chat {chat_id}{segment_info}")
         else:
-            self.chat_history[history_key] = []
-            logger.warning("No user_id or chat_id provided, starting with empty history") 
-
+            self.chat_manager.set_chat_history(history_key, [])
+            logger.warning("No user_id or chat_id provided, starting with empty history")
+    
     @db_handler.save_user_input()
     def get_message(self, query: str, config: Optional[Dict[str, Any]] = None) -> HumanMessage:
         """Create a human message and add it to history."""
         message = HumanMessage(content=query)
         if config:
             history_key = self._get_chat_history_key(config)
-            self.chat_history[history_key].append(message)
+            self.chat_manager.append_message(history_key, message)
         return message
     
     @db_handler.save_output()
     async def call_supervisor_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         
         history_key = self._get_chat_history_key(config)
-        logger.info(f"Calling supervisor with message history length: {len(self.chat_history[history_key])}")
-        all_messages = self.chat_history[history_key]
+        all_messages = self.chat_manager.get_chat_history(history_key)
+        logger.info(f"Calling supervisor with message history length: {len(all_messages)}")
         
         prompt_template = ChatPromptTemplate.from_messages([
             SystemMessage(content=SUPERVISOR_INSTRUCTIONS, name="Supervisor_System_Message"),
@@ -121,7 +123,7 @@ class Orchestrator:
                 await asyncio.sleep(60)  # Retry after a short delay
         response.name = "Supervisor_Agent"
         
-        self.chat_history[history_key].append(response)
+        self.chat_manager.append_message(history_key, response)
         
         return response
     
@@ -129,8 +131,8 @@ class Orchestrator:
     async def call_researcher_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
 
         history_key = self._get_chat_history_key(config)
-        logger.info(f"Calling researcher with message history length: {len(self.chat_history[history_key])}")
-        all_messages = self.chat_history[history_key]
+        all_messages = self.chat_manager.get_chat_history(history_key)
+        logger.info(f"Calling researcher with message history length: {len(all_messages)}")
 
         prompt_template = ChatPromptTemplate.from_messages([
             SystemMessage(content=RESEARCHER_INSTRUCTIONS, name="Researcher_System_Message"),
@@ -151,7 +153,7 @@ class Orchestrator:
                 logger.error(f"Error calling supervisor: {e}")
                 await asyncio.sleep(60)  # Retry after a short delay
         response.name = "Researcher_Agent_"+str(config.get("segment_number"))
-        self.chat_history[history_key].append(response)
+        self.chat_manager.append_message(history_key, response)
 
         return response
     
@@ -185,7 +187,7 @@ class Orchestrator:
 
         if config:
             history_key = self._get_chat_history_key(config)
-            self.chat_history[history_key].extend(messages)
+            self.chat_manager.extend_messages(history_key, messages)
         return messages, raw_messages
     
     @db_handler.save_tools_output()
@@ -208,23 +210,23 @@ class Orchestrator:
             research_results = await asyncio.gather(*research_results)
         messages = []
         for result, segment in zip(research_results, research_segments):
-            message = ToolMessage(
+            result_message = ToolMessage(
                 content=result.content,
                 tool_call_id=segment.get("id"),
                 name="Researcher_Agent_"+str(segment["args"]["segment_number"])
             )
-            messages.append(message)
+            messages.append(result_message)
         
         # Add messages to the main chat history (without segment number)
         history_key = self._get_chat_history_key(config)
-        self.chat_history[history_key].extend(messages)
+        self.chat_manager.extend_messages(history_key, messages)
         return messages, [None] * len(messages)  # Assuming no raw results for now
         
     async def orchestrate_research(self, query: str, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Orchestrate the research process with in-memory history management."""
         if config:
             self.load_chat_history(config)
-        message = self.get_message(query, config)
+        self.get_message(query, config)
         researcher_response = await self.call_researcher_llm(config)
         while researcher_response.tool_calls:
             tool_calls = researcher_response.tool_calls
@@ -241,7 +243,7 @@ class Orchestrator:
 
         if config:
             self.load_chat_history(config)
-        message = self.get_message(query, config)
+        self.get_message(query, config)
         supervisor_response = await self.call_supervisor_llm(config)
         while supervisor_response.tool_calls:
             function_calls = supervisor_response.tool_calls
@@ -256,8 +258,8 @@ class Orchestrator:
                     tool_calls.append(tool_call)
 
             logger.info(f'Tool calls: {[tool["name"] for tool in tool_calls]}, Handover calls: {[tool["name"] for tool in handover]}')
-            tool_results = await self.handle_tools(tool_calls, config)
-            research_results = await self.run_research_tasks(handover, config)
+            await self.handle_tools(tool_calls, config)
+            await self.run_research_tasks(handover, config)
             supervisor_response = await self.call_supervisor_llm(config)
 
         return supervisor_response
@@ -267,7 +269,7 @@ class Orchestrator:
         if config:
             self.load_chat_history(config)
         
-        message = self.get_message(query, config)
+        self.get_message(query, config)
         
         # Stream initial processing message
         yield  {'progress': "🤔 Processing your request...\n\n"}
@@ -300,8 +302,8 @@ class Orchestrator:
                     tool_calls.append(tool_call)
 
             if itinerary:
-                itinerary = await self.handle_tools(itinerary, config)
-                yield {'itinerary': f'{itinerary.tool_call_id}'}
+                itinerary_results = await self.handle_tools(itinerary, config)
+                yield {'itinerary': f'{itinerary_results[0].tool_call_id}'}
 
             if tool_calls:
                 yield {'progress': "🔍 Searching for information...\n\n"}
@@ -320,6 +322,19 @@ class Orchestrator:
                     if line.strip():
                         yield line + '\n'
                         await asyncio.sleep(0.1)  # Simulate streaming delay
+
+    def get_memory_stats(self) -> Dict[str, Any]:
+        """Get statistics about current memory usage."""
+        return self.chat_manager.get_memory_stats()
+    
+    def force_cleanup(self) -> int:
+        """Manually trigger cleanup and return number of chats removed."""
+        return self.chat_manager.force_cleanup()
+    
+    async def shutdown(self) -> None:
+        """Clean shutdown of the orchestrator."""
+        await self.chat_manager.stop_cleanup_task()
+        logger.info("Orchestrator shutdown complete")
     
 if __name__ == "__main__":
 
