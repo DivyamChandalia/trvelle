@@ -129,7 +129,7 @@ class DBHandler:
             'content': response.content,
             'message_name': response.name if hasattr(response, 'name') else None,
             'type': response.type,
-            'additional_kwargs': response.tool_calls if hasattr(response, 'tool_calls') else response.additional_kwargs,
+            'additional_kwargs': {"tool_calls": response.tool_calls} if hasattr(response, 'tool_calls') else response.additional_kwargs,
             'input_tokens': usage_metadata['input_tokens'],
             'output_tokens': usage_metadata['output_tokens'],
             'total_tokens': usage_metadata['total_tokens'],

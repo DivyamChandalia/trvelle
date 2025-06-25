@@ -31,12 +31,30 @@ class SymlinkUpdateHandler(logging.FileHandler):
         self.update_symlink()
 
     def update_symlink(self):
+        import shutil
         full_log_file = os.path.abspath(self.baseFilename)
         symlink_path = os.path.join(os.path.dirname(full_log_file), self.symlink_name)
 
+        # Remove existing file if it exists
         if os.path.exists(symlink_path):
-            os.remove(symlink_path)
-        os.symlink(full_log_file, symlink_path)
+            try:
+                os.remove(symlink_path)
+            except OSError:
+                pass
+        
+        try:
+            # Try symlink first (requires admin privileges on Windows)
+            os.symlink(full_log_file, symlink_path)
+        except (OSError, NotImplementedError):
+            try:
+                # Fall back to hard link
+                os.link(full_log_file, symlink_path)
+            except OSError:
+                try:
+                    # Final fallback: copy the file
+                    shutil.copy2(full_log_file, symlink_path)
+                except Exception:
+                    pass  # Ignore if all methods fail
 
 
 def configure_logging(

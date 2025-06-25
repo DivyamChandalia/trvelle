@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 class Orchestrator:
     db_handler = DBHandler()
     
-    def __init__(self, chat_cleanup_interval_minutes: int = 30, chat_expiry_minutes: int = 60):
+    def __init__(self, chat_cleanup_interval_minutes: int = 5, chat_expiry_minutes: int = 10):
         self.supervisor = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
         self.researcher = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
         self.mcp_config = self.load_mcp_config()
