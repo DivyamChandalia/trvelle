@@ -1,0 +1,13 @@
+FROM ghcr.io/astral-sh/uv:debian
+
+ENV PYTHONUNBUFFERED True
+
+WORKDIR /trvelle
+
+COPY ./ ./
+
+RUN uv sync --no-cache
+
+EXPOSE 8001
+# start the server
+CMD ["sh", "-c", "uv run --no-cache -m trvelle.orchestrator.api_wrapper & uv run --no-cache -m trvelle.tools.mcp_server"]

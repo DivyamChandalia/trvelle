@@ -8,7 +8,7 @@ from .logging_config import get_logger
 
 logger = get_logger(__name__)
 
-REQUIRED_ENV_VARS = ["GOOGLE_API_KEY"]
+REQUIRED_ENV_VARS = []
 
 module_path = Path(__file__).resolve().parent.parent.parent
 env_file_path = module_path / ".env"

@@ -1,0 +1,22 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: trvelle
+spec:
+  template:
+    spec:
+      containers:
+        - image: asia-south1-docker.pkg.dev/trvelle-463918/custom-fastapi/trvelle:latest
+          ports:
+            containerPort: 8001
+          env:
+          - name: TAVILY_API_KEY
+            value: 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
+          - name: GOOGLE_API_KEY
+            value: AIzaSyBQW0xQhZSFHWy7Zry9tlmT1Phw2dWykwI
+          - name: SERPAPI_API_KEY
+            value: 964a53d58e8c04b2b48b7f356acc547e4cc7d21cb0cbc7fc9bd4f8c98ef29ec5
+          - name: DB_URI
+            value: postgresql://postgres.csqnxjrfwbxdspqooete:2iz_*YtujuF56U%@aws-0-ap-south-1.pooler.supabase.com:5432/postgres
+          - name: DEBUG
+            value: 'False'

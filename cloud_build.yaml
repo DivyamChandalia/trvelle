@@ -1,0 +1,17 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '--pull',
+      '--rm',
+      '-f',
+      'Dockerfile.prod',
+      '-t',
+      'asia-south1-docker.pkg.dev/trvelle-463918/custom-fastapi/trvelle:latest', # Updated tag
+      '.'
+    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      'asia-south1-docker.pkg.dev/trvelle-463918/custom-fastapi/trvelle:latest' # Updated tag
+    ]
