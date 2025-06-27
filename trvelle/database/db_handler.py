@@ -207,6 +207,12 @@ class DBHandler:
                                 raw_response=json.dump(raw),
                                 created_at=datetime.datetime.now(datetime.timezone.utc)
                             )
+                            if message.name == "itinerary_tool":
+                                trip_name = raw.get("trip_name", "New Chat")
+                                db.query(ChatSession).filter(
+                                    ChatSession.chat_id == config.get("chat_id"),
+                                    ChatSession.user_id == config.get("user_id")
+                                ).update({"session_name": trip_name})
                             db.add(tool_execution)
                     db.query(ChatSession).filter(
                         ChatSession.chat_id == config.get("chat_id"),
@@ -361,6 +367,48 @@ class DBHandler:
                 return {"error": "Tool response not found"}
             
             return tool_execution.model_dump()
+        
+        finally:
+            db.close()
+
+    @classmethod
+    def delete_chat(cls, user_id: UUID, chat_id: UUID) -> Dict[str, Any]:
+        """Delete a chat session and all associated data for a given user."""
+        db = cls.db_session()
+        
+        try:
+            # Verify user exists
+            existing_user = db.query(User).filter(User.user_id == user_id).first()
+            if not existing_user:
+                return {"error": "User not found"}
+            
+            # Verify chat session exists and belongs to the user
+            chat_session = db.query(ChatSession).filter(
+                ChatSession.user_id == user_id,
+                ChatSession.chat_id == chat_id
+            ).first()
+            
+            if not chat_session:
+                return {"error": "Chat session not found"}
+            
+            # Delete the chat session (cascade will handle related records)
+            # This will automatically delete:
+            # - All messages in the chat
+            # - All tool executions in the chat  
+            # - All researcher agent records in the chat
+            db.delete(chat_session)
+            db.commit()
+            
+            logger.info(f"Successfully deleted chat session {chat_id} for user {user_id}")
+            return {
+                "success": True,
+                "message": f"Chat session {chat_id} and all associated data deleted successfully"
+            }
+            
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Error deleting chat session {chat_id} for user {user_id}: {str(e)}")
+            return {"error": f"Failed to delete chat session: {str(e)}"}
         
         finally:
             db.close()

@@ -13,7 +13,7 @@ DEFAULT_LOG_LEVEL = logging.INFO
 
 def is_debug_mode() -> bool:
     """Check if the application is running in debug mode."""
-    return os.getenv("DEBUG", False).lower() in (True, "true", "1", "yes", "on")
+    return os.getenv("DEBUG", False)
 
 def get_log_file_path() -> Path:
     """Get the path to the log file."""

@@ -43,7 +43,7 @@ class ChatSession(Base):
     
     chat_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.user_id'), nullable=False)
-    session_name = Column(String(255), nullable=True)
+    session_name = Column(String(255), nullable=True, default="New Chat")
     created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)

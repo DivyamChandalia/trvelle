@@ -63,7 +63,7 @@ class UserChatsResponse(BaseModel):
     user_id: str
     total_chats: int
 
-@app.post("/chat")
+@app.get("/chat")
 async def chat(
     request: ChatRequest,
     user_id: str = Header(None, description="User ID from authorization header"),
@@ -114,9 +114,9 @@ async def stream_chat_response(message: str, config: dict) -> AsyncGenerator[str
         
         # Stream the response content as message events
         async for chunk in orchestrator.orchestrate_stream(query=message, config=config):
-            # print(f"Streaming chunk: {chunk}".encode())
-            if isinstance(chunk, str):
-                yield f"event: message\ndata: {chunk}\n\n"
+            
+            if isinstance(chunk, dict) and "message" in chunk:
+                yield f"event: message\ndata: {chunk['message']}\n\n"
             elif isinstance(chunk, dict) and "progress" in chunk:
                 yield f"event: progress\ndata: {chunk["progress"]}\n\n"
             elif isinstance(chunk, dict) and "itinerary" in chunk:
@@ -131,7 +131,7 @@ async def stream_chat_response(message: str, config: dict) -> AsyncGenerator[str
         logger.error(traceback.format_exc())
         yield f"event: error\ndata: {str(e)}\n\n"
 
-@app.get("/chat")
+@app.get("/chat_history")
 async def get_chat_history(
     user_id: str = Header(..., description="User ID"),
     chat_id: str = Query(..., description="Chat ID")
@@ -168,7 +168,7 @@ async def get_chat_history(
         logger.error(f"Error retrieving chat history: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-@app.get("/chats")
+@app.get("/list_chats")
 async def get_user_chats(
     user_id: str = Header(..., description="User ID from authorization header")
 ):
@@ -234,12 +234,56 @@ async def get_tool_response(
                 raise HTTPException(status_code=404, detail="Tool response not found")
             return tool_response
 
-        
-        
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
     except Exception as e:
         logger.error(f"Error retrieving itinerary: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.delete("/chat")
+async def delete_chat(
+    user_id: str = Header(..., description="User ID"),
+    chat_id: str = Query(..., description="Chat ID to delete")
+):
+    """
+    Delete a chat session and all associated data for a user.
+    
+    Deletes the specified chat session along with all related data including:
+    - All messages in the chat
+    - All tool executions in the chat
+    - All researcher agent records in the chat
+    
+    User ID should be provided in the 'user-id' header.
+    Chat ID should be provided as a query parameter.
+    """
+    try:
+        # Convert string IDs to UUIDs
+        user_uuid = uuid.UUID(user_id)
+        chat_uuid = uuid.UUID(chat_id)
+        
+        # Delete the chat using the database handler
+        result = db_handler.delete_chat(user_uuid, chat_uuid)
+        
+        # Check if deletion was successful
+        if "error" in result:
+            if result["error"] == "User not found":
+                raise HTTPException(status_code=404, detail="User not found")
+            elif result["error"] == "Chat session not found":
+                raise HTTPException(status_code=404, detail="Chat session not found")
+            else:
+                raise HTTPException(status_code=500, detail=result["error"])
+        
+        return {
+            "success": True,
+            "message": result["message"],
+            "deleted_chat_id": chat_id,
+            "user_id": user_id
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error deleting chat: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

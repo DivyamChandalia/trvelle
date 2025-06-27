@@ -47,5 +47,5 @@ def delete_tables():
     print("All tables have been deleted.")
 
 if __name__ == "__main__":
-    delete_tables()
+    # delete_tables()
     create_tables()

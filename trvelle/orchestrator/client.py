@@ -272,7 +272,7 @@ class Orchestrator:
         self.get_message(query, config)
         
         # Stream initial processing message
-        yield  {'progress': "🤔 Processing your request...\n\n"}
+        yield  {'progress': "🤔 Processing your request...\n"}
         
         supervisor_response = await self.call_supervisor_llm(config)
         
@@ -281,12 +281,12 @@ class Orchestrator:
             content_lines = supervisor_response.content.split('\n')
             for line in content_lines:
                 if line.strip():
-                    yield line + '\n'
+                    yield {'message': f'{line}\n'}
                     await asyncio.sleep(0.1)  # Simulate streaming delay
         
         # Handle tool calls if present
         while supervisor_response.tool_calls:
-            yield {'progress': "\n🔧 Using tools to gather more information...\n\n"}
+            yield {'progress': "🔧 Using tools to gather more information...\n"}
             
             function_calls = supervisor_response.tool_calls
             handover = []
@@ -306,21 +306,21 @@ class Orchestrator:
                 yield {'itinerary': f'{itinerary_results[0].tool_call_id}'}
 
             if tool_calls:
-                yield {'progress': "🔍 Searching for information...\n\n"}
+                yield {'progress': "🔍 Searching for information...\n"}
                 await self.handle_tools(tool_calls, config)
             
             if handover:
-                yield {'progress': "👥 Consulting specialized researchers...\n\n"}
+                yield {'progress': "👥 Consulting specialized researchers...\n"}
                 await self.run_research_tasks(handover, config)
             
             # Get next response and stream it
             supervisor_response = await self.call_supervisor_llm(config)
             
-            if hasattr(supervisor_response, 'content') and supervisor_response.content:
+            if hasattr(supervisor_response, 'content') and supervisor_response.content: # "Heloo \n\n whats up \n .\n\n"
                 content_lines = supervisor_response.content.split('\n')
                 for line in content_lines:
                     if line.strip():
-                        yield line + '\n'
+                        yield {'message': f'{line}\n'}
                         await asyncio.sleep(0.1)  # Simulate streaming delay
 
     def get_memory_stats(self) -> Dict[str, Any]:
