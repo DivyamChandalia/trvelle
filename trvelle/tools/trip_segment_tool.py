@@ -1,7 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 from fastapi import FastAPI
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, field_validator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -10,14 +10,25 @@ mcp = FastMCP("TripSegmentTool")
 
 class TripSegmentInput(BaseModel):
     """Input schema for the Trip Segment Planner tool."""
-    city: str = Field(..., description="The city for the trip segment.")
-    content: str = Field(..., description="The detailed plan for this trip segment include information about chosen hotels(including UUID), activities, etc.")
+    city: str = Field(..., description="The city for the trip segment.", min_length=1)
+    content: str = Field(..., description="The detailed plan for this trip segment include information about chosen hotels(including UUID), activities, etc.", min_length=1)
     arrival_datetime: str = Field(..., description="Arrival datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).")
     departure_datetime: str = Field(..., description="Departure datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).")
-    adults: int = Field(1, description="Number of adults.")
+    adults: int = Field(1, description="Number of adults.", ge=1, le=20)
     interests: Optional[List[str]] = Field(None, description="Optional list of interests (e.g., ['museums', 'food']).")
     information: Optional[str] = Field(None, description="Optional string containing user preferences like budget, style, specific requests.")
     query: Optional[str] = Field(None, description="The query for the Supervisor if you need to clarify some information only fill this field if you have a query.")
+    
+    @field_validator('arrival_datetime', 'departure_datetime')
+    @classmethod
+    def validate_datetime_format(cls, v):
+        """Validate datetime format is ISO 8601."""
+        try:
+            from datetime import datetime
+            datetime.fromisoformat(v)
+        except ValueError:
+            raise ValueError("Datetime must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SS)")
+        return v
 
 class TripSegmentProcessor:
     """A tool for creating and managing trip segments."""
@@ -39,38 +50,29 @@ class TripSegmentProcessor:
         """
         Create a trip segment with validated input data.
         """
-        try:
-            # Validate input against TripSegmentInput schema
-            validated = TripSegmentInput.model_validate({
-                'city': city,
-                'content': content,
-                'arrival_datetime': arrival_datetime,
-                'departure_datetime': departure_datetime,
-                'adults': adults,
-                'interests': interests,
-                'information': information,
-                'query': query,
-            })
-            
-            self.num_segments += 1
-            logger.info(f"Created trip segment #{self.num_segments} for {city}")
-            
-            # Return the structured segment data
-            result = validated.model_dump()
-            result.update({
-                "success": True,
-                "segment_id": self.num_segments,
-            })
-            
-            return result
-
-        except ValidationError as e:
-            logger.error(f"Input validation failed: {e}")
-            return {
-                "success": False,
-                "error": "Input validation failed",
-                "details": e.errors()
-            }
+        # Validate input against TripSegmentInput schema
+        validated = TripSegmentInput.model_validate({
+            'city': city,
+            'content': content,
+            'arrival_datetime': arrival_datetime,
+            'departure_datetime': departure_datetime,
+            'adults': adults,
+            'interests': interests,
+            'information': information,
+            'query': query,
+        })
+        
+        self.num_segments += 1
+        logger.info(f"Created trip segment #{self.num_segments} for {city}")
+        
+        # Return the structured segment data
+        result = validated.model_dump()
+        result.update({
+            "success": True,
+            "segment_id": self.num_segments,
+        })
+        
+        return result
 
 trip_segment_processor = TripSegmentProcessor()
 
@@ -98,21 +100,17 @@ async def trip_segment(
         information (Optional[str]): Optional string containing user preferences like budget, style, specific requests.
         query (Optional[str]): The query for the Supervisor if you need to clarify some information.
     """
-    try:
-        result = trip_segment_processor.create_trip_segment(
-            city=city,
-            content=content,
-            arrival_datetime=arrival_datetime,
-            departure_datetime=departure_datetime,
-            adults=adults,
-            interests=interests,
-            information=information,
-            query=query
-        )
-        return result
-    except Exception as e:
-        logger.error(f"Error creating trip segment: {e}")
-        return {"error": str(e), "message": "Failed to create trip segment"}
+    result = trip_segment_processor.create_trip_segment(
+        city=city,
+        content=content,
+        arrival_datetime=arrival_datetime,
+        departure_datetime=departure_datetime,
+        adults=adults,
+        interests=interests,
+        information=information,
+        query=query
+    )
+    return result
 
 async def main():
     sample_segment = {

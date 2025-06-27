@@ -1,7 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 from fastapi import FastAPI
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, field_validator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -11,16 +11,27 @@ mcp = FastMCP("ResearcherAgentTool")
 class ResearcherAgentInput(BaseModel):
     """Input schema for a trip segment"""
 
-    city: str = Field(description="City for the trip segment.")
-    content: str = Field(description="The content plan for this trip segment.")
-    arrival_datetime: str = Field(description="Arrival datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).")
-    departure_datetime: str = Field(description="Departure datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).")
-    segment_number: int = Field(description="Unique identifier for the trip segment for future replanning.")
-    adults: int = Field(1, description="Number of adults for the trip segment.")
-    children: Optional[int] = Field(None, description="Number of children for the trip segment.")
+    city: str = Field(..., description="City for the trip segment.", min_length=1)
+    content: str = Field(..., description="The content plan for this trip segment.", min_length=1)
+    arrival_datetime: str = Field(..., description="Arrival datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).")
+    departure_datetime: str = Field(..., description="Departure datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).")
+    segment_number: int = Field(..., description="Unique identifier for the trip segment for future replanning.", ge=1)
+    adults: int = Field(1, description="Number of adults for the trip segment.", ge=1, le=20)
+    children: Optional[int] = Field(None, description="Number of children for the trip segment.", ge=0, le=10)
     interests: Optional[List[str]] = Field(None, description="Optional list of traveler interests (e.g., ['museums', 'food']).")
     information: Optional[str] = Field(None, description="Optional string with additional context like budget or style.")
     feedback: Optional[str] = Field(None, description="Optional feedback to make changes to the trip segment.")
+    
+    @field_validator('arrival_datetime', 'departure_datetime')
+    @classmethod
+    def validate_datetime_format(cls, v):
+        """Validate datetime format is ISO 8601."""
+        try:
+            from datetime import datetime
+            datetime.fromisoformat(v)
+        except ValueError:
+            raise ValueError("Datetime must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SS)")
+        return v
 
 class ResearcherAgent:
     """A tool for creating and managing trip segments through a researcher agent."""
@@ -41,39 +52,30 @@ class ResearcherAgent:
         """
         Process a trip segment creation request and return structured trip segment information.
         """
-        try:
-            validated = ResearcherAgentInput.model_validate({
-                'city': city,
-                'content': content,
-                'arrival_datetime': arrival_datetime,
-                'departure_datetime': departure_datetime,
-                'segment_number': segment_number,
-                'adults': adults,
-                'children': children,
-                'interests': interests,
-                'information': information,
-                'feedback': feedback,
-            })
-            
-            logger.info(f"Created trip segment #{segment_number} for {city}")
-            
-            # Add success indicator and metadata
-            result = validated.model_dump()
-            result.update({
-                "success": True,
-                "instance_id": segment_number,
-                "research_segments": [result]  # Wrap in list for compatibility with orchestrator
-            })
-            
-            return result
-
-        except ValidationError as e:
-            logger.error(f"Input validation failed: {e}")
-            return {
-                "success": False,
-                "error": "Input validation failed",
-                "details": e.errors()
-            }
+        validated = ResearcherAgentInput.model_validate({
+            'city': city,
+            'content': content,
+            'arrival_datetime': arrival_datetime,
+            'departure_datetime': departure_datetime,
+            'segment_number': segment_number,
+            'adults': adults,
+            'children': children,
+            'interests': interests,
+            'information': information,
+            'feedback': feedback,
+        })
+        
+        logger.info(f"Created trip segment #{segment_number} for {city}")
+        
+        # Add success indicator and metadata
+        result = validated.model_dump()
+        result.update({
+            "success": True,
+            "instance_id": segment_number,
+            "research_segments": [result]  # Wrap in list for compatibility with orchestrator
+        })
+        
+        return result
 
 researcher_agent_instance = ResearcherAgent()
 
@@ -107,23 +109,19 @@ async def researcher_agent(
         information (Optional[str]): Additional relevant information for the trip segment.
         feedback (Optional[str]): Feedback for modifying the trip segment.
     """
-    try:
-        result = researcher_agent_instance.process_trip_segment(
-            city=city,
-            content=content,
-            arrival_datetime=arrival_datetime,
-            departure_datetime=departure_datetime,
-            segment_number=segment_number,
-            adults=adults,
-            children=children,
-            interests=interests,
-            information=information,
-            feedback=feedback
-        )
-        return result
-    except Exception as e:
-        logger.error(f"Error processing trip segment: {e}")
-        return {"error": str(e), "message": "Failed to process trip segment"}
+    result = researcher_agent_instance.process_trip_segment(
+        city=city,
+        content=content,
+        arrival_datetime=arrival_datetime,
+        departure_datetime=departure_datetime,
+        segment_number=segment_number,
+        adults=adults,
+        children=children,
+        interests=interests,
+        information=information,
+        feedback=feedback
+    )
+    return result
 
 async def main():
     sample_segment = {

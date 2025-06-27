@@ -127,15 +127,9 @@ class ItineraryValidator:
         """
         logger.info("Validating itinerary data against schema...")
         
-        try:
-            # If the input already has the 'itinerary' wrapper, use it directly
-
-            model = Itinerary.model_validate(itinerary_data)
-            
-            return model.model_dump()
-        except Exception as e:
-            logger.error(f"Error validating itinerary: {e}")
-            return {"error": str(e), "message": "Failed to validate itinerary"}
+        # If the input already has the 'itinerary' wrapper, use it directly
+        model = Itinerary.model_validate(itinerary_data)
+        return model.model_dump()
 
 validator = ItineraryValidator()
 
@@ -148,15 +142,10 @@ async def itinerary_tool(itinerary: Itinerary) -> Dict[str, Any]:
     Args:
         itinerary (Itinerary) -> Dict[str, Any]: The itinerary data to validate and format
     """
-    try:
-        result = validator.validate_and_format_itinerary(itinerary)
-        itinerary_uid = str(uuid.uuid4())
-        result["itinerary_uid"] = itinerary_uid
-        if "error" in result:
-            return {"error": result["error"], "message": "Failed to validate itinerary"}
-        return  f"Itinerary displayed with UID:{itinerary_uid}", result
-    except Exception as e:
-        return {"error": str(e), "message": "Failed to validate itinerary"}
+    result = validator.validate_and_format_itinerary(itinerary)
+    itinerary_uid = str(uuid.uuid4())
+    result["itinerary_uid"] = itinerary_uid
+    return f"Itinerary displayed with UID:{itinerary_uid}", result
 
 async def main():
     sample_itinerary = {

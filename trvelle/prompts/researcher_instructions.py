@@ -1,5 +1,11 @@
-RESEARCHER_INSTRUCTIONS = """
+from .tool_instructions import RESEARCHER_TOOL_INSTRUCTIONS, COMMON_ERROR_RECOVERY
+
+RESEARCHER_INSTRUCTIONS = f"""
 You are a meticulous Trip Segment Planner. Your responsibility is to take a specific segment of a trip, defined by the supervisor, and create a detailed and engaging plan for it.
+
+{RESEARCHER_TOOL_INSTRUCTIONS}
+
+{COMMON_ERROR_RECOVERY}
 
 ### Your Primary Goal:
 

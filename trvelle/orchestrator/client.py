@@ -10,6 +10,7 @@ from langchain_tavily import TavilySearch
 from ..utils import get_logger, load_environment, configure_logging
 from ..prompts import SUPERVISOR_INSTRUCTIONS, RESEARCHER_INSTRUCTIONS
 from ..database import DBHandler, InMemoryChatManager
+from .tool_validator import tool_validator, ToolValidationError
 import uuid
 
 load_environment()
@@ -158,32 +159,64 @@ class Orchestrator:
         return response
     
     @db_handler.save_tools_output()
-    async def handle_tools(self, tool_calls: List[Dict[str, Any]], config: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        logger.info(f"Handling tool calls: {[tool_call['name'] for tool_call in tool_calls]}")
-        _, tools = await self.get_tools("system")
+    async def handle_tools(self, tool_calls: List[Dict[str, Any]], agent_type: str = "system", config: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        logger.info(f"Handling tool calls for {agent_type}: {[tool_call['name'] for tool_call in tool_calls]}")
+        _, tools = await self.get_tools(requester=agent_type)
         messages = []
         raw_messages = []
         
         for tool_call in tool_calls:
             tool_name = tool_call["name"]
-            if tool_name not in tools:
-                raise ValueError(f"Tool {tool_name} not found in available tools.")
+            tool_call_id = tool_call.get("id", "unknown")
+            tool_args = tool_call.get("args", {})
             
-            tool = tools[tool_name]
-            response = await tool.ainvoke(tool_call['args'])
+            # Step 1: Check if tool exists for this agent type
+            if not tool_validator.validate_tool_exists(tool_name, tools):
+                allowed_tools = list(self.tools_by_agent.get(agent_type, []))
+                error_msg = f"Tool '{tool_name}' not available for {agent_type} agent. Available tools for {agent_type}: {allowed_tools}"
+                logger.error(error_msg)
+                error_message = tool_validator.create_error_response(tool_call_id, tool_name, error_msg)
+                messages.append(error_message)
+                raw_messages.append(None)
+                continue
             
-            if isinstance(response, List):
-                response, raw = response
-            else:
-                raw = None
+            # Step 2: Validate tool input format
+            is_valid, validation_error, validated_args = tool_validator.validate_tool_input(tool_name, tool_args)
+            
+            if not is_valid:
+                logger.error(f"Tool validation failed for {tool_name}: {validation_error}")
+                error_message = tool_validator.create_error_response(tool_call_id, tool_name, validation_error)
+                messages.append(error_message)
+                raw_messages.append(None)
+                continue
+            
+            # Step 3: Execute tool with validated arguments
+            try:
+                tool = tools[tool_name]
+                response = await tool.ainvoke(validated_args)
+                
+                if isinstance(response, List):
+                    response, raw = response
+                else:
+                    raw = None
 
-            message = ToolMessage(
-                content=response,
-                tool_call_id=tool_call.get("id"),
-                name=tool_name)
-            
-            raw_messages.append(raw)
-            messages.append(message)
+                message = ToolMessage(
+                    content=response,
+                    tool_call_id=tool_call_id,
+                    name=tool_name
+                )
+                
+                raw_messages.append(raw)
+                messages.append(message)
+                logger.info(f"Successfully executed tool {tool_name} for {agent_type}")
+                
+            except Exception as e:
+                # This should be rare since we validated inputs
+                error_msg = f"Tool execution error: {str(e)}"
+                logger.error(f"Unexpected error executing {tool_name}: {error_msg}")
+                error_message = tool_validator.create_error_response(tool_call_id, tool_name, error_msg)
+                messages.append(error_message)
+                raw_messages.append(None)
 
         if config:
             history_key = self._get_chat_history_key(config)
@@ -230,7 +263,7 @@ class Orchestrator:
         researcher_response = await self.call_researcher_llm(config)
         while researcher_response.tool_calls:
             tool_calls = researcher_response.tool_calls
-            tool_results = await self.handle_tools(tool_calls, config)
+            tool_results = await self.handle_tools(tool_calls, "researcher", config)
             for tool_result in tool_results:
                 if tool_result.name == "trip_segment":
                     return tool_result
@@ -258,7 +291,7 @@ class Orchestrator:
                     tool_calls.append(tool_call)
 
             logger.info(f'Tool calls: {[tool["name"] for tool in tool_calls]}, Handover calls: {[tool["name"] for tool in handover]}')
-            await self.handle_tools(tool_calls, config)
+            await self.handle_tools(tool_calls, "supervisor", config)
             await self.run_research_tasks(handover, config)
             supervisor_response = await self.call_supervisor_llm(config)
 
@@ -302,12 +335,12 @@ class Orchestrator:
                     tool_calls.append(tool_call)
 
             if itinerary:
-                itinerary_results = await self.handle_tools(itinerary, config)
+                itinerary_results = await self.handle_tools(itinerary, "supervisor", config)
                 yield {'itinerary': f'{itinerary_results[0].tool_call_id}'}
 
             if tool_calls:
                 yield {'progress': "🔍 Searching for information...\n"}
-                await self.handle_tools(tool_calls, config)
+                await self.handle_tools(tool_calls, "supervisor", config)
             
             if handover:
                 yield {'progress': "👥 Consulting specialized researchers...\n"}
