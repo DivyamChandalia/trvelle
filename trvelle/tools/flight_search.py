@@ -3,7 +3,7 @@ from mcp.server.fastmcp import FastMCP
 from fastapi import FastAPI
 import asyncio
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 import json
 from serpapi import GoogleSearch
 from human_id import generate_id
@@ -22,29 +22,50 @@ class FlightLeg(BaseModel):
 class FlightSearchInput(BaseModel):
     """Input schema for the Flight Search tool. Provide either a list of multi-city legs OR departure/arrival IDs with dates for one-way or round-trip. """
     # --- Parameters for One-Way / Round-Trip ---
-    departure_id: Optional[str] = Field(None, description="Departure airport code(s) (e.g., 'DEL', 'DEL,BOM') for one-way/round-trip.")
-    arrival_id: Optional[str] = Field(None, description="Arrival airport code(s) (e.g., 'CDG', 'CDG,LYS') for one-way/round-trip.")
-    outbound_date: Optional[str] = Field(None, description="Outbound date in YYYY-MM-DD format for one-way/round-trip.")
+    departure_id: Optional[str] = Field(None, description="Departure airport code(s) (e.g., 'DEL', 'DEL,BOM') for one-way/round-trip. Required if flight_legs not provided.")
+    arrival_id: Optional[str] = Field(None, description="Arrival airport code(s) (e.g., 'CDG', 'CDG,LYS') for one-way/round-trip. Required if flight_legs not provided.")
+    outbound_date: Optional[str] = Field(None, description="Outbound date in YYYY-MM-DD format for one-way/round-trip. Required if flight_legs not provided.")
     return_date: Optional[str] = Field(None, description="Return date in YYYY-MM-DD format. If provided, performs a round-trip search.")
 
     # --- Parameters for Multi-City ---
-    flight_legs: Optional[List[FlightLeg]] = Field(None, description="List of flight legs for a multi-city search. Use this *instead* of departure_id/arrival_id/dates.")
+    flight_legs: Optional[List[FlightLeg]] = Field(None, description="List of flight legs for a multi-city search. Use this *instead* of departure_id/arrival_id/dates. Required if departure_id not provided.")
 
     # --- Common Parameters ---
-    adults: int = Field(1, description="Number of adult passengers.")
-    children: int = Field(0, description="Number of child passengers (age 2-11).")
-    infants_in_seat: int = Field(0, description="Number of infants (under 2) requiring their own seat.")
-    infants_on_lap: int = Field(0, description="Number of infants (under 2) travelling on lap.")
-    travel_class: int = Field(1, description="Travel class: 1=Economy, 2=Premium Economy, 3=Business, 4=First.")
-    currency: str = Field("USD", description="Currency code for pricing (e.g., 'USD', 'EUR', 'INR').")
+    adults: int = Field(1, description="Number of adult passengers.", ge=1, le=9)
+    children: int = Field(0, description="Number of child passengers (age 2-11).", ge=0, le=9)
+    infants_in_seat: int = Field(0, description="Number of infants (under 2) requiring their own seat.", ge=0, le=9)
+    infants_on_lap: int = Field(0, description="Number of infants (under 2) travelling on lap.", ge=0, le=9)
+    travel_class: int = Field(1, description="Travel class: 1=Economy, 2=Premium Economy, 3=Business, 4=First.", ge=1, le=4)
+    currency: str = Field("USD", description="Currency code for pricing (e.g., 'USD', 'EUR', 'INR').", min_length=3, max_length=3)
     sort_by: Optional[int] = Field(
         1,
         description=(
             "Determines which flight or set is returned based on ranking: "
             "1=Overall best (default), 2=Cheapest, 3=Departure earliest, "
             "4=Arrival earliest, 5=Shortest duration, 6=Lowest emissions."
-        )
+        ),
+        ge=1, le=6
     )
+    
+    @model_validator(mode='after')
+    def validate_search_type(self) -> 'FlightSearchInput':
+        """Validate that either flight_legs OR departure/arrival info is provided."""
+        has_flight_legs = self.flight_legs is not None and len(self.flight_legs) > 0
+        has_simple_search = all([self.departure_id, self.arrival_id, self.outbound_date])
+        
+        if not has_flight_legs and not has_simple_search:
+            raise ValueError(
+                "Must provide either 'flight_legs' for multi-city search OR "
+                "'departure_id', 'arrival_id', and 'outbound_date' for one-way/round-trip search"
+            )
+        
+        if has_flight_legs and has_simple_search:
+            raise ValueError(
+                "Cannot provide both 'flight_legs' and simple search parameters. "
+                "Use flight_legs for multi-city OR departure_id/arrival_id for one-way/round-trip"
+            )
+        
+        return self
 
 class FlightSearch:
     def __init__(self):
@@ -53,8 +74,8 @@ class FlightSearch:
 
     def format_flight_data_simple(self, data):
         output = []
-        for i, option in enumerate(data):
-            output.append(f"**Leg {i+1}:**")
+        for j, option in enumerate(data):
+            output.append(f"**Leg {j+1}:**")
             total_duration_hours = option['total_duration'] // 60
             total_duration_minutes = option['total_duration'] % 60
             output.append(f"The total travel time is about {total_duration_hours} hours and {total_duration_minutes} minutes.")
@@ -128,9 +149,9 @@ class FlightSearch:
         all_returns[-1]["currency"] = params.get("currency", "USD")
         output = self.format_flight_data_simple(all_returns)
         choose_uid = generate_id()
-        output.append(f'The UID to choose this flight is: "{choose_uid}"')
+        output = output + f'\nThe UID to choose this flight is: "{choose_uid}"'
         raw_list.append({"choose_uid": choose_uid})
-        return output, raw_list
+        return {"result": output, "raw": raw_list}
     
 
     def flight_search(self, search_params: FlightSearchInput):
@@ -161,13 +182,17 @@ async def flight_search(search_params: FlightSearchInput):
         search_params (FlightSearchInput): An instance of the FlightSearchInput
             Pydantic model containing all search criteria.
     """
-    if isinstance(search_params, FlightSearchInput):
-        search_params_dict = search_params.model_dump()
-    else:
-        search_params_dict = search_params
+    try:
+        if isinstance(search_params, FlightSearchInput):
+            search_params_dict = search_params.model_dump()
+        else:
+            search_params_dict = search_params
 
-    results = searcher.flight_search(search_params_dict)
-    return results
+        results = searcher.flight_search(search_params_dict)
+        return results
+    except Exception as e:
+        import traceback    
+        print(f"Error in flight_search: {e}\n{traceback.format_exc()}")
 
 
 async def main():
@@ -175,9 +200,13 @@ async def main():
         "flight_legs": [{"departure_id":"CDG","arrival_id":"NRT","date":"2025-06-01"},{"departure_id":"NRT","arrival_id":"LAX,SEA","date":"2025-06-08"},{"departure_id":"LAX,SEA","arrival_id":"AUS","date":"2025-06-15","times":"8,18,9,23"}],
         "adults": 2
     }
-    print(await flight_search(search_params))
+    search_params = {'departure_id': 'BOM', 'arrival_id': 'IBZ', 'outbound_date': '2025-07-09', 'return_date': '2025-07-13', 'flight_legs': None, 'adults': 1, 'children': 0, 'infants_in_seat': 0, 'infants_on_lap': 0, 'travel_class': 1, 'currency': 'USD', 'sort_by': 1}
+    result = await flight_search(search_params)
+    print(f'Flight Search type: {type(result)}')
+    # print(f'Flight Search raw type: {type(raw)}')
+    print(f'Flight Search length: {len(result)}')
 
-# if __name__ == "__main__":
-    # asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
 
 # mcp.run(transport="streamable-http")

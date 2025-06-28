@@ -145,6 +145,8 @@ def run_gradio_app():
                 error_message = f"I encountered an error while processing your request: {str(e)}"
                 chat_history[-1] = (user_message, error_message)
                 logger.error(f"Error processing user query: {e}", exc_info=True)
+                import traceback
+                logger.error(traceback.format_exc())
 
             return "", chat_history, current_user_id, current_chat_id
 

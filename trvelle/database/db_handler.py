@@ -12,6 +12,7 @@ import os
 from .init_db import create_tables
 from ..utils import get_logger
 import uuid
+from sqlalchemy import cast, String # Potentially useful for other types
 import json
 import yaml
 logger = get_logger(__name__)
@@ -189,9 +190,12 @@ class DBHandler:
         """Decorator to save tool execution outputs to database."""
         def decorator(func):
             @functools.wraps(func)
-            async def wrapper(self, tool_calls: List[Dict[str, Any]], config: Optional[Dict[str, Any]] = None):
+            async def wrapper(self, tool_calls: List[Dict[str, Any]], agent_type: str = None, config: Optional[Dict[str, Any]] = None):
                 # Execute the function
-                messages, raw_messages = await func(self, tool_calls, config)
+                if agent_type is None:
+                    messages, raw_messages = await func(self, tool_calls, config)
+                else:
+                    messages, raw_messages = await func(self, tool_calls, agent_type, config)
 
                 # Save the tool messages to the database
                 if config:
@@ -204,7 +208,7 @@ class DBHandler:
                                 chat_id=config.get("chat_id"),
                                 message_id=msg_to_db.message_id,
                                 tool_name=message.name,
-                                raw_response=json.dump(raw),
+                                raw_response=raw,
                                 created_at=datetime.datetime.now(datetime.timezone.utc)
                             )
                             if message.name == "itinerary_tool":
@@ -360,13 +364,13 @@ class DBHandler:
             # Retrieve the tool execution
             tool_execution = db.query(ToolExecution).filter(
                 ToolExecution.chat_id == chat_id,
-                ToolExecution.raw_response.like(f"%{human_id}%")
+                cast(ToolExecution.raw_response, String).like(f"%{human_id}%")
             ).first()
             
             if not tool_execution:
                 return {"error": "Tool response not found"}
             
-            return tool_execution.model_dump()
+            return tool_execution
         
         finally:
             db.close()

@@ -3,7 +3,7 @@ from mcp.server.fastmcp import FastMCP
 from fastapi import FastAPI
 import asyncio
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import json
 from serpapi import GoogleSearch
 from human_id import generate_id
@@ -14,25 +14,27 @@ mcp = FastMCP("HotelSearch")
 
 class HotelSearchInput(BaseModel):
     """Input schema for the Hotel Search tool."""
-    q: str = Field(..., description="Search query - anything you would use in a regular Google Hotels search")
+    q: str = Field(..., description="Search query - anything you would use in a regular Google Hotels search (city, hotel name, area)", min_length=1)
     check_in_date: str = Field(..., description="Check-in date in YYYY-MM-DD format")
     check_out_date: str = Field(..., description="Check-out date in YYYY-MM-DD format")
-    currency: Optional[str] = Field("USD", description="Currency of returned prices (default: USD)")
-    adults: Optional[int] = Field(2, description="Number of adults (default: 2)")
-    children: Optional[int] = Field(0, description="Number of children (default: 0)")
+    currency: Optional[str] = Field("USD", description="Currency of returned prices (default: USD)", min_length=3, max_length=3)
+    adults: Optional[int] = Field(2, description="Number of adults (default: 2)", ge=1, le=30)
+    children: Optional[int] = Field(0, description="Number of children (default: 0)", ge=0, le=10)
     children_ages: Optional[str] = Field(None, description="Ages of children (1-17), comma-separated for multiple children (e.g., '5,8,10')")
     sort_by: Optional[int] = Field(
         None,
         description=(
             "Sorting criteria: "
             "3=Lowest price, 8=Highest rating, 13=Most reviewed (default: Relevance)"
-        )
+        ),
+        ge=3, le=13
     )
-    min_price: Optional[int] = Field(None, description="Lower bound of price range")
-    max_price: Optional[int] = Field(None, description="Upper bound of price range")
+    min_price: Optional[int] = Field(None, description="Lower bound of price range", ge=0)
+    max_price: Optional[int] = Field(None, description="Upper bound of price range", ge=0)
     rating: Optional[int] = Field(
         None,
-        description="Filter by rating: 7=3.5+, 8=4.0+, 9=4.5+"
+        description="Filter by rating: 7=3.5+, 8=4.0+, 9=4.5+",
+        ge=7, le=9
     )
     hotel_class: Optional[str] = Field(
         None,
@@ -41,8 +43,8 @@ class HotelSearchInput(BaseModel):
     free_cancellation: Optional[bool] = Field(None, description="Show only results with free cancellation")
     special_offers: Optional[bool] = Field(None, description="Show only results with special offers")
     vacation_rentals: Optional[bool] = Field(None, description="Search for vacation rentals instead of hotels")
-    bedrooms: Optional[int] = Field(None, description="Minimum number of bedrooms (vacation rentals only)")
-    bathrooms: Optional[int] = Field(None, description="Minimum number of bathrooms (vacation rentals only)")
+    bedrooms: Optional[int] = Field(None, description="Minimum number of bedrooms (vacation rentals only)", ge=1, le=10)
+    bathrooms: Optional[int] = Field(None, description="Minimum number of bathrooms (vacation rentals only)", ge=1, le=10)
     property_types: Optional[str] = Field(
         None,
         description=(
@@ -67,7 +69,26 @@ class HotelSearchInput(BaseModel):
             "Comma-separated for multiple (e.g., '35,9,19')"
         )
     )
-    max_results: int = Field(5, description="Maximum number of hotel results to return (1-20)")
+    max_results: int = Field(5, description="Maximum number of hotel results to return (1-20)", ge=1, le=20)
+    
+    @field_validator('min_price', 'max_price')
+    @classmethod
+    def validate_price_range(cls, v, info):
+        """Validate price range logic."""
+        if v is not None and v < 0:
+            raise ValueError("Price must be non-negative")
+        return v
+    
+    @field_validator('check_in_date', 'check_out_date')
+    @classmethod
+    def validate_date_format(cls, v):
+        """Validate date format is YYYY-MM-DD."""
+        try:
+            from datetime import datetime
+            datetime.strptime(v, '%Y-%m-%d')
+        except ValueError:
+            raise ValueError("Date must be in YYYY-MM-DD format")
+        return v
 
 class HotelSearch:
     def __init__(self):
@@ -197,7 +218,7 @@ class HotelSearch:
         # Format output
         formatted_output = self.format_hotel_data_simple(hotels)
         
-        return formatted_output, raw_results
+        return {"result": formatted_output, "raw": raw_results}
 
 
 searcher = HotelSearch()
@@ -233,7 +254,9 @@ async def main():
         "sort_by": 3,  # Lowest price
         "max_results": 5
     }
-    print(await hotel_search(search_params))
+    response, raw_results = await hotel_search(search_params)
+    print(f'type(response): {type(response)}')
+    print(f'type(raw_results): {type(raw_results)}')
 
 if __name__ == "__main__":
     asyncio.run(main())

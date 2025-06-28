@@ -239,6 +239,9 @@ async def get_tool_response(
         raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
     except Exception as e:
         logger.error(f"Error retrieving itinerary: {e}")
+        print(e)
+        import traceback
+        print(traceback.print_exc())
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.delete("/chat")
