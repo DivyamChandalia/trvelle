@@ -351,8 +351,6 @@ class Orchestrator:
 
             if tool_calls:
                 yield {'progress': "🔍 Searching for information...\\n"}
-                await self.handle_tools(tool_calls, config)
-                yield {'progress': "🔍 Searching for information...\n"}
                 await self.handle_tools(tool_calls, "supervisor", config)
             
             if handover:
