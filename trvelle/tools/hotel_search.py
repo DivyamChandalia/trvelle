@@ -218,7 +218,7 @@ class HotelSearch:
         # Format output
         formatted_output = self.format_hotel_data_simple(hotels)
         
-        return formatted_output, raw_results
+        return {"result": formatted_output, "raw": raw_results}
 
 
 searcher = HotelSearch()

@@ -145,7 +145,7 @@ async def itinerary_tool(itinerary: Itinerary) -> Dict[str, Any]:
     result = validator.validate_and_format_itinerary(itinerary)
     itinerary_uid = str(uuid.uuid4())
     result["itinerary_uid"] = itinerary_uid
-    return f"Itinerary displayed with UID:{itinerary_uid}", result
+    return {"result": f"Itinerary displayed with UID:{itinerary_uid}", "raw": result}
 
 async def main():
     sample_itinerary = {

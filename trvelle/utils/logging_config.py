@@ -78,7 +78,7 @@ def configure_logging(
     if not force_enable and not is_debug_mode():
         # Set root logger to CRITICAL to effectively disable all logging
         root_logger = logging.getLogger()
-        root_logger.setLevel(logging.CRITICAL)
+        root_logger.setLevel(log_level)
         root_logger.handlers.clear()
         return
     log_file = log_file or get_log_file_path()

@@ -12,6 +12,7 @@ from ..prompts import SUPERVISOR_INSTRUCTIONS, RESEARCHER_INSTRUCTIONS
 from ..database import DBHandler, InMemoryChatManager
 from .tool_validator import tool_validator, ToolValidationError
 import uuid
+import json
 
 load_environment()
 configure_logging()
@@ -193,10 +194,19 @@ class Orchestrator:
             # Step 3: Execute tool with validated arguments
             try:
                 tool = tools[tool_name]
+                print(f"Executing tool {tool_name} for {agent_type} with args: {validated_args}")
                 response = await tool.ainvoke(validated_args)
-                
-                if isinstance(response, List):
-                    response, raw = response
+                try:
+                    response = json.loads(response)
+                except Exception as e:
+                    logger.error(f"JSON decode error for tool {tool_name} response: {e}")
+                    pass
+                print(f'type(response)={type(response)}, len(response)={len(response) if isinstance(response, (list, str)) else "N/A"}')
+                if isinstance(response, dict):
+                    if "result" in response:
+                        response, raw = response["result"], response.get("raw", None)
+                    else:
+                        response, raw = str(response), None
                 else:
                     raw = None
 
@@ -212,6 +222,8 @@ class Orchestrator:
                 
             except Exception as e:
                 # This should be rare since we validated inputs
+                import traceback
+                logger.error(f"Error executing tool {tool_name} for {agent_type}: {e}\n{traceback.format_exc()}")
                 error_msg = f"Tool execution error: {str(e)}"
                 logger.error(f"Unexpected error executing {tool_name}: {error_msg}")
                 error_message = tool_validator.create_error_response(tool_call_id, tool_name, error_msg)
@@ -292,7 +304,7 @@ class Orchestrator:
 
             logger.info(f'Tool calls: {[tool["name"] for tool in tool_calls]}, Handover calls: {[tool["name"] for tool in handover]}')
             await self.handle_tools(tool_calls, "supervisor", config)
-            await self.run_research_tasks(handover, config)
+            await self.run_research_tasks(handover, config = config)
             supervisor_response = await self.call_supervisor_llm(config)
 
         return supervisor_response

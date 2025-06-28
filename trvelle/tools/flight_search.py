@@ -74,8 +74,8 @@ class FlightSearch:
 
     def format_flight_data_simple(self, data):
         output = []
-        for i, option in enumerate(data):
-            output.append(f"**Leg {i+1}:**")
+        for j, option in enumerate(data):
+            output.append(f"**Leg {j+1}:**")
             total_duration_hours = option['total_duration'] // 60
             total_duration_minutes = option['total_duration'] % 60
             output.append(f"The total travel time is about {total_duration_hours} hours and {total_duration_minutes} minutes.")
@@ -149,9 +149,9 @@ class FlightSearch:
         all_returns[-1]["currency"] = params.get("currency", "USD")
         output = self.format_flight_data_simple(all_returns)
         choose_uid = generate_id()
-        output.append(f'The UID to choose this flight is: "{choose_uid}"')
+        output = output + f'\nThe UID to choose this flight is: "{choose_uid}"'
         raw_list.append({"choose_uid": choose_uid})
-        return output, raw_list
+        return {"result": output, "raw": raw_list}
     
 
     def flight_search(self, search_params: FlightSearchInput):
@@ -182,13 +182,17 @@ async def flight_search(search_params: FlightSearchInput):
         search_params (FlightSearchInput): An instance of the FlightSearchInput
             Pydantic model containing all search criteria.
     """
-    if isinstance(search_params, FlightSearchInput):
-        search_params_dict = search_params.model_dump()
-    else:
-        search_params_dict = search_params
+    try:
+        if isinstance(search_params, FlightSearchInput):
+            search_params_dict = search_params.model_dump()
+        else:
+            search_params_dict = search_params
 
-    results = searcher.flight_search(search_params_dict)
-    return results
+        results = searcher.flight_search(search_params_dict)
+        return results
+    except Exception as e:
+        import traceback    
+        print(f"Error in flight_search: {e}\n{traceback.format_exc()}")
 
 
 async def main():
@@ -196,9 +200,13 @@ async def main():
         "flight_legs": [{"departure_id":"CDG","arrival_id":"NRT","date":"2025-06-01"},{"departure_id":"NRT","arrival_id":"LAX,SEA","date":"2025-06-08"},{"departure_id":"LAX,SEA","arrival_id":"AUS","date":"2025-06-15","times":"8,18,9,23"}],
         "adults": 2
     }
-    print(await flight_search(search_params))
+    search_params = {'departure_id': 'BOM', 'arrival_id': 'IBZ', 'outbound_date': '2025-07-09', 'return_date': '2025-07-13', 'flight_legs': None, 'adults': 1, 'children': 0, 'infants_in_seat': 0, 'infants_on_lap': 0, 'travel_class': 1, 'currency': 'USD', 'sort_by': 1}
+    result = await flight_search(search_params)
+    print(f'Flight Search type: {type(result)}')
+    # print(f'Flight Search raw type: {type(raw)}')
+    print(f'Flight Search length: {len(result)}')
 
-# if __name__ == "__main__":
-    # asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
 
 # mcp.run(transport="streamable-http")
