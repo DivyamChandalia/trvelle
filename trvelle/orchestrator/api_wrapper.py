@@ -65,11 +65,12 @@ class UserChatsResponse(BaseModel):
 
 @app.get("/chat")
 async def chat(
-    request: ChatRequest,
-    user_id: str = Header(None, description="User ID from authorization header"),
+    message: str = Query(..., description="User message to chat with"),
+    user_id: str = Query(..., description="User ID from authorization header"),
+    stream: Optional[bool] = Query(True, description="Whether to stream the response"),
     chat_id: Optional[str] = Query(None, description="Chat ID from authorization header")
 ):
-    print(f"Received request: {request} with user_id: {user_id} and chat_id: {chat_id}")
+    print(f"Received request: {message} with user_id: {user_id} and chat_id: {chat_id}")
     if not user_id:
         raise HTTPException(status_code=400, detail="User ID is required")
     config = {
@@ -77,14 +78,14 @@ async def chat(
         "chat_id": uuid.UUID(chat_id) if chat_id else uuid.uuid4(),
     }
 
-    if request.stream:
+    if stream:
         return StreamingResponse(
-            stream_chat_response(request.message, config),
-            media_type="text/plain; charset=utf-8"
+            stream_chat_response(message, config),
+            media_type="text/event-stream"
         )
     else:
         response = await orchestrator.orchestrate(
-            query=request.message,
+            query=message,
             config=config
         )
         
