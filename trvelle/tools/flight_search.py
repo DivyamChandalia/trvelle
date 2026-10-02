@@ -1,3 +1,4 @@
+from ..utils.secrets import redact_secrets
 import os
 from mcp.server.fastmcp import FastMCP
 from fastapi import FastAPI
@@ -119,12 +120,13 @@ class FlightSearch:
         if self.use_cache:
             if os.path.exists(cache_file):
                 with open(cache_file, "r") as f:
-                    return json.load(f)
+                    return redact_secrets(json.load(f))
 
         search = GoogleSearch(params)
-        results = search.get_dict()
+        results = redact_secrets(search.get_dict())
 
         if self.use_cache:
+            os.makedirs(os.path.dirname(cache_file), exist_ok=True)
             with open(cache_file, "w") as f:
                 json.dump(results, f, indent=2)
         return results

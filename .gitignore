@@ -4,3 +4,9 @@
 logs/
 *.pyc
 *__pycache__*
+.runtime/
+
+.env
+.env.*
+!.env.example
+cache/
