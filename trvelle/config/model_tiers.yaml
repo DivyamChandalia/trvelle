@@ -1,0 +1,26 @@
+# Ordered preferences, not a universal intelligence benchmark. OpenRouter is free-only.
+# Researchers start one tier below the orchestrator's selected tier.
+# Explicit role assignments override automatic tier fallback until removed.
+role_models: {}
+tiers:
+  - name: planning
+    models:
+      # Experimental free preview, expires 2026-10-05; catalog validation skips it after expiry.
+      - openrouter:stealth/space-bunny-alpha
+      - google:gemini-3.8-flash
+      - openrouter:qwen/qwen3.8-27b:free
+  - name: research
+    models:
+      - google:gemini-3.5-flash-lite
+      - google:gemini-3.7-flash
+      - google:gemini-3.6-flash
+      - openrouter:thinkingmachines/inkling-small:free
+      - openrouter:thinkingmachines/inkling:free
+  - name: fallback
+    models:
+      - openrouter:nvidia/nemotron-3-ultra-550b-a55b:free
+  - name: last_resort
+    models:
+      - openrouter:google/gemma-4-31b-it:free
+      - openrouter:nvidia/nemotron-3.5-lightning:free
+      - openrouter:nvidia/nemotron-3-super-120b-a12b:free

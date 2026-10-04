@@ -12,13 +12,16 @@ PATTERNS = [
     ('Database password', re.compile(rb'postgres(?:ql)?://[^\s:@]+:[^\s@]+@')),
 ]
 staged = '--staged' in sys.argv
-command = ['git','diff','--cached','--name-only','--diff-filter=ACMR','-z'] if staged else ['git','ls-files','-z']
+command = ['git','diff','--cached','--name-only','--diff-filter=ACMR','-z'] if staged else ['git','ls-files','--cached','--others','--exclude-standard','-z']
 files = subprocess.check_output(command).decode().split('\0')
 found = False
 for path in filter(None, files):
+    from pathlib import Path
+    if not staged and not Path(path).is_file():
+        continue
     data = subprocess.check_output(['git','show', ':'+path] if staged else ['git','show','HEAD:'+path]) if staged else open(path,'rb').read()
     for label, pattern in PATTERNS:
-        if pattern.search(data):
+        if pattern.search(data.replace(b'USER:YOUR_DATABASE_PASSWORD@', b'USER@')):
             print(f'{path}: possible {label}; remove it before committing', file=sys.stderr)
             found = True
 sys.exit(1 if found else 0)

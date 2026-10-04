@@ -1,0 +1,247 @@
+{
+  "search_metadata": {
+    "id": "6ac172119f8abc34c7238520",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/2gGuh3wtU-MGSICQPiUbsZn38tNRD-cbfhsZpaWAZ60/6ac172119f8abc34c7238520.json",
+    "markdown_endpoint": "https://serpapi.com/searches/2gGuh3wtU-MGSICQPiUbsZn38tNRD-cbfhsZpaWAZ60/6ac172119f8abc34c7238520.md",
+    "created_at": "2026-10-03 21:22:25 UTC",
+    "processed_at": "2026-10-03 21:22:25 UTC",
+    "google_flights_url": "https://www.google.com/travel/flights?hl=en&gl=us&curr=INR&tfs=CBwQAhpAEgoyMDI2LTExLTE1IiAKA0JMUhIKMjAyNi0xMS0xNRoDU0lOKgI2RTIEMTQ1N2oHCAESA0JMUnIHCAESA1NJThoeEgoyMDI2LTExLTE5agcIARIDU0lOcgcIARIDQkxSQAFAAUgBcAGYAQE&tfu=EgIIAQ",
+    "raw_html_file": "https://serpapi.com/searches/2gGuh3wtU-MGSICQPiUbsZn38tNRD-cbfhsZpaWAZ60/6ac172119f8abc34c7238520.html",
+    "prettify_html_file": "https://serpapi.com/searches/2gGuh3wtU-MGSICQPiUbsZn38tNRD-cbfhsZpaWAZ60/6ac172119f8abc34c7238520.prettify",
+    "total_time_taken": 10.03
+  },
+  "search_parameters": {
+    "engine": "google_flights",
+    "hl": "en",
+    "gl": "us",
+    "type": "1",
+    "departure_id": "BLR",
+    "arrival_id": "SIN",
+    "outbound_date": "2026-11-15",
+    "return_date": "2026-11-19",
+    "travel_class": 1,
+    "adults": 2,
+    "children": 0,
+    "infants_in_seat": 0,
+    "infants_on_lap": 0,
+    "departure_token": "WyJDalJJVVV4UU0zUllSRXRTVlZGQlMwaEhUVUZDUnkwdExTMHRMUzB0TFhscGRHY3hNRUZCUVVGQlIzSkNZMmhCVDBNd2NVbEJFZ1kyUlRFME5UY2FDd2lrMEFZUUFCb0RTVTVTT0J4dzB2QUciLFtbIkJMUiIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIjZFIiwiMTQ1NyJdXV0=",
+    "currency": "INR",
+    "sort_by": "1"
+  },
+  "other_flights": [
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-19 04:20"
+          },
+          "arrival_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-19 06:25"
+          },
+          "duration": 275,
+          "airplane": "Airbus A321neo",
+          "airline": "IndiGo",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+          "travel_class": "Economy",
+          "flight_number": "6E 1248",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 403 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 275,
+      "carbon_emissions": {
+        "this_flight": 403000,
+        "typical_for_this_route": 554000,
+        "difference_percent": -27
+      },
+      "price": 108580,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+      "booking_token": "WyJDalJJU1d0SU5VNVpWVWROV0VsQlNHUnNlbWRDUnkwdExTMHRMUzB0TFMxd1ptNTNORUZCUVVGQlIzSkNZMmhqVGtSelJXVkJFZ1kyUlRFeU5EZ2FDd2lrMEFZUUFCb0RTVTVTT0J4dzB2QUciLFtbIkJMUiIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIjZFIiwiMTQ1NyJdXSxbWyJTSU4iLCIyMDI2LTExLTE5IiwiQkxSIixudWxsLCI2RSIsIjEyNDgiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-19 19:30"
+          },
+          "arrival_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-19 21:35"
+          },
+          "duration": 275,
+          "airplane": "Airbus A321neo",
+          "airline": "IndiGo",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+          "travel_class": "Economy",
+          "flight_number": "6E 1458",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 403 kg"
+          ]
+        }
+      ],
+      "total_duration": 275,
+      "carbon_emissions": {
+        "this_flight": 403000,
+        "typical_for_this_route": 554000,
+        "difference_percent": -27
+      },
+      "price": 119440,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+      "booking_token": "WyJDalJJU1d0SU5VNVpWVWROV0VsQlNHUnNlbWRDUnkwdExTMHRMUzB0TFMxd1ptNTNORUZCUVVGQlIzSkNZMmhqVGtSelJXVkJFZ1kyUlRFME5UZ2FDd2lRcFFjUUFCb0RTVTVTT0J4dzNNZ0giLFtbIkJMUiIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIjZFIiwiMTQ1NyJdXSxbWyJTSU4iLCIyMDI2LTExLTE5IiwiQkxSIixudWxsLCI2RSIsIjE0NTgiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-19 08:45"
+          },
+          "arrival_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-19 10:35"
+          },
+          "duration": 260,
+          "airplane": "Airbus A350",
+          "airline": "Singapore Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SQ.png",
+          "travel_class": "Economy",
+          "flight_number": "SQ 508",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 414 kg"
+          ]
+        }
+      ],
+      "total_duration": 260,
+      "carbon_emissions": {
+        "this_flight": 414000,
+        "typical_for_this_route": 554000,
+        "difference_percent": -25
+      },
+      "price": 167426,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SQ.png",
+      "booking_token": "WyJDalJJU1d0SU5VNVpWVWROV0VsQlNHUnNlbWRDUnkwdExTMHRMUzB0TFMxd1ptNTNORUZCUVVGQlIzSkNZMmhqVGtSelJXVkJFZ1ZUVVRVd09Cb0xDSUtjQ2hBQUdnTkpUbEk0SEhEMXpRbz0iLFtbIkJMUiIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIjZFIiwiMTQ1NyJdXSxbWyJTSU4iLCIyMDI2LTExLTE5IiwiQkxSIixudWxsLCJTUSIsIjUwOCJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-19 20:00"
+          },
+          "arrival_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-19 21:55"
+          },
+          "duration": 265,
+          "airplane": "Airbus A350",
+          "airline": "Singapore Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SQ.png",
+          "travel_class": "Economy",
+          "flight_number": "SQ 510",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 414 kg"
+          ]
+        }
+      ],
+      "total_duration": 265,
+      "carbon_emissions": {
+        "this_flight": 414000,
+        "typical_for_this_route": 554000,
+        "difference_percent": -25
+      },
+      "price": 190028,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SQ.png",
+      "booking_token": "WyJDalJJU1d0SU5VNVpWVWROV0VsQlNHUnNlbWRDUnkwdExTMHRMUzB0TFMxd1ptNTNORUZCUVVGQlIzSkNZMmhqVGtSelJXVkJFZ1ZUVVRVeE1Cb0xDTXpNQ3hBQUdnTkpUbEk0SEhDZGhRdz0iLFtbIkJMUiIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIjZFIiwiMTQ1NyJdXSxbWyJTSU4iLCIyMDI2LTExLTE5IiwiQkxSIixudWxsLCJTUSIsIjUxMCJdXV0="
+    }
+  ],
+  "airports": [
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "BLR",
+            "name": "Kempegowda International Airport Bengaluru"
+          },
+          "city": "Bengaluru",
+          "country": "India",
+          "country_code": "IN",
+          "image": "https://encrypted-tbn2.gstatic.com/images?q=tbn%3AANd9GcQIQIUfZg6v3rdHMVD96D5vTNuXwVO7zsdZy0l7s2uiyV-xuK8nJlokAp_ChoLy9r0vjJWcOOBkEvBI2g",
+          "thumbnail": "https://encrypted-tbn2.gstatic.com/images?q=tbn%3AANd9GcSFrS_QMxzjURYrYSPiuRW9uR9imYuBAhdE49jwKag7Ucgl0en4CNAtP0hf1MDSGdvhAw2s1-2w71_b-pcIyFOM1F1yMSPQLO5_XlgJc_4"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "SIN",
+            "name": "Singapore Changi Airport"
+          },
+          "city": "Singapore",
+          "country": "Singapore",
+          "country_code": "SG",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn%3AANd9GcTPxNDQYUBDKl_Cnb-2R_TakwdFGzKIpvsMBeDdYwNHK_c2jUY6LVQ5R_mwZDf9hOuu6iHgYjrL87eDZw",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn%3AANd9GcSp10Y3G-u5LPBzRWABhOUD7BGcBspacZc2r31UP6QmzLmyprerN-6BZ5wZkdsDXngRuIYCPQI8Ny3uYjbRegATm48AJfppuLgpsc0mhsE"
+        }
+      ]
+    },
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "SIN",
+            "name": "Singapore Changi Airport"
+          },
+          "city": "Singapore",
+          "country": "Singapore",
+          "country_code": "SG",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn%3AANd9GcTPxNDQYUBDKl_Cnb-2R_TakwdFGzKIpvsMBeDdYwNHK_c2jUY6LVQ5R_mwZDf9hOuu6iHgYjrL87eDZw",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn%3AANd9GcSp10Y3G-u5LPBzRWABhOUD7BGcBspacZc2r31UP6QmzLmyprerN-6BZ5wZkdsDXngRuIYCPQI8Ny3uYjbRegATm48AJfppuLgpsc0mhsE"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "BLR",
+            "name": "Kempegowda International Airport Bengaluru"
+          },
+          "city": "Bengaluru",
+          "country": "India",
+          "country_code": "IN",
+          "image": "https://encrypted-tbn2.gstatic.com/images?q=tbn%3AANd9GcQIQIUfZg6v3rdHMVD96D5vTNuXwVO7zsdZy0l7s2uiyV-xuK8nJlokAp_ChoLy9r0vjJWcOOBkEvBI2g",
+          "thumbnail": "https://encrypted-tbn2.gstatic.com/images?q=tbn%3AANd9GcSFrS_QMxzjURYrYSPiuRW9uR9imYuBAhdE49jwKag7Ucgl0en4CNAtP0hf1MDSGdvhAw2s1-2w71_b-pcIyFOM1F1yMSPQLO5_XlgJc_4"
+        }
+      ]
+    }
+  ]
+}

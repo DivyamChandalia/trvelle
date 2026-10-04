@@ -1,0 +1,34 @@
+{
+  "query": "singapore mrt airport transport fare official changi airport city",
+  "follow_up_questions": null,
+  "answer": null,
+  "images": [],
+  "results": [
+    {
+      "url": "https://ph.trip.com/guide/transport/singapore-airport-to-city.html",
+      "title": "Singapore Airport to City: Best Transport Options and Travel Tips | Trip.com",
+      "content": "| Transport Option | Where to Find It | Travel Time | Cost (SGD / PHP) |  | Best For | Extra Info |\n ---  ---  --- \n| MRT (Train) | Follow signs to Changi Airport MRT Station (Terminal 2 & 3) | 30–45 mins | SGD 2–3 |  | Budget travelers, solo trips | Transfer at  Tanah Merah Station  to reach the city |\n| Taxi (Official Taxi) | Taxi stands outside every terminal | 20–30 mins | SGD 25–35 | ⭐⭐⭐⭐ | First-timers, families | Airport pickup and late-night surcharges may apply | [...] The MRT (train) is the cheapest and most convenient option. It costs around SGD 2 to 3 (₱85 to ₱130) and takes about 35 to 50 minutes to reach areas like Bugis, City Hall, or Orchard.\n ### How much is a taxi from Changi Airport to the city?\n\n  A regular taxi to central Singapore costs around SGD 25 to 35 (₱1,100 to ₱1,500). Fares may be slightly higher at night or during peak hours.\n ### Can I use Grab from the airport? [...] Yes, public buses are available from the basement level of each terminal. They are the cheapest option at around SGD 2, but travel time is longer (up to 90 minutes). Make sure you have exact change or use an EZ-Link card.\n ### Is the MRT connected to the airport?\n\n  Yes. The Changi Airport MRT Station is located at Terminals 2 and 3. If you land at Terminal 1 or 4, take the free Skytrain to reach the MRT.",
+      "score": 0.81025416,
+      "raw_content": null,
+      "id": "4cf690-00"
+    },
+    {
+      "url": "https://www.changiairport.com/en/at-changi/transport-and-directions/leaving-the-airport.html",
+      "title": "Leaving Changi Airport: Transport Options",
+      "content": "Click here for more information on the payment options for public transport.\n\n## TAXI\n\nTaxis are available for hire at the taxi stands in the Arrival areas of Terminals 1, 2, 3 and 4. A ride to the city takes about 30 minutes and costs between S$25 and S$45. All fares are metered.\n\nThere is an additional Airport Surcharge for all trips originating from the Airport:\n\n Mon–Sun (5:00PM – 11:59PM): S$8\n All other times: S$6 [...] 4-seater vehicle (S$70.00 per trip to any destination in Singapore, one drop-off location)\n 6-seater vehicle (S$75.00 per trip to any destination in Singapore, one drop-off location)\n Destination Surcharge for Sembawang Shipyard, Jurong Island and Changi Airfreight Centre (Additional S$30)\n Destination Surcharge for Tuas Mega shipyard/PSA Tuas port (beyond Seatrium Tuas yard) (Additional S$75)\n\nimage\n\nHelpful links\n\nDQW\n\n#### Getting to the Airport\n\nvd\n\n#### Transfer between Terminals & Jewel [...] Separately, midnight and peak-hour surcharges apply to taxi hires country-wide.\n\nMidnight surcharge (50% of final metered fare):\n\n Mon-Sun (12:00AM – 5:59AM)\n\nPeak-hour surcharge (25% of final metered fare):\n\n Mon-Fri, excluding Public Holidays (6:00AM–9:29AM)\n Sat, Sun and Public Holidays (10:00AM-1:59PM)\n Mon-Sun (5:00PM-11:59PM)\n\n\\Note: Flag-down charge plus distance and waiting charges differ among taxi companies.\n\n## PRIVATE HIRE CAR",
+      "score": 0.7568076,
+      "raw_content": null,
+      "id": "4dc30d-01"
+    },
+    {
+      "url": "https://singaporetravelinsider.com/how-to-get-from-singapore-airport-to-the-city",
+      "title": "How to get from Singapore airport to the City",
+      "content": "You can also book a private fixed-price airport transfer into the city from the airport. This can either be booked via the Changi airport app, or at one of the Ground Concierge counters in the arrivals hall.\n\nThis is particularly useful if you need a 7-seater vehicle for a larger group or if you have lots of luggage.\n\nOptions for private transfers include:\n\n 4-seater vehicle for a flat fee of $55 to anywhere in Singapore.\n 7-seater vehicle for a flat fee of $60 to anywhere in Singapore. [...] Buses leave every 30 minutes from 7am to 7pm and every hour from 8pm to 11pm.\n\nBook at the Ground Transportation Desk in the arrivals hall.\n\n## MRT from Singapore Airport to the city\n\nSingapore has a very efficient underground train system known as the MRT. It is air-conditioned, cheap and clean and is a great way to get around the city.\n\nTaking the MRT from the airport into Singapore takes around an hour and will cost around $2. [...] Taxis are metered, and the fare should cost in the region of $25 – $45, depending on the time of day (see below for surcharges) and where exactly you are going within Singapore.\n\nNote that the following surcharge applies to all trips originating at the airport:\n\n $8 Mon-Sun, 5pm-11.59pm.\n $6 All other times\n\nAdditionally, the following surcharges apply to taxi fares in Singapore:\n\n Midnight surcharge: 50% of final metered fare, 12.00am – 5.59am",
+      "score": 0.68496037,
+      "raw_content": null,
+      "id": "507e91-02"
+    }
+  ],
+  "response_time": 1.39,
+  "request_id": "927f01dc-c4ff-433a-b713-6e92168e6e78"
+}

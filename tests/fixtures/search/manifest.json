@@ -1,0 +1,127 @@
+{
+  "recorded_at": "2026-10-04 (Asia/Kolkata)",
+  "availability": "Historical acceptance evidence; not live availability",
+  "queries": [
+    {
+      "provider": "serpapi",
+      "query": {
+        "type": 1,
+        "adults": 2,
+        "engine": "google_flights",
+        "sort_by": 1,
+        "children": 0,
+        "currency": "INR",
+        "arrival_id": "SIN",
+        "deep_search": false,
+        "return_date": "2026-11-19",
+        "departure_id": "BLR",
+        "travel_class": 1,
+        "outbound_date": "2026-11-15",
+        "infants_on_lap": 0,
+        "infants_in_seat": 0
+      },
+      "fixture": "1986d8d3d5256188cfe62be11ac07a10f5ae386efe79ce7d588fa066c1d36e40.json"
+    },
+    {
+      "provider": "serpapi",
+      "query": {
+        "type": 1,
+        "adults": 2,
+        "engine": "google_flights",
+        "sort_by": 1,
+        "children": 0,
+        "currency": "INR",
+        "arrival_id": "SIN",
+        "deep_search": false,
+        "return_date": "2026-11-19",
+        "departure_id": "BLR",
+        "travel_class": 1,
+        "outbound_date": "2026-11-15",
+        "infants_on_lap": 0,
+        "departure_token": "WyJDalJJVVV4UU0zUllSRXRTVlZGQlMwaEhUVUZDUnkwdExTMHRMUzB0TFhscGRHY3hNRUZCUVVGQlIzSkNZMmhCVDBNd2NVbEJFZ1kyUlRFME5UY2FDd2lrMEFZUUFCb0RTVTVTT0J4dzB2QUciLFtbIkJMUiIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIjZFIiwiMTQ1NyJdXV0=",
+        "infants_in_seat": 0
+      },
+      "fixture": "ad713970593fd49f7c1b7b80fe367bfb9b7f29a933ea834ff7a60e9704ed7737.json"
+    },
+    {
+      "provider": "tavily",
+      "query": {
+        "query": "singapore official attractions admission prices gardens by the bay national gallery singapore 2026",
+        "max_results": 3,
+        "search_depth": "basic"
+      },
+      "fixture": "93c6e2f778c700db2abfc8fd75c551161c529e194a532f84827f410881c2a953.json"
+    },
+    {
+      "provider": "tavily",
+      "query": {
+        "query": "singapore hawker centres official opening hours maxwell food centre lau pa sat chinatown complex",
+        "max_results": 3,
+        "search_depth": "basic"
+      },
+      "fixture": "425a6e1204042364590b1caaea4bbe4bdc8d49f021583632e0d88c2155d4d58e.json"
+    },
+    {
+      "provider": "tavily",
+      "query": {
+        "query": "singapore mrt airport transport fare official changi airport city",
+        "max_results": 3,
+        "search_depth": "basic"
+      },
+      "fixture": "0707279c493caa56918775b2b6828186b6d6394d8a1ef810c21a29e28adc6479.json"
+    },
+    {
+      "provider": "serpapi",
+      "query": {
+        "q": "singapore",
+        "adults": 2,
+        "engine": "google_hotels",
+        "output": "json",
+        "children": 0,
+        "currency": "INR",
+        "check_in_date": "2026-11-15",
+        "check_out_date": "2026-11-19"
+      },
+      "fixture": "b3e52b87bd63bc6692f2d95299a032b42d3f7823ad582790c93691d660c8d131.json"
+    },
+    {
+      "provider": "serpapi",
+      "query": {
+        "type": 1,
+        "adults": 2,
+        "engine": "google_flights",
+        "sort_by": 2,
+        "children": 0,
+        "currency": "INR",
+        "arrival_id": "SIN",
+        "deep_search": false,
+        "return_date": "2026-11-19",
+        "departure_id": "BLR",
+        "travel_class": 1,
+        "outbound_date": "2026-11-15",
+        "infants_on_lap": 0,
+        "infants_in_seat": 0
+      },
+      "fixture": "1f496c72e45bd75bc11d6b7f1a621d61fe1ab86c938815c9cd4fad7b99027d26.json"
+    },
+    {
+      "provider": "serpapi",
+      "query": {
+        "q": "singapore",
+        "adults": 2,
+        "engine": "google_hotels",
+        "output": "json",
+        "rating": 8,
+        "sort_by": 3,
+        "children": 0,
+        "currency": "INR",
+        "max_price": 11000,
+        "hotel_class": "3,4,5",
+        "check_in_date": "2026-11-15",
+        "check_out_date": "2026-11-19",
+        "vacation_rentals": false
+      },
+      "fixture": "ae49e367785f1ab34b04d19eb4e27b3f22e12dd3ceceeeb8cd21461c782ecfff.json"
+    }
+  ]
+}

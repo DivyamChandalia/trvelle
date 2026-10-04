@@ -2,11 +2,14 @@ from typing import Optional, List, AsyncGenerator, Any, Dict
 import yaml
 from langchain_mcp_adapters.client import MultiServerMCPClient
 import asyncio
+import ast
+import re
+from datetime import date
 import os
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import SystemMessage, ToolMessage, HumanMessage
-from langchain_tavily import TavilySearch
+from langchain_core.messages import SystemMessage, ToolMessage, HumanMessage, AIMessage
+from ..tools.web_search import tavily_search, web_search, search_providers
+from ..tools.place_search import brave_place_search, enrich_itinerary
 from ..utils import get_logger, load_environment, configure_logging
 from ..prompts import SUPERVISOR_INSTRUCTIONS, RESEARCHER_INSTRUCTIONS
 from ..database import DBHandler, InMemoryChatManager
@@ -22,16 +25,19 @@ class Orchestrator:
     db_handler = DBHandler()
     
     def __init__(self, chat_cleanup_interval_minutes: int = 5, chat_expiry_minutes: int = 10):
-        self.supervisor = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
-        self.researcher = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
+        from .model_router import ModelRouter
+        self.model_router = ModelRouter()
         self.mcp_config = self.load_mcp_config()
         self.mcp_client = MultiServerMCPClient(self.mcp_config['mcp_servers'])
-        self.tavily_search = TavilySearch(api_key=os.getenv("TAVILY_API_KEY"))
-        self.sequential_researchers = True
+        self.tavily_search = tavily_search
+        self.sequential_researchers = False
+        self._research_capacity = asyncio.Semaphore(2)
+        self._tools = None
+        self._tools_lock = asyncio.Lock()
         self.tools_by_agent = {
-            "supervisor": ["flight_search", "researcher_agent", "itinerary_tool", "tavily_search"],
-            "researcher": ["trip_segment", "hotel_search", "tavily_search"],
-            "system": ["flight_search", "researcher_agent", "itinerary_tool", "tavily_search", "trip_segment", "hotel_search"]
+            "supervisor": ["flight_search", "researcher_agent", "itinerary_tool", "tavily_search", "web_search"],
+            "researcher": ["trip_segment", "hotel_search", "tavily_search", "web_search", "brave_place_search"],
+            "system": ["flight_search", "researcher_agent", "itinerary_tool", "tavily_search", "web_search", "brave_place_search", "trip_segment", "hotel_search"]
         }
         # Initialize the in-memory chat manager
         self.chat_manager = InMemoryChatManager(
@@ -40,6 +46,19 @@ class Orchestrator:
         )
         # Start the cleanup task
         self.chat_manager.start_cleanup_task()
+
+    def recover_failed_turn(self, config):
+        """Close pending tool calls so a subsequent user message can resume the chat."""
+        key = self._get_chat_history_key(config)
+        history = self.chat_manager.get_chat_history(key)
+        completed = {message.tool_call_id for message in history if isinstance(message, ToolMessage)}
+        for message in history:
+            for call in getattr(message, "tool_calls", []):
+                if call["id"] not in completed:
+                    result = ToolMessage(content="This planning step was interrupted by a provider error. Retry it if still needed.", tool_call_id=call["id"], name=call["name"])
+                    self.chat_manager.append_message(key, result)
+                    self.db_handler.save_message_to_db(result, config)
+                    completed.add(call["id"])
 
     def load_mcp_config(self) -> Dict[str, Any]:
         with open("trvelle/config/mcp_servers.yaml", 'r') as f:
@@ -50,17 +69,24 @@ class Orchestrator:
         """Generate a consistent chat history key from config."""
         chat_id = config.get("chat_id")
         segment_number = config.get("segment_number")
+        suffix = ':' + str(config['run_id']) if config.get('run_id') else ''
         
         if segment_number is not None:
-            return f"{chat_id}#{segment_number}"
-        return str(chat_id)
+            return f"{config.get('user_id')}:{chat_id}{suffix}#{segment_number}"
+        return f"{config.get('user_id')}:{chat_id}{suffix}"
     
     async def get_tools(self, requester: str):
         
-        tools = await self.mcp_client.get_tools()
-        tools.append(self.tavily_search)
+        async with self._tools_lock:
+            if self._tools is None:
+                self._tools = await self.mcp_client.get_tools()
+                self._tools.append(self.tavily_search)
+                self._tools.extend([web_search, brave_place_search])
+        tools = self._tools
         tools_to_requester = []
         for tool in tools:
+            if tool.name == 'brave_place_search' and search_providers()['places'] != 'brave':
+                continue
             if tool.name in self.tools_by_agent[requester]:
                 tools_to_requester.append(tool)
 
@@ -81,7 +107,7 @@ class Orchestrator:
         
         # Load chat history from database
         if user_id and chat_id:
-            messages = self.db_handler.load_chat_history(user_id, chat_id, segment_number)
+            messages = self.db_handler.load_chat_history(user_id, chat_id, segment_number, config.get('run_id')) if config.get('run_id') else self.db_handler.load_chat_history(user_id, chat_id, segment_number)
             self.chat_manager.set_chat_history(history_key, messages)
             segment_info = f" and segment {segment_number}" if segment_number is not None else ""
             logger.info(f"Loaded {len(messages)} messages from database for user {user_id}, chat {chat_id}{segment_info}")
@@ -92,7 +118,7 @@ class Orchestrator:
     @db_handler.save_user_input()
     def get_message(self, query: str, config: Optional[Dict[str, Any]] = None) -> HumanMessage:
         """Create a human message and add it to history."""
-        message = HumanMessage(content=query)
+        message = HumanMessage(content=query, id=str(uuid.uuid4()))
         if config:
             history_key = self._get_chat_history_key(config)
             self.chat_manager.append_message(history_key, message)
@@ -100,30 +126,42 @@ class Orchestrator:
     
     @db_handler.save_output()
     async def call_supervisor_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        await self.checkpoint(config, 'compose' if config.get('finalizing') else 'clarify', 'Planning the next step')
         
         history_key = self._get_chat_history_key(config)
         all_messages = self.chat_manager.get_chat_history(history_key)
         logger.info(f"Calling supervisor with message history length: {len(all_messages)}")
         
         prompt_template = ChatPromptTemplate.from_messages([
-            SystemMessage(content=SUPERVISOR_INSTRUCTIONS, name="Supervisor_System_Message"),
+            SystemMessage(content=f"Today is {date.today().isoformat()}. Never search past travel dates.\n" + SUPERVISOR_INSTRUCTIONS, name="Supervisor_System_Message"),
             MessagesPlaceholder(variable_name="message")
         ])
-        formatted_prompt = prompt_template.format_prompt(message=all_messages)
+        formatted_prompt = prompt_template.format_prompt(message=all_messages + [SystemMessage(content=f"Use {config.get('currency', 'USD')} for ALL flight searches, hotel searches, budgets and prices. Keep that currency throughout this trip.")])
+        if plan := config.get('continuation_plan'):
+            inventory = [{key: h.get(key) for key in ('name', 'choose_uid', 'check_in_date', 'check_out_date', 'total_rate', 'overall_rating', 'selected')}
+                         for h in plan.get('travel_options', {}).get('hotels', [])]
+            formatted_prompt.messages.append(SystemMessage(content=(
+                'The user explicitly continued the saved draft. Work on its unresolved gaps using saved evidence first, '
+                'then publish the updated plan with itinerary_tool. Do not merely repeat the previous summary or claim '
+                'an update without calling that tool. Keep previously verified selections and notes. Treat this hotel '
+                'inventory as authoritative for property names, UIDs and quotes; narrative summaries can be wrong. '
+                'Keep the plan partial if any essential stay is unresolved. Remaining gaps and verified hotels: '
+                + json.dumps({'unfinished': plan.get('unfinished', []), 'hotels': inventory}, ensure_ascii=False))))
         tools, tools_by_name = await self.get_tools(requester="supervisor")
-        retry = True
-        while retry:
-            try:
-                response = await self.researcher.bind_tools(tools).ainvoke(formatted_prompt)
-                if len(response.content)>0 or response.tool_calls:
-                    retry = False
-                else:
-                    logger.info(f"Supervisor response: {response}")
-                    await asyncio.sleep(60)  # Retry after a short delay
-            except Exception as e:
-                logger.error(f"Error calling supervisor: {e}")
-                await asyncio.sleep(60)  # Retry after a short delay
+        if config.get('run_id'):
+            from .run_store import store
+            count = store.snapshot(config['user_id'], config['run_id'])['counters'].get('supervisor', 0)
+            if count >= 6:
+                config['finalizing'] = True
+                tools = [tool for tool in tools if tool.name == 'itinerary_tool']
+                formatted_prompt.messages.append(SystemMessage(content='Finalize now using the saved evidence. Submit itinerary_tool with selected real hotel and flight UIDs. Mark unverified constraints in the description. No further searches or delegation.'))
+        response = await self.invoke_model(config, 'supervisor', tools, formatted_prompt)
+        config["supervisor_tier"] = response.additional_kwargs["routing_tier"]
+        if not response.content and not response.tool_calls:
+            raise RuntimeError("The model returned an empty response")
         response.name = "Supervisor_Agent"
+        if config.get('continuation_plan') and not response.tool_calls:
+            response.content = 'Your saved draft is unchanged. Look up missing information beside the relevant detail in the itinerary, or send a specific change to continue planning.'
         
         self.chat_manager.append_message(history_key, response)
         
@@ -131,6 +169,7 @@ class Orchestrator:
     
     @db_handler.save_output()
     async def call_researcher_llm(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        await self.checkpoint(config, 'research', f"Researching {config.get('destination', 'the destination')}")
 
         history_key = self._get_chat_history_key(config)
         all_messages = self.chat_manager.get_chat_history(history_key)
@@ -140,23 +179,68 @@ class Orchestrator:
             SystemMessage(content=RESEARCHER_INSTRUCTIONS, name="Researcher_System_Message"),
             MessagesPlaceholder(variable_name="message")
         ])
-        formatted_prompt = prompt_template.format_prompt(message=all_messages)
+        from .research_budget import compact, should_finalize
+        finalizing = should_finalize(all_messages)
+        instruction = "Research budget: at most 3 hotel searches, 6 web searches and 4 model rounds per segment, including saved work. Reuse verified results. Submit trip_segment as soon as there is enough evidence. Mark unavailable details honestly; never keep searching for perfect results."
+        if finalizing:
+            instruction += " The research budget is already reached. Submit trip_segment now using the saved evidence. No more searches."
+        formatted_prompt = prompt_template.format_prompt(message=compact(all_messages) + [SystemMessage(content=instruction)] + [SystemMessage(content=f"Use {config.get('currency', 'USD')} for ALL flight searches, hotel searches, budgets and prices. Keep that currency throughout this trip.")])
         tools, tools_by_name = await self.get_tools(requester="researcher")
-        retry = True
-        while retry:
-            try:
-                response = await self.researcher.bind_tools(tools).ainvoke(formatted_prompt)
-                if len(response.content)>0 or response.tool_calls:
-                    retry = False
-                else:
-                    logger.info(f"Supervisor response: {response}")
-                    await asyncio.sleep(60)  # Retry after a short delay
-            except Exception as e:
-                logger.error(f"Error calling supervisor: {e}")
-                await asyncio.sleep(60)  # Retry after a short delay
+        if finalizing:
+            tools = [tool for tool in tools if tool.name == "trip_segment"]
+        if config.get('run_id'):
+            from .run_store import store
+            snap = store.snapshot(config['user_id'], config['run_id'])
+            if snap['counters'].get(f"researcher:{config.get('segment_number')}", 0) >= 3:
+                tools = [tool for tool in tools if tool.name == 'trip_segment']
+                formatted_prompt.messages.append(SystemMessage(content='Submit trip_segment now with saved search evidence and exact hotel UIDs. No more research.'))
+            changes = [item['message'] for item in snap['queued_changes'] if item['status'] == 'applied']
+            if changes:
+                formatted_prompt.messages.append(SystemMessage(content='Apply these user changes to this segment: ' + '\n'.join(changes)))
+        response = await self.invoke_model(config, 'researcher', tools, formatted_prompt)
+        if not response.content and not response.tool_calls:
+            raise RuntimeError("The model returned an empty response")
         response.name = "Researcher_Agent_"+str(config.get("segment_number"))
         self.chat_manager.append_message(history_key, response)
 
+        return response
+
+    async def checkpoint(self, config, phase, task):
+        if not config or not config.get('run_id'):
+            return
+        from .run_store import store
+        # Changes are appended only at a tool/model boundary, preserving call/result pairs.
+        # Only an orchestrator boundary after all outstanding tool results is safe
+        # for a new user message. Researchers can read queued preferences meanwhile.
+        main = {k: v for k, v in config.items() if k not in ('segment_number', 'researcher_id')}
+        history = self.chat_manager.get_chat_history(self._get_chat_history_key(main))
+        completed = {item.tool_call_id for item in history if isinstance(item, ToolMessage)}
+        pending = any(call['id'] not in completed for item in history if isinstance(item, AIMessage) for call in item.tool_calls)
+        queued = store.take_steering(config['run_id']) if not pending and 'segment_number' not in config else []
+        if queued:
+            self.load_chat_history(main)
+            for change in queued:
+                self.get_message(change['message'], main)
+            store.event(config['run_id'], 'change_applied', {'ids': [item['id'] for item in queued]})
+        store.checkpoint(config['run_id'], phase, task=task)
+        store.event(config['run_id'], 'run', store.snapshot(config['user_id'], config['run_id']))
+
+    async def invoke_model(self, config, role, tools, prompt):
+        if not config.get('run_id'):
+            return await self.model_router.invoke(role, tools, prompt, config.get('supervisor_tier', 0))
+        from .run_store import store
+        operation = store.reserve_model(config['run_id'], role, config.get('segment_number'))
+        store.operation(config['run_id'], operation, 'model')
+        response = await self.model_router.invoke(role, tools, prompt, config.get('supervisor_tier', 0))
+        if response.id is None:
+            response.id = str(uuid.uuid4())
+        response.name = 'Supervisor_Agent' if role == 'supervisor' else 'Researcher_Agent_' + str(config.get('segment_number'))
+        # Persist model output before the operation checkpoint is advanced.
+        self.db_handler.save_message_to_db(response, config)
+        store.operation(config['run_id'], operation, 'model', response.model_dump(mode='json'))
+        snapshot = store.snapshot(config['user_id'], config['run_id'])
+        models = {**snapshot['models'], role: {'provider': response.additional_kwargs.get('routing_provider'), 'model': response.additional_kwargs.get('routing_model'), 'effort': response.additional_kwargs.get('routing_effort', '')}}
+        store.checkpoint(config['run_id'], models=models)
         return response
     
     @db_handler.save_tools_output()
@@ -166,11 +250,25 @@ class Orchestrator:
         messages = []
         raw_messages = []
         
+        research_used = {}
+        if agent_type == "researcher":
+            from .research_budget import counts, LIMITS
+            history = self.chat_manager.get_chat_history(self._get_chat_history_key(config)) if config else []
+            research_used = counts(history)
         for tool_call in tool_calls:
             tool_name = tool_call["name"]
             tool_call_id = tool_call.get("id", "unknown")
             tool_args = tool_call.get("args", {})
+            await self.checkpoint(config, 'validate' if tool_name == 'itinerary_tool' else 'search' if tool_name in ('flight_search', 'hotel_search', 'tavily_search', 'web_search', 'brave_place_search') else 'research', f"{tool_name.replace('_', ' ').title()} · {(config or {}).get('destination', '')}".strip(' ·'))
             
+            budget_name = 'tavily_search' if tool_name in ('web_search', 'brave_place_search') else tool_name
+            if agent_type == "researcher" and budget_name in research_used:
+                if research_used[budget_name] >= LIMITS[budget_name]:
+                    messages.append(tool_validator.create_error_response(tool_call_id, tool_name, "Research search budget reached. Reuse the saved results and submit trip_segment now. Mark missing details as unverified."))
+                    raw_messages.append(None)
+                    continue
+                research_used[budget_name] += 1
+
             # Step 1: Check if tool exists for this agent type
             if not tool_validator.validate_tool_exists(tool_name, tools):
                 allowed_tools = list(self.tools_by_agent.get(agent_type, []))
@@ -193,15 +291,56 @@ class Orchestrator:
             
             # Step 3: Execute tool with validated arguments
             try:
+                from .run_store import store
+                if tool_name in ('flight_search', 'hotel_search') and config:
+                    validated_args['search_params']['currency'] = config.get('currency', 'USD')
+                    if tool_name == 'hotel_search' and config.get('destination'):
+                        validated_args['search_params']['_destination'] = config['destination']
+                if tool_name == 'itinerary_tool' and config:
+                    config['publication_attempted'] = True
+                    issue = self.db_handler.itinerary_search_issue(config['user_id'], config['chat_id'], validated_args.get('itinerary', {}))
+                    if issue and issue.startswith('Overnight itineraries require real hotel searches') and config.get('run_id'):
+                        state = store.snapshot(config['user_id'], config['run_id'])
+                        if state['search_usage']['serpapi'] >= state['search_limits']['serpapi']:
+                            draft = validated_args['itinerary']
+                            draft['planning_status'] = 'partial'
+                            draft['unfinished'] = list(dict.fromkeys([*(draft.get('unfinished') or []), 'Hotels', 'Full trip budget']))
+                            issue = self.db_handler.itinerary_search_issue(config['user_id'], config['chat_id'], draft)
+                    if issue:
+                        messages.append(tool_validator.create_error_response(tool_call_id, tool_name, issue))
+                        raw_messages.append(None)
+                        continue
                 tool = tools[tool_name]
-                print(f"Executing tool {tool_name} for {agent_type} with args: {validated_args}")
-                response = await tool.ainvoke(validated_args)
+                saved = store.operation(config['run_id'], tool_call_id, 'tool') if config and config.get('run_id') else None
+                if saved is not None:
+                    response = saved
+                elif tool_name == 'flight_search':
+                    from trvelle.tools.flight_search import flight_search
+                    response = await flight_search(**validated_args)
+                elif tool_name == 'hotel_search':
+                    from trvelle.tools.hotel_search import hotel_search
+                    response = await hotel_search(**validated_args)
+                elif tool_name == 'tavily_search' and search_providers()['web'] == 'brave':
+                    # Saved histories may still contain the legacy tool name.
+                    # Honor the run's selected web provider even on those calls.
+                    response = await web_search.ainvoke(validated_args)
+                elif tool_name == 'itinerary_tool':
+                    from trvelle.tools.itinerary_tool import itinerary_tool, Itinerary
+                    enriched = await enrich_itinerary(validated_args['itinerary'])
+                    response = await itinerary_tool(Itinerary.model_validate(enriched))
+                else:
+                    response = await tool.ainvoke(validated_args)
+                if isinstance(response, list):
+                    response = "".join(part.get("text", "") for part in response if isinstance(part, dict))
                 try:
-                    response = json.loads(response)
+                    if isinstance(response, str):
+                        response = json.loads(response)
                 except Exception as e:
                     logger.error(f"JSON decode error for tool {tool_name} response: {e}")
                     pass
-                print(f'type(response)={type(response)}, len(response)={len(response) if isinstance(response, (list, str)) else "N/A"}')
+                if config and config.get('run_id'):
+                    from trvelle.utils.secrets import redact_secrets
+                    store.operation(config['run_id'], tool_call_id, 'tool', redact_secrets(response))
                 if isinstance(response, dict):
                     if "result" in response:
                         response, raw = response["result"], response.get("raw", None)
@@ -218,6 +357,12 @@ class Orchestrator:
                 
                 raw_messages.append(raw)
                 messages.append(message)
+                if config and config.get('run_id') and tool_name in ('flight_search', 'hotel_search', 'tavily_search', 'web_search', 'brave_place_search'):
+                    snapshot = store.snapshot(config['user_id'], config['run_id'])
+                    finding = {'tool': tool_name, 'destination': config.get('destination', ''), 'summary': str(response)[:300], 'operation_id': tool_call_id}
+                    sources = [{'title': r.get('title', ''), 'url': r.get('url', '')} for r in (raw or {}).get('results', [])] if isinstance(raw, dict) else []
+                    store.checkpoint(config['run_id'], findings=[*snapshot['findings'][-11:], finding], sources=list({s['url']: s for s in snapshot['sources'] + sources if s.get('url')}.values())[-20:])
+                    store.event(config['run_id'], 'finding', finding)
                 logger.info(f"Successfully executed tool {tool_name} for {agent_type}")
                 
             except Exception as e:
@@ -240,14 +385,29 @@ class Orchestrator:
         logger.info(f"Running research tasks for segments: {[research_segment['args']['city'] for research_segment in research_segments]}")
         researcher_config = config.copy()
         research_results = []
+        destinations = {segment['args'].get('city', '') for segment in research_segments}
+        multiple_cities = len(destinations) > 1 or any(re.search(r'\s+(?:and|&|\+|to|→|/)\s+', city, re.I) for city in destinations)
+        if config.get('run_id') and multiple_cities:
+            from .run_store import store
+            from trvelle.database.models import PlanningRun
+            with store.sessions() as db:
+                run = db.query(PlanningRun).filter_by(run_id=config['run_id']).with_for_update().one()
+                run.request = {**run.request, 'search_limits': {**run.request.get('search_limits', {}), 'serpapi':12, 'tavily':12}}
+                db.commit()
+            config['search_limits'] = {**config.get('search_limits', {}), 'serpapi':12, 'tavily':12}
         for i, research_segment in enumerate(research_segments): # TODO: validate reserach_agent_tool schema
             message = f"Plan this trip segment: {research_segment['args']}"
+            researcher_config = config.copy()
             researcher_config["segment_number"] = research_segment["args"]["segment_number"]
             researcher_config["researcher_id"] = research_segment.get("id")
+            researcher_config['destination'] = research_segment['args'].get('city', '')
             if self.sequential_researchers:
                 research_results.append(await self.orchestrate_research(message, researcher_config))
             else:
-                research_results.append(self.orchestrate_research(message, researcher_config))
+                async def limited_research(query, options):
+                    async with self._research_capacity:
+                        return await self.orchestrate_research(query, options)
+                research_results.append(limited_research(message, researcher_config))
 
         if self.sequential_researchers:
             research_results =  research_results
@@ -255,8 +415,13 @@ class Orchestrator:
             research_results = await asyncio.gather(*research_results)
         messages = []
         for result, segment in zip(research_results, research_segments):
+            from .research_budget import hotel_offer_catalog
+            segment_config = {**config, 'segment_number': segment['args']['segment_number']}
+            evidence = self.chat_manager.get_chat_history(self._get_chat_history_key(segment_config))
+            catalog = '\n\n'.join(hotel_offer_catalog(item.content) for item in evidence
+                                  if isinstance(item, ToolMessage) and item.name == 'hotel_search' and isinstance(item.content, str))
             result_message = ToolMessage(
-                content=result.content,
+                content=result.text + '\n\nAuthoritative hotel search offers (use these exact names, UIDs and quotes over conflicting prose):\n' + catalog if catalog else result.content,
                 tool_call_id=segment.get("id"),
                 name="Researcher_Agent_"+str(segment["args"]["segment_number"])
             )
@@ -267,13 +432,55 @@ class Orchestrator:
         self.chat_manager.extend_messages(history_key, messages)
         return messages, [None] * len(messages)  # Assuming no raw results for now
         
+    @staticmethod
+    def same_research_query(left, right):
+        if left == right:
+            return True
+        prefix = "Plan this trip segment: "
+        if not isinstance(left, str) or not isinstance(right, str) or not left.startswith(prefix) or not right.startswith(prefix):
+            return False
+        try:
+            # JSONB can reorder stored tool arguments. Segment identity must not
+            # depend on dictionary display order when reconnecting after restart.
+            return ast.literal_eval(left[len(prefix):]) == ast.literal_eval(right[len(prefix):])
+        except (SyntaxError, ValueError):
+            return False
+
+    def pending_response(self, config):
+        """Return only calls lacking saved tool results after the last AI turn."""
+        history = self.chat_manager.get_chat_history(self._get_chat_history_key(config))
+        for index in range(len(history) - 1, -1, -1):
+            message = history[index]
+            if isinstance(message, AIMessage):
+                completed = {item.tool_call_id for item in history[index + 1:] if isinstance(item, ToolMessage)}
+                pending = [call for call in message.tool_calls if call["id"] not in completed]
+                return message.model_copy(update={"tool_calls": pending}) if pending else None
+            if isinstance(message, HumanMessage):
+                break
+        return None
+
     async def orchestrate_research(self, query: str, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Orchestrate the research process with in-memory history management."""
         if config:
             self.load_chat_history(config)
-        self.get_message(query, config)
-        researcher_response = await self.call_researcher_llm(config)
+        history = self.chat_manager.get_chat_history(self._get_chat_history_key(config)) if config else []
+        continuing = any(isinstance(item, HumanMessage) and self.same_research_query(item.content, query) for item in history)
+        if continuing:
+            for item in reversed(history):
+                if isinstance(item, ToolMessage) and item.name == "trip_segment":
+                    return item
+                if isinstance(item, HumanMessage):
+                    break
+        if not continuing:
+            self.get_message(query, config)
+        researcher_response = self.pending_response(config) if continuing else None
+        if researcher_response is None:
+            researcher_response = await self.call_researcher_llm(config)
+        rounds = 0
         while researcher_response.tool_calls:
+            rounds += 1
+            if rounds > 12:
+                raise RuntimeError("Research exceeded the tool round limit")
             tool_calls = researcher_response.tool_calls
             tool_results = await self.handle_tools(tool_calls, "researcher", config)
             for tool_result in tool_results:
@@ -290,7 +497,11 @@ class Orchestrator:
             self.load_chat_history(config)
         self.get_message(query, config)
         supervisor_response = await self.call_supervisor_llm(config)
+        rounds = 0
         while supervisor_response.tool_calls:
+            rounds += 1
+            if rounds > 20:
+                raise RuntimeError("Planning exceeded the tool round limit")
             function_calls = supervisor_response.tool_calls
 
             handover = []
@@ -309,28 +520,34 @@ class Orchestrator:
 
         return supervisor_response
     
-    async def orchestrate_stream(self, query: str, config: Optional[Dict[str, Any]] = None) -> AsyncGenerator[str, None]:
+    async def orchestrate_stream(self, query: str, config: Optional[Dict[str, Any]] = None, resume: bool = False) -> AsyncGenerator[str, None]:
         """Main orchestration method with streaming support."""
         if config:
             self.load_chat_history(config)
         
-        self.get_message(query, config)
+        if not resume:
+            self.get_message(query, config)
         
         # Stream initial processing message
-        yield  {'progress': "🤔 Processing your request...\\n"}
+        yield  {'progress': "🤔 Processing your request...\n"}
         
-        supervisor_response = await self.call_supervisor_llm(config)
+        supervisor_response = self.pending_response(config) if resume else None
+        if supervisor_response is None:
+            supervisor_response = await self.call_supervisor_llm(config)
+        yield {"message_id": str(self.db_handler.get_message_uuid(supervisor_response.id))}
         # Stream the initial response content
-        if hasattr(supervisor_response, 'content') and supervisor_response.content:
-            content_lines = supervisor_response.content.split('\n')
+        if hasattr(supervisor_response, 'content') and supervisor_response.content and not supervisor_response.tool_calls:
+            content_lines = supervisor_response.text.split('\n')
             for line in content_lines:
-                if line.strip():
-                    yield {'message': f'{line}\\n'}
-                    await asyncio.sleep(0.1)  # Simulate streaming delay
+                yield {'message': f'{line}\n'}
         
         # Handle tool calls if present
+        rounds = 0
         while supervisor_response.tool_calls:
-            yield {'progress': "🔧 Using tools to gather more information...\\n"}
+            rounds += 1
+            if rounds > 20:
+                raise RuntimeError("Planning exceeded the tool round limit")
+            yield {'progress': "🔧 Using tools to gather more information...\n"}
             
             function_calls = supervisor_response.tool_calls
             handover = []
@@ -347,25 +564,37 @@ class Orchestrator:
 
             if itinerary:
                 itinerary_results = await self.handle_tools(itinerary, "supervisor", config)
-                yield {'itinerary': f'{itinerary_results[0].tool_call_id}'}
+                published = [result for result in itinerary_results if result.status != 'error' and 'displayed with UID' in result.content]
+                if published:
+                    from trvelle.utils.travel_text import itinerary_chat_text
+                    identifier = str(self.db_handler.get_message_uuid(published[0].tool_call_id))
+                    raw = next((call.get('args', {}).get('itinerary', {}) for call in itinerary if call['id'] == published[0].tool_call_id), {})
+                    if config:
+                        saved_plan = self.db_handler.get_itinerary(config['user_id'], config['chat_id'], uuid.UUID(identifier))
+                        if isinstance(saved_plan, dict) and 'daily_plan' in saved_plan:
+                            raw = saved_plan  # Preserve any backend-applied draft status.
+                    yield {'message_id': identifier}
+                    yield {'message': itinerary_chat_text(raw)}
+                    yield {'itinerary': identifier}
+                    # Publishing is the terminal step; no redundant narrative model call.
+                    return
 
             if tool_calls:
-                yield {'progress': "🔍 Searching for information...\\n"}
+                yield {'progress': "🔍 Searching for information...\n"}
                 await self.handle_tools(tool_calls, "supervisor", config)
             
             if handover:
-                yield {'progress': "👥 Consulting specialized researchers...\\n"}
-                await self.run_research_tasks(handover, config)
+                yield {'progress': "👥 Consulting specialized researchers...\n"}
+                await self.run_research_tasks(handover, config=config)
             
             # Get next response and stream it
             supervisor_response = await self.call_supervisor_llm(config)
+            yield {"message_id": str(self.db_handler.get_message_uuid(supervisor_response.id))}
             
-            if hasattr(supervisor_response, 'content') and supervisor_response.content: # "Heloo \\n\\n whats up \\n .\\n\\n"
-                content_lines = supervisor_response.content.split('\n')
+            if hasattr(supervisor_response, 'content') and supervisor_response.content and not supervisor_response.tool_calls:
+                content_lines = supervisor_response.text.split('\n')
                 for line in content_lines:
-                    if line.strip():
-                        yield {'message': f'{line}\\n'}
-                        await asyncio.sleep(0.1)  # Simulate streaming delay
+                    yield {'message': f'{line}\n'}
 
     def get_memory_stats(self) -> Dict[str, Any]:
         """Get statistics about current memory usage."""

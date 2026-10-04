@@ -1,7 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 from fastapi import FastAPI
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import List, Optional, Dict, Any, Literal
+from pydantic import AliasChoices, BaseModel, Field, field_validator, model_validator
 from datetime import datetime, date
 import logging
 import yaml
@@ -51,9 +51,49 @@ class ActivityCard(CardItem):
 
 # --- Daily Plan Model ---
 
+class ItemCost(BaseModel):
+    price: float = Field(ge=0, allow_inf_nan=False, description='Numeric cost; zero only when explicitly free. Omit cost entirely when unknown.')
+    currency: str = Field(pattern=r'^[A-Z]{3}$')
+    scope: Literal['per_person', 'party']
+    status: Literal['quoted', 'estimate'] = 'estimate'
+    source_url: Optional[str] = None
+    coverage_key: Optional[str] = Field(None, description='Shared identifier for a combined ticket or pass, so its price is counted once across covered activities.')
+
+
+class PlannedItem(BaseModel):
+    model_config = {'extra': 'allow'}
+    item_type: Literal['card', 'tag'] = 'card'
+    card_type: Literal['flight', 'hotel', 'activity', 'transfer', 'meal', 'free_time', 'note'] = 'activity'
+    title: Optional[str] = None
+    description: Optional[str] = None
+    uid: Optional[str] = None
+    location: Optional[str] = None
+    place_name: Optional[str] = Field(None, description='Exact attraction name for place/photo matching, especially when the card title combines attractions or describes a walk. Omit for generic rest or orientation items.')
+    image_url: Optional[str] = Field(None, description='Optional actual matched-place photo URL from provider results. Never invent a photo URL.')
+    photos: Optional[List[Dict[str, Any]]] = Field(None, description='Optional provider-sourced matched-place photos with url, thumbnail and source_url.')
+    place_details: Optional[Dict[str, Any]] = Field(None, description='Optional structured provider result for a place matched by name and location; keep source, address, coordinates, rating and hours when available.')
+    visitor_information: Optional[str | Dict[str, Any]] = Field(None, validation_alias=AliasChoices('visitor_information', 'visitor_details'), description="Optional sourced visit notes: opening hours/closures, ticket or reservation rules, dress code and accessibility where relevant. Use plain text or a dictionary of notes; keep uncertain or future-date information explicitly unconfirmed. Omit for ordinary strolls/rest when no special visitor rules apply.")
+    source_url: Optional[str] = Field(None, description="Official attraction or other source URL supporting visit notes, if researched. Do not invent a URL.")
+    visitor_information_sources: Optional[List[Dict[str, str]]] = Field(None, description="Supporting researched sources, each with title and url, when available.")
+    cost: Optional[ItemCost] = Field(None, description='Optional researched ticket, meal or transport cost. Specify currency, party/per-person scope and quote/estimate status. Never invent an unavailable price or put prices in visitor notes.')
+
+    @field_validator('title', 'description', mode='before')
+    @classmethod
+    def readable_prose(cls, value):
+        from trvelle.utils.travel_text import readable_text
+        return readable_text(value)
+    transport_mode: Optional[str] = Field(None, description="Chosen transport mode: walking, car (including taxi), train (including metro), bus, bicycle, boat (including ferry), or flight. Leave null when unknown or when listing alternatives.")
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    timezone: Optional[str] = None
+    time_status: Literal['suggested', 'verified', 'unknown'] = 'suggested'
+
+
 class DailyPlan(BaseModel):
     day: int = Field(description="Day number of the itinerary (e.g., 1, 2, ...)")
-    items: List[Dict[str, Any]] = Field(description="List of items planned for the day")
+    date: Optional[date] = None
+    destination: Optional[str] = None
+    items: List[PlannedItem] = Field(description="Typed flight/hotel/activity/transfer/meal/free_time/note items. Activities need a location and suggested start/end time. Only actual place activities need visitor details.")
 
     @field_validator("items", mode="before")
     @classmethod
@@ -63,10 +103,16 @@ class DailyPlan(BaseModel):
             return v
 
         for item_input in v:
+            if isinstance(item_input, dict):
+                item_input = dict(item_input)
+                if item_input.get('time') and not item_input.get('start_time'):
+                    item_input['start_time'] = str(item_input['time'])
+                if item_input.get('item_type') == 'tag':
+                    item_input.setdefault('card_type', 'note')
             if isinstance(item_input, dict) and "description" in item_input:
                 if len(item_input) == 1 or \
                    ("title" not in item_input and "item_type" not in item_input and "card_type" not in item_input):
-                    processed_items.append({
+                    processed_items.append({**item_input,
                         "item_type": "card",
                         "card_type": "activity",
                         "title": item_input["description"],
@@ -92,18 +138,35 @@ class DailyPlan(BaseModel):
 class TripDates(BaseModel):
     start: date
     end: date
+    @model_validator(mode='after')
+    def ordered(self):
+        if self.end < self.start:
+            raise ValueError('Trip end must be on or after its start.')
+        return self
 
 class TripSummary(BaseModel):
     dates: TripDates
     origin: Optional[str] = None
     budget: Optional[str] = None
-    travelers: int = 0
+    budget_amount: Optional[float] = Field(None, ge=0)
+    currency: Optional[str] = None
+    travelers: int = Field(1, ge=1)
     vibe: Optional[str] = None
 
+class TripRequirements(BaseModel):
+    private_room: Optional[bool] = None
+    bed: Optional[Literal['double', 'twin', 'any']] = None
+    minimum_rating: Optional[float] = Field(None, ge=1, le=5)
+    checked_baggage_kg: Optional[float] = Field(None, ge=0)
+
 class Itinerary(BaseModel):
+    model_config = {'extra': 'allow'}
     trip_name: str
+    planning_status: Literal['complete', 'partial'] = Field('complete', description='Use partial when required flight/hotel searches or pricing could not finish. Publish the researched schedule as a draft rather than dropping it into chat only.')
+    unfinished: List[str] = Field(default_factory=list, description='Concrete remaining work for a partial plan, such as Hotels or Full trip budget. Do not invent missing quotes.')
     trip_description: Optional[str] = None
     summary: TripSummary
+    requirements: TripRequirements = Field(default_factory=TripRequirements, description='Traveler constraints, distinct from verified provider details. Preserve requested private room, bed configuration and minimum review rating.')
     daily_plan: List[DailyPlan] = Field(default_factory=list)
 
     @field_validator('daily_plan')
@@ -129,7 +192,7 @@ class ItineraryValidator:
         
         # If the input already has the 'itinerary' wrapper, use it directly
         model = Itinerary.model_validate(itinerary_data)
-        return model.model_dump()
+        return model.model_dump(mode="json")
 
 validator = ItineraryValidator()
 

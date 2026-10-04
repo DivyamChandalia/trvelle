@@ -1,299 +1,531 @@
-from trvelle.orchestrator import Orchestrator
-from trvelle.database import DBHandler
-from trvelle.utils import get_logger, load_environment
-from fastapi import FastAPI, HTTPException, Query, Header
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
-from typing import List, Optional, AsyncGenerator, Dict, Any
-import uuid
-import uvicorn
-from fastapi.middleware.cors import CORSMiddleware
-import json
+"""Authenticated HTTP API used by the Next.js server-side proxy."""
 import asyncio
+import hmac
+import json
+import os
+import uuid
+from datetime import datetime, timezone
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Depends, Header, HTTPException, Query
+from fastapi.responses import StreamingResponse
+from .streaming import with_keepalive
+from .chat_runs import ChatRuns
+from pydantic import BaseModel, Field
+from sqlalchemy import text
+from trvelle.utils import load_environment
+
 load_environment()
-logger = get_logger(__name__)
+from trvelle.database import DBHandler
 
-app = FastAPI(title="Trvelle", version="0.0.1")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-orchestrator = Orchestrator()
 db_handler = DBHandler()
+orchestrator = None
+chat_locks = {}
+chat_runs = ChatRuns()
+
+@asynccontextmanager
+async def lifespan(app):
+    yield
+    await chat_runs.close()
+    if orchestrator is not None:
+        await orchestrator.shutdown()
+    from . import personal_models
+    if personal_models.accounts is not None:
+        await personal_models.accounts.close()
+
+app = FastAPI(title="Trvelle", version="0.1.0", lifespan=lifespan)
+
+async def authorize(x_backend_token: str = Header(default="")):
+    secret = os.getenv("BACKEND_API_TOKEN", "")
+    if not secret or not hmac.compare_digest(x_backend_token, secret):
+        raise HTTPException(401, "Backend authentication required")
+
+@app.get('/search_configuration', dependencies=[Depends(authorize)])
+async def search_configuration(user_id: uuid.UUID = Header()):
+    from trvelle.tools.search_gateway import gateway, brave_run_budget
+    from trvelle.tools.web_search import search_providers
+    return {'defaults':search_providers(),
+            'configured':{name:bool(os.getenv(key)) for name,key in {'brave':'BRAVE_API_KEY','tavily':'TAVILY_API_KEY','serpapi':'SERPAPI_API_KEY'}.items()},
+            'brave_limits':{'monthly':int(os.getenv('BRAVE_MONTHLY_REQUEST_LIMIT','100')), 'run':brave_run_budget()[0], 'reserved_for_places':brave_run_budget()[1], 'rps':float(os.getenv('BRAVE_REQUESTS_PER_SECOND','1'))},
+            'usage':gateway.status()}
+
+def missing_keys():
+    missing = [name for name in ("SERPAPI_API_KEY", "TAVILY_API_KEY") if not os.getenv(name)]
+    if not (os.getenv("GOOGLE_API_KEY") or os.getenv("OPENROUTER_API_KEY")):
+        missing.append("GOOGLE_API_KEY or OPENROUTER_API_KEY")
+    return missing
+
+def get_orchestrator():
+    global orchestrator
+    missing = [name for name in ("SERPAPI_API_KEY", "TAVILY_API_KEY") if not os.getenv(name)]
+    if missing:
+        raise HTTPException(503, "Configure backend environment: " + ", ".join(missing))
+    if orchestrator is None:
+        from trvelle.orchestrator.client import Orchestrator
+        orchestrator = Orchestrator()
+    return orchestrator
+
+@app.get("/health")
+async def health():
+    database = False
+    try:
+        with db_handler.engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        database = True
+    except Exception:
+        pass
+    from pathlib import Path
+    import time
+    heartbeat = Path(os.getenv('TRVELLE_WORKER_HEARTBEAT', '.runtime/worker-heartbeat.json'))
+    worker = heartbeat.exists() and time.time() - heartbeat.stat().st_mtime < 20
+    return {"status": "ok" if database and worker else "degraded", "database": database, 'worker': worker,
+            "ai_ready": not missing_keys(), "missing_configuration": missing_keys(),
+            "model": os.getenv("GOOGLE_MODEL", "gemini-3.8-flash")}
 
 class ChatRequest(BaseModel):
-    message: str = Field(..., description="User message")
-    stream: bool = Field(True, description="Whether to stream the response")
+    message: str = Field(min_length=1, max_length=20000)
+    stream: bool = True
+    replace_message_id: uuid.UUID | None = None
+    resume: bool = False
+    currency: str | None = Field(default=None, pattern=r"^[A-Z]{3}$")
 
-class ChatResponse(BaseModel):
-    response: str
-    message_id: str
-    user_id: str
-    chat_id: str
+def sse(event, data):
+    return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
-class ChatHistoryMessage(BaseModel):
-    message_id: str
-    type: str
-    content: str
-    created_at: str
+async def model_owner(user_id: uuid.UUID = Header()):
+    from .personal_models import active_owner, active_choices, get_accounts
+    token = active_owner.set(str(user_id))
+    snapshot = active_choices.set(get_accounts().load(user_id))
+    try:
+        yield
+    finally:
+        active_choices.reset(snapshot)
+        active_owner.reset(token)
 
-class ChatHistoryResponse(BaseModel):
-    messages: List[ChatHistoryMessage]
-    user_id: str
-    chat_id: str
-    total_messages: int
+async def detail_budget():
+    from trvelle.tools.search_gateway import search_context
+    with search_context():
+        yield
 
-class ChatSummary(BaseModel):
-    chat_id: str
-    session_name: Optional[str] = None
-    created_at: str
-    updated_at: str
-    is_active: bool
-    message_count: int
-    last_message_content: Optional[str] = None
-    last_message_type: Optional[str] = None
-    last_message_time: Optional[str] = None
+from .run_api import router as runs_router
+app.include_router(runs_router)
 
-class UserChatsResponse(BaseModel):
-    chats: List[ChatSummary]
-    user_id: str
-    total_chats: int
+class GuestMigration(BaseModel):
+    guest_id: uuid.UUID
 
-@app.get("/chat")
-async def chat(
-    message: str = Query(..., description="User message to chat with"),
-    user_id: str = Query(..., description="User ID from authorization header"),
-    stream: Optional[bool] = Query(True, description="Whether to stream the response"),
-    chat_id: Optional[str] = Query(None, description="Chat ID from authorization header")
-):
-    print(f"Received request: {message} with user_id: {user_id} and chat_id: {chat_id}")
-    if not user_id:
-        raise HTTPException(status_code=400, detail="User ID is required")
-    config = {
-        "user_id": uuid.UUID(user_id),
-        "chat_id": uuid.UUID(chat_id) if chat_id else uuid.uuid4(),
-    }
+@app.post('/guest_migrate', dependencies=[Depends(authorize)])
+async def migrate_guest(body: GuestMigration, user_id: uuid.UUID = Header()):
+    from trvelle.database.models import User, ChatSession, Message, PlanningRun
+    if body.guest_id == user_id:
+        return {'migrated': True}
+    with db_handler.db_session() as db:
+        if db.get(User, body.guest_id) is None:
+            return {'migrated': True}
+        if db.get(User, user_id) is None:
+            db.add(User(user_id=user_id))
+            db.flush()
+        if db.query(PlanningRun).filter_by(user_id=body.guest_id).filter(PlanningRun.status.in_(['queued', 'running'])).first():
+            raise HTTPException(409, 'Stop guest planning before linking this account. Your chats are retained.')
+        db.query(ChatSession).filter_by(user_id=body.guest_id).update({'user_id': user_id})
+        db.query(Message).filter_by(user_id=body.guest_id).update({'user_id': user_id})
+        db.query(PlanningRun).filter_by(user_id=body.guest_id).update({'user_id': user_id})
+        db.commit()
+    from .personal_models import get_accounts
+    accounts = get_accounts()
+    source, target = accounts.load(body.guest_id), accounts.load(user_id)
+    for field in ('keys', 'oauth', 'roles'):
+        target[field] = {**source.get(field, {}), **{key: value for key, value in target.get(field, {}).items() if value}}
+    accounts.save(user_id, target)
+    return {'migrated': True}
 
-    if stream:
-        return StreamingResponse(
-            stream_chat_response(message, config),
-            media_type="text/event-stream"
-        )
+@app.get("/chat_history", dependencies=[Depends(authorize)])
+async def history(user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query()):
+    messages = db_handler.get_filtered_chat_history(user_id, chat_id)
+    return {"messages": messages, "user_id": str(user_id), "chat_id": str(chat_id), "total_messages": len(messages)}
+
+class ChatVersionRequest(BaseModel):
+    message_id: uuid.UUID
+
+
+@app.post('/chat_version', dependencies=[Depends(authorize)])
+async def chat_version(body: ChatVersionRequest, user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query()):
+    try:
+        run_id = db_handler.select_chat_version(user_id, chat_id, body.message_id)
+    except LookupError:
+        raise HTTPException(404, 'Message version not found') from None
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from None
+    from .run_store import store
+    run = store.snapshot(user_id, uuid.UUID(run_id)) if run_id else None
+    return {'messages':db_handler.get_filtered_chat_history(user_id, chat_id), 'run':run}
+
+@app.get("/list_chats", dependencies=[Depends(authorize)])
+async def chats(user_id: uuid.UUID = Header()):
+    result = db_handler.get_user_chats(user_id)
+    return {"chats": result, "user_id": str(user_id), "total_chats": len(result)}
+
+@app.get("/tool_call", dependencies=[Depends(authorize)])
+async def tool_result(user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query(), tool_call_id: str = Header(), display_currency: str | None = Query(default=None, pattern=r"^[A-Z]{3}$"), revision: int | None = Query(None, ge=1)):
+    try:
+        identifier = uuid.UUID(tool_call_id)
+    except ValueError:
+        result = db_handler.get_tool_response(user_id, chat_id, tool_call_id)
     else:
-        response = await orchestrator.orchestrate(
-            query=message,
-            config=config
-        )
-        
-        if hasattr(response, 'content'):
-            response_content = response.content
-        elif isinstance(response, str):
-            response_content = response
-        else:
-            response_content = "I apologize, but I encountered an issue processing your request."
+        result = db_handler.get_itinerary(user_id, chat_id, identifier, revision)
+    if not result or "error" in result:
+        raise HTTPException(404, "Travel item not found")
+    from trvelle.utils.currency import preferred_currency, present_currency
+    origin = result.get("summary", {}).get("origin", "") if isinstance(result, dict) else ""
+    return await present_currency(result, display_currency or preferred_currency(origin))
 
-        return ChatResponse(
-            response=response_content,
-            user_id=str(config["user_id"]),
-            chat_id=str(config["chat_id"]),
-            message_id=str(response.message_id) if hasattr(response, 'message_id') else str(uuid.uuid4())
-        )
+@app.get('/itinerary_versions', dependencies=[Depends(authorize)])
+async def itinerary_versions(user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query(), itinerary_id: uuid.UUID = Query()):
+    if 'error' in db_handler.get_itinerary(user_id, chat_id, itinerary_id):
+        raise HTTPException(404, 'Itinerary not found')
+    from trvelle.database.models import ItineraryRevision
+    with db_handler.db_session() as db:
+        rows = db.query(ItineraryRevision).filter_by(chat_id=chat_id, itinerary_id=itinerary_id).order_by(ItineraryRevision.revision.desc()).all()
+        return {'versions': [{'revision': row.revision, 'reason': row.reason, 'created_at': row.created_at.isoformat()} for row in rows]}
 
-async def stream_chat_response(message: str, config: dict) -> AsyncGenerator[str, None]:
-    """Stream the chat response as it's being generated."""
+@app.delete("/chat", dependencies=[Depends(authorize)])
+async def delete_chat(user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query()):
+    from .run_store import store
     try:
-        message_id = str(uuid.uuid4())
-        
-        # Send metadata as SSE event
-        yield f"event: user_id\ndata: {config['user_id']}\n\n"
-        yield f"event: chat_id\ndata: {config["chat_id"]}\n\n"
-        yield f"event: message_id\ndata: {message_id}\n\n"
-        
-        # Stream the response content as message events
-        async for chunk in orchestrator.orchestrate_stream(query=message, config=config):
-            
-            if isinstance(chunk, dict) and "message" in chunk:
-                yield f"event: message\ndata: {chunk['message']}\n\n"
-            elif isinstance(chunk, dict) and "progress" in chunk:
-                yield f"event: progress\ndata: {chunk["progress"]}\n\n"
-            elif isinstance(chunk, dict) and "itinerary" in chunk:
-                yield f"event: itinerary_id\ndata: {chunk["itinerary"]}\n\n"
-        
-        # Send itinerary ID as separate event
-        yield f"event: itinerary_id\ndata: {'3b53f560-a08d-461e-86ba-8357b1ac1fbb'}\n\n"
-            
-    except Exception as e:
-        logger.error(f"Error in stream_chat_response: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
-        yield f"event: error\ndata: {str(e)}\n\n"
-
-@app.get("/chat_history")
-async def get_chat_history(
-    user_id: str = Header(..., description="User ID"),
-    chat_id: str = Query(..., description="Chat ID")
-):
-    """
-    Get filtered chat history containing all human messages and all supervisor agent messages.
-    
-    Returns all human messages and all supervisor AI responses in chronological order.
-    This filters out tool calls, researcher agents, and other intermediate messages.
-    """
-    try:
-        # Convert string IDs to UUIDs
-        user_uuid = uuid.UUID(user_id)
-        chat_uuid = uuid.UUID(chat_id)
-        
-        # Get filtered chat history from database
-        messages = db_handler.get_filtered_chat_history(user_uuid, chat_uuid)
-        
-        # Convert to response format
-        chat_history_messages = [
-            ChatHistoryMessage(**message) for message in messages
-        ]
-        
-        return ChatHistoryResponse(
-            messages=chat_history_messages,
-            user_id=user_id,
-            chat_id=chat_id,
-            total_messages=len(chat_history_messages)
-        )
-        
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
-    except Exception as e:
-        logger.error(f"Error retrieving chat history: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-@app.get("/list_chats")
-async def get_user_chats(
-    user_id: str = Header(..., description="User ID from authorization header")
-):
-    """
-    Get all chat sessions for a given user.
-    
-    Returns a list of all chat sessions for the specified user, ordered by most recently updated.
-    Includes metadata such as message count, last message preview, and session details.
-    User ID should be provided in the 'user-id' header.
-    """
-    try:
-        # Convert string ID to UUID
-        user_uuid = uuid.UUID(user_id)
-        
-        # Get user chats from database
-        chats = db_handler.get_user_chats(user_uuid)
-        
-        # Convert to response format
-        chat_summaries = [
-            ChatSummary(**chat) for chat in chats
-        ]
-        
-        return UserChatsResponse(
-            chats=chat_summaries,
-            user_id=user_id,
-            total_chats=len(chat_summaries)
-        )
-        
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
-    except Exception as e:
-        logger.error(f"Error retrieving user chats: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-    
-@app.get("/tool_call")
-async def get_tool_response(
-    user_id: str = Header(..., description="User ID authorization header"),
-    chat_id: str = Query(..., description="Chat ID from authorization header"),
-    tool_call_id: str = Header(..., description="tool_response ID from authorization header")
-):
-    """
-    Get the tool_response for a specific chat session.
-    
-    Returns the structured tool_response data for the specified chat session.
-    User ID and chat ID should be provided in the 'user-id' and 'chat-id' headers.
-    """
-    try:
-        user_id = uuid.UUID(user_id)
-        chat_id = uuid.UUID(chat_id)
-
-        try:
-            tool_call_id = uuid.UUID(tool_call_id)
-
-            itinerary = db_handler.get_itinerary(user_id, chat_id, tool_call_id)
-            if not itinerary:
-                raise HTTPException(status_code=404, detail="Itinerary not found")
-            
-            return itinerary
-        
-        except ValueError:
-            tool_response = db_handler.get_tool_response(user_id, chat_id, tool_call_id)
-            if not tool_response:
-                raise HTTPException(status_code=404, detail="Tool response not found")
-            return tool_response
-
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
-    except Exception as e:
-        logger.error(f"Error retrieving itinerary: {e}")
-        print(e)
-        import traceback
-        print(traceback.print_exc())
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-@app.delete("/chat")
-async def delete_chat(
-    user_id: str = Header(..., description="User ID"),
-    chat_id: str = Query(..., description="Chat ID to delete")
-):
-    """
-    Delete a chat session and all associated data for a user.
-    
-    Deletes the specified chat session along with all related data including:
-    - All messages in the chat
-    - All tool executions in the chat
-    - All researcher agent records in the chat
-    
-    User ID should be provided in the 'user-id' header.
-    Chat ID should be provided as a query parameter.
-    """
-    try:
-        # Convert string IDs to UUIDs
-        user_uuid = uuid.UUID(user_id)
-        chat_uuid = uuid.UUID(chat_id)
-        
-        # Delete the chat using the database handler
-        result = db_handler.delete_chat(user_uuid, chat_uuid)
-        
-        # Check if deletion was successful
-        if "error" in result:
-            if result["error"] == "User not found":
-                raise HTTPException(status_code=404, detail="User not found")
-            elif result["error"] == "Chat session not found":
-                raise HTTPException(status_code=404, detail="Chat session not found")
+        current = store.snapshot(user_id, chat_id=chat_id)
+        if current['status'] in ('queued', 'running'):
+            store.control(user_id, uuid.UUID(current['run_id']), 'stop')
+            for _ in range(8):
+                await asyncio.sleep(.25)
+                if store.snapshot(user_id, uuid.UUID(current['run_id']))['status'] not in ('queued', 'running'):
+                    break
             else:
-                raise HTTPException(status_code=500, detail=result["error"])
-        
-        return {
-            "success": True,
-            "message": result["message"],
-            "deleted_chat_id": chat_id,
-            "user_id": user_id
-        }
-        
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
-    except Exception as e:
-        logger.error(f"Error deleting chat: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+                raise HTTPException(409, 'Planning is stopping. Delete this chat again in a moment.')
+    except LookupError:
+        pass
+    await chat_runs.stop(user_id, chat_id)
+    lock = chat_locks.setdefault((user_id, chat_id), asyncio.Lock())
+    async with lock:
+        result = db_handler.delete_chat(user_id, chat_id)
+        if "error" in result:
+            raise HTTPException(404, "Chat not found")
+        if orchestrator is not None:
+            prefix = f"{user_id}:{chat_id}"
+            for key in orchestrator.chat_manager.get_all_chat_keys_with_access_times():
+                if key == prefix or key.startswith(prefix + "#"):
+                    orchestrator.chat_manager.remove_chat(key)
+    return result
 
+
+@app.get("/models", dependencies=[Depends(authorize)])
+async def model_status():
+    return get_orchestrator().model_router.status()
+
+
+class ModelKeyRequest(BaseModel):
+    provider: str = Field(pattern=r"^(openai|anthropic|google|openrouter)$")
+    key: str = Field(default="", max_length=2048, repr=False)
+
+class ModelChoice(BaseModel):
+    provider: str = Field(pattern=r"^(openai|anthropic|google|openrouter|chatgpt|claude)$")
+    model: str = Field(min_length=1, max_length=200)
+    effort: str = Field(default="", pattern=r"^(|none|low|medium|high|xhigh|max)$")
+
+class ModelRolesRequest(BaseModel):
+    supervisor: ModelChoice | None = None
+    researcher: ModelChoice | None = None
+
+class AccountRequest(BaseModel):
+    provider: str = Field(pattern=r"^(chatgpt|claude)$")
+    action: str = Field(pattern=r"^(connect|disconnect)$")
+
+@app.get('/model_settings', dependencies=[Depends(authorize)])
+async def model_settings(user_id: uuid.UUID = Header()):
+    from .personal_models import get_accounts
+    result = await get_accounts().settings(user_id)
+    import yaml
+    from pathlib import Path
+    result['defaults'] = yaml.safe_load(Path(os.getenv('MODEL_TIERS_CONFIG', str(Path(__file__).parents[1] / 'config/model_tiers.yaml'))).read_text()).get('role_models', {})
+    return result
+
+@app.get('/model_catalog', dependencies=[Depends(authorize)])
+async def model_catalog(user_id: uuid.UUID = Header(), refresh: bool = Query(False)):
+    from .personal_models import get_accounts
+    return await get_accounts().catalog(user_id, refresh)
+
+@app.post('/model_key', dependencies=[Depends(authorize)])
+async def model_key(body: ModelKeyRequest, user_id: uuid.UUID = Header()):
+    from .personal_models import get_accounts
+    from .model_accounts import AccountError
+    try:
+        get_accounts().set_key(user_id, body.provider, body.key)
+    except AccountError as error:
+        raise HTTPException(422, str(error)) from None
+    return {'saved': True}
+
+@app.post('/model_roles', dependencies=[Depends(authorize)])
+async def model_roles(body: ModelRolesRequest, user_id: uuid.UUID = Header()):
+    from .personal_models import get_accounts
+    from .model_accounts import AccountError
+    try:
+        await get_accounts().save_roles(user_id, body.model_dump())
+    except AccountError as error:
+        raise HTTPException(422, str(error)) from None
+    return {'saved': True}
+
+@app.post('/model_account', dependencies=[Depends(authorize)])
+async def model_account(body: AccountRequest, user_id: uuid.UUID = Header()):
+    from .personal_models import get_accounts
+    from .model_accounts import AccountError
+    service = get_accounts()
+    try:
+        if body.action == 'connect':
+            return await (service.start_chatgpt(user_id) if body.provider == 'chatgpt' else service.start_claude(user_id))
+        await (service.disconnect_chatgpt(user_id) if body.provider == 'chatgpt' else service.disconnect_claude(user_id))
+    except AccountError as error:
+        raise HTTPException(422, str(error)) from None
+    return {'disconnected': True}
+
+class FlightSelection(BaseModel):
+    itinerary_id: uuid.UUID
+    uid: str = Field(min_length=1, max_length=255)
+    search_index: int = Field(ge=0)
+    option_index: int = Field(ge=0)
+    currency: str | None = Field(default=None, pattern=r"^[A-Z]{3}$")
+    revision: int | None = Field(None, ge=1)
+
+@app.post('/select_flight', dependencies=[Depends(authorize)])
+async def select_flight(body: FlightSelection, user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query()):
+    lock = chat_locks.setdefault((user_id, chat_id), asyncio.Lock())
+    async with lock:
+        itinerary = db_handler.get_itinerary(user_id, chat_id, body.itinerary_id)
+        if not itinerary or 'error' in itinerary:
+            raise HTTPException(404, 'Itinerary not found')
+        if body.revision and body.revision != itinerary.get('revision', 1):
+            raise HTTPException(409, 'This plan changed. Reopen it before choosing a flight.')
+        if not any(f['uid'] == body.uid for f in itinerary.get('travel_options', {}).get('flights', [])):
+            raise HTTPException(404, 'Flight search not found in this itinerary')
+        raw = itinerary.get('flight_selections', {}).get(body.uid) or db_handler.get_tool_response(user_id, chat_id, body.uid)
+        from trvelle.tools.flight_selection import choose_flight
+        try:
+            from trvelle.tools.search_gateway import search_context
+            with search_context():
+                selected = await asyncio.to_thread(choose_flight, raw, body.search_index, body.option_index)
+            updated = db_handler.save_flight_selection(user_id, chat_id, body.itinerary_id, body.uid, selected)
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+        except Exception:
+            raise HTTPException(502, 'Flight availability could not be refreshed. Your existing selection is unchanged.')
+        from trvelle.utils.currency import preferred_currency, present_currency
+        currency = body.currency or preferred_currency(updated.get('summary', {}).get('origin', ''))
+        return {'itinerary': await present_currency(updated, currency), 'flight_data': await present_currency(selected, currency)}
+
+class HotelSelection(BaseModel):
+    itinerary_id: uuid.UUID
+    uid: str = Field(min_length=1, max_length=255)
+    stay_key: str = Field(min_length=1, max_length=64)
+    currency: str | None = Field(default=None, pattern=r"^[A-Z]{3}$")
+    revision: int | None = Field(None, ge=1)
+
+class ActivityEdit(BaseModel):
+    itinerary_id: uuid.UUID
+    day_index: int = Field(ge=0)
+    item_index: int = Field(ge=0)
+    title: str = Field(min_length=1, max_length=200)
+    description: str = Field(default='', max_length=4000)
+    location: str = Field(default='', max_length=300)
+    start_time: str | None = Field(default=None, pattern=r'^(?:[01][0-9]|2[0-3]):[0-5][0-9]$')
+    end_time: str | None = Field(default=None, pattern=r'^(?:[01][0-9]|2[0-3]):[0-5][0-9]$')
+    currency: str | None = Field(default=None, pattern=r"^[A-Z]{3}$")
+    revision: int | None = Field(None, ge=1)
+
+async def save_owned_edit(body, user_id, chat_id, transform):
+    lock = chat_locks.setdefault((user_id, chat_id), asyncio.Lock())
+    async with lock:
+        itinerary = db_handler.get_itinerary(user_id, chat_id, body.itinerary_id)
+        if not itinerary or 'error' in itinerary:
+            raise HTTPException(404, 'Itinerary not found')
+        if body.revision and body.revision != itinerary.get('revision', 1):
+            raise HTTPException(409, 'This plan changed. Reopen it before saving your edit.')
+        try:
+            raw = transform(itinerary)
+            updated = db_handler.save_itinerary_edit(user_id, chat_id, body.itinerary_id, raw)
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+        from trvelle.utils.currency import preferred_currency, present_currency
+        currency = body.currency or preferred_currency(updated.get('summary',{}).get('origin',''))
+        return {'itinerary':await present_currency(updated,currency)}
+
+@app.post('/select_hotel', dependencies=[Depends(authorize)])
+async def select_hotel(body: HotelSelection, user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query()):
+    from trvelle.utils.itinerary_edits import replace_hotel
+    return await save_owned_edit(body,user_id,chat_id,lambda itinerary:replace_hotel(itinerary,itinerary.get('travel_options',{}).get('hotels',[]),body.stay_key,body.uid))
+
+@app.post('/edit_activity', dependencies=[Depends(authorize)])
+async def update_activity(body: ActivityEdit, user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query()):
+    from trvelle.utils.itinerary_edits import edit_activity
+    def transform(itinerary):
+        options=itinerary.get('travel_options',{})
+        hotel_names=[h.get('name','') for h in options.get('hotels',[])]
+        uids=[h['choose_uid'] for h in options.get('hotels',[])]+[f['uid'] for f in options.get('flights',[])]
+        return edit_activity(itinerary,body.day_index,body.item_index,body.model_dump(include={'title','description','location','start_time','end_time'}),hotel_names,uids)
+    return await save_owned_edit(body,user_id,chat_id,transform)
+
+class BudgetAllocation(BaseModel):
+    itinerary_id: uuid.UUID
+    revision: int = Field(ge=1)
+    currency: str = Field(pattern=r'^[A-Z]{3}$')
+    activities: float = Field(ge=0, le=1e10, allow_inf_nan=False)
+    meals: float = Field(ge=0, le=1e10, allow_inf_nan=False)
+    transport: float = Field(ge=0, le=1e10, allow_inf_nan=False)
+    buffer: float = Field(ge=0, le=1e10, allow_inf_nan=False)
+
+
+@app.post('/budget_allocation', dependencies=[Depends(authorize)])
+async def update_budget_allocation(body: BudgetAllocation, user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query()):
+    def transform(itinerary):
+        return {**itinerary, 'budget_allocations': body.model_dump(include={'currency', 'activities', 'meals', 'transport', 'buffer'})}
+    return await save_owned_edit(body, user_id, chat_id, transform)
+
+
+class DetailRequest(BaseModel):
+    itinerary_id: uuid.UUID
+    kind: str = Field(pattern=r'^(flight|hotel|activity)$')
+    uid: str | None = Field(default=None, max_length=255)
+    day_index: int | None = Field(default=None, ge=0)
+    item_index: int | None = Field(default=None, ge=0)
+    currency: str | None = Field(default=None, pattern=r'^[A-Z]{3}$')
+    revision: int | None = Field(default=None, ge=1)
+    purpose: str = Field(default='details', pattern=r'^(details|booking|place)$')
+    fetch_photos: bool = False
+    fields: list[str] | None = Field(default=None, min_length=1, max_length=6)
+
+@app.post('/fetch_details', dependencies=[Depends(authorize), Depends(model_owner), Depends(detail_budget)])
+async def fetch_details(body: DetailRequest, user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query()):
+    from copy import deepcopy
+    from trvelle.tools.detail_lookup import DetailLookup, DETAIL_FIELDS
+    from trvelle.utils.currency import preferred_currency, present_currency
+    if body.purpose == 'booking' and body.kind != 'hotel':
+        raise HTTPException(422, 'Booking options are only available for hotels')
+    if body.purpose == 'place' and body.kind != 'activity':
+        raise HTTPException(422, 'Place matching is only available for activities')
+    if body.fields and (body.purpose != 'details' or not set(body.fields).issubset(DETAIL_FIELDS[body.kind])):
+        raise HTTPException(422, 'Choose details belonging to this travel item')
+    lock = chat_locks.setdefault((user_id, chat_id), asyncio.Lock())
+    async with lock:
+        itinerary = db_handler.get_itinerary(user_id, chat_id, body.itinerary_id)
+        if not itinerary or 'error' in itinerary:
+            raise HTTPException(404, 'Itinerary not found')
+        if body.revision and body.revision != itinerary.get('revision', 1):
+            raise HTTPException(409, 'This plan changed. Open its latest version before fetching details.')
+        currency = body.currency or preferred_currency(itinerary.get('summary', {}).get('origin',''))
+        options = itinerary.get('travel_options', {})
+        activity = None
+        if body.uid and body.day_index is None:
+            for di, day in enumerate(itinerary.get('daily_plan', [])):
+                for ii, item in enumerate(day.get('items', [])):
+                    if item.get('uid') == body.uid and item.get('card_type') == body.kind:
+                        body.day_index, body.item_index = di, ii
+                        break
+        if body.day_index is not None and body.item_index is not None:
+            try:
+                activity = itinerary['daily_plan'][body.day_index]['items'][body.item_index]
+            except (KeyError, IndexError, TypeError):
+                raise HTTPException(404, 'Travel item not found')
+            if activity.get('item_type') == 'tag' or activity.get('card_type', 'activity') != body.kind:
+                raise HTTPException(422, 'Choose the matching travel item type')
+        if body.kind == 'activity' and activity is not None:
+            from trvelle.utils.itinerary_edits import edit_activity
+            try:
+                edit_activity(itinerary, body.day_index, body.item_index, {},
+                              [h.get('name', '') for h in options.get('hotels', [])],
+                              [h.get('choose_uid') for h in options.get('hotels', [])] + [f.get('uid') for f in options.get('flights', [])])
+            except ValueError as error:
+                raise HTTPException(422, str(error)) from error
+        hotel = next((h for h in options.get('hotels', []) if h.get('choose_uid') == body.uid), None) if body.kind == 'hotel' else None
+        flight = next((f for f in options.get('flights', []) if f.get('uid') == body.uid), None) if body.kind == 'flight' else None
+        if (body.kind == 'activity' and activity is None) or (body.kind != 'activity' and not (hotel or flight or activity)):
+            raise HTTPException(404, 'Travel item not found in this itinerary')
+        key = f'{body.kind}:{body.uid}' if hotel or flight else f'{body.kind}:{body.day_index}:{body.item_index}'
+        if body.purpose == 'booking':
+            key = f'hotel-booking:{body.uid}'
+        if body.purpose == 'place':
+            key = f'activity-place:{body.day_index}:{body.item_index}'
+        if body.fields:
+            key += ':' + '|'.join(sorted(set(body.fields)))
+        from trvelle.tools.web_search import search_providers
+        lookup_kwargs = {'fields': body.fields} if body.fields else {}
+        if search_providers()['web'] == 'brave':
+            lookup_kwargs['web_provider'] = 'brave'
+        # Use the existing quota-aware researcher router, without starting a chat turn.
+        try:
+            router = get_orchestrator().model_router if body.purpose == 'details' else None
+        except HTTPException:
+            router = None
+        lookup = DetailLookup(router)
+        edited = deepcopy(itinerary)
+        detail_data = None
+        context = ' '.join(str(value) for value in (
+            itinerary.get('trip_name', ''), itinerary.get('summary', {}).get('dates', {}).get('start', ''),
+            itinerary.get('summary', {}).get('dates', {}).get('end', '')) if value)
+        if flight:
+            raw = deepcopy(itinerary.get('flight_selections', {}).get(body.uid) or db_handler.get_tool_response(user_id, chat_id, body.uid))
+            if not isinstance(raw, list):
+                raise HTTPException(422, 'The saved flight search is unavailable')
+            reports = []
+            for part in raw:
+                choices = part.get('best_flights', []) + part.get('other_flights', [])
+                if not choices:
+                    continue
+                index = part.get('selected_option_index', 0)
+                if not isinstance(index, int) or not 0 <= index < len(choices):
+                    raise HTTPException(422, 'The selected flight is unavailable')
+                enriched, report = await lookup.fetch('flight', choices[index], part, currency, context, **lookup_kwargs)
+                bucket = 'best_flights' if index < len(part.get('best_flights', [])) else 'other_flights'
+                offset = index if bucket == 'best_flights' else index - len(part.get('best_flights', []))
+                part[bucket][offset] = enriched
+                reports.append(report)
+            edited.setdefault('flight_selections', {})[body.uid] = raw
+            detail_data = raw
+            report = {'summary':'\n\n'.join(r['summary'] for r in reports if r.get('summary')),
+                      'sources':list({s['url']:s for r in reports for s in r.get('sources', [])}.values()),
+                      'missing':list(dict.fromkeys(x for r in reports for x in r.get('missing', []))),
+                      'filled':list(dict.fromkeys(x for r in reports for x in r.get('filled', []))),
+                      'provider_notice':' '.join(dict.fromkeys(r['provider_notice'] for r in reports if r.get('provider_notice'))),
+                      'fetched_at':reports[-1]['fetched_at'] if reports else None,
+                      'status':'partial' if any(r.get('missing') for r in reports) else 'complete',
+                      **({'fields':body.fields} if body.fields else {})}
+        elif hotel:
+            raw = db_handler.get_tool_response(user_id, chat_id, body.uid)
+            kwargs = {'booking_only': True} if body.purpose == 'booking' else lookup_kwargs
+            hotel_context = ' '.join(str(value) for value in (
+                hotel.get('location') or hotel.get('destination') or context,
+                hotel.get('check_in_date'), hotel.get('check_out_date'),
+                (raw or {}).get('search_parameters', {}).get('adults')) if value)
+            enriched, report = await lookup.fetch('hotel', hotel, raw, currency, hotel_context, **kwargs)
+            edited.setdefault('hotel_details', {})[body.uid] = enriched
+            detail_data = {'properties':[enriched]}
+        else:
+            from trvelle.tools.web_search import search_providers
+            providers = search_providers()
+            if body.purpose == 'place':
+                from trvelle.tools.place_search import enrich_activity
+                from trvelle.tools.search_gateway import SearchBudgetError
+                try:
+                    enriched, matched = await enrich_activity(activity, destination=itinerary['daily_plan'][body.day_index].get('destination') or '', photos=body.fetch_photos)
+                    report = {'summary':'', 'sources':[], 'status':'complete' if matched or enriched.get('place_details') else 'unavailable',
+                        'filled':['Place details'] if matched else [], 'missing':[], 'fetched_at':datetime.now(timezone.utc).isoformat()}
+                except SearchBudgetError as error:
+                    enriched = activity
+                    report = {'summary':'', 'sources':[], 'status':'unavailable', 'filled':[], 'missing':[], 'provider_notice':str(error)}
+            else:
+                kwargs = lookup_kwargs
+                enriched, report = await lookup.fetch(body.kind, activity, None, currency, activity.get('location') or context, **kwargs)
+            edited['daily_plan'][body.day_index]['items'][body.item_index] = enriched
+        edited.setdefault('detail_reports', {})[key] = report
+        updated = db_handler.save_itinerary_edit(user_id, chat_id, body.itinerary_id, edited)
+        return {'itinerary':await present_currency(updated, currency),
+                'detail_data':await present_currency(detail_data, currency) if detail_data else None,
+                'report':report}
 
 if __name__ == "__main__":
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8001
-    )
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=int(os.getenv("PORT", "8001")))

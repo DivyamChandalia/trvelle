@@ -6,7 +6,7 @@ import asyncio
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field, model_validator
 import json
-from serpapi import GoogleSearch
+from .search_gateway import gateway
 from human_id import generate_id
 # from ..utils import get_logger
 # logger = get_logger(__name__)
@@ -71,7 +71,7 @@ class FlightSearchInput(BaseModel):
 class FlightSearch:
     def __init__(self):
         self.api_key = os.getenv("SERPAPI_API_KEY")
-        self.use_cache = True
+        self.use_cache = False
 
     def format_flight_data_simple(self, data):
         output = []
@@ -89,7 +89,8 @@ class FlightSearch:
                 duration_hours = flight['duration'] // 60
                 duration_minutes = flight['duration'] % 60
                 output.append(f"  This flight takes about {duration_hours} hours and {duration_minutes} minutes.")
-                output.append(f"  Legroom is {flight['legroom'].lower().replace(' in', ' inches')}.")
+                if flight.get('legroom'):
+                    output.append(f"  Legroom is {flight['legroom'].lower().replace(' in', ' inches')}.")
                 if 'often_delayed_by_over_30_min' in flight and flight['often_delayed_by_over_30_min']:
                     output.append("  Note: This flight is often delayed by over 30 minutes.")
                 if 'extensions' in flight:
@@ -113,23 +114,10 @@ class FlightSearch:
         flights = results.get("best_flights", [])
         if not flights:
             flights = results.get("other_flights", [])
-        return flights[0] if flights else []
+        return flights[0] if flights else {}
     
     def _fetch_results(self, params, cache_file):
-        """Loads from cache_file if present, otherwise calls SerpAPI and caches."""
-        if self.use_cache:
-            if os.path.exists(cache_file):
-                with open(cache_file, "r") as f:
-                    return redact_secrets(json.load(f))
-
-        search = GoogleSearch(params)
-        results = redact_secrets(search.get_dict())
-
-        if self.use_cache:
-            os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-            with open(cache_file, "w") as f:
-                json.dump(results, f, indent=2)
-        return results
+        return gateway.request('serpapi', params)
 
     def handle_search(self, params):
         """Fetch outbound then inbound for each token."""
@@ -137,8 +125,14 @@ class FlightSearch:
         raw = self._fetch_results(params, "cache/two_way.json")
         raw_list = [raw]
         first_leg = self._extract_flight_list(raw)
+        if not first_leg:
+            raise ValueError("No flights found for these search parameters")
         all_returns = [first_leg]
+        seen = set()
         while first_leg.get("departure_token") is not None:
+            if first_leg['departure_token'] in seen or len(raw_list) >= 6:
+                raise ValueError('The provider returned an unresolved flight chain.')
+            seen.add(first_leg['departure_token'])
             params["departure_token"] = first_leg["departure_token"]
             inbound = self._fetch_results(params, "cache/return_way.json")
             raw_list.append(inbound)
@@ -168,7 +162,7 @@ class FlightSearch:
         
         search_params["engine"] = "google_flights"
         search_params["api_key"] = self.api_key
-        search_params["deep_search"] = True
+        search_params["deep_search"] = False
         result = self.handle_search(search_params)
         return result
         
@@ -186,15 +180,15 @@ async def flight_search(search_params: FlightSearchInput):
     """
     try:
         if isinstance(search_params, FlightSearchInput):
-            search_params_dict = search_params.model_dump()
+            search_params_dict = search_params.model_dump(exclude_none=True)
         else:
             search_params_dict = search_params
 
-        results = searcher.flight_search(search_params_dict)
+        results = await asyncio.to_thread(searcher.flight_search, search_params_dict)
         return results
     except Exception as e:
         import traceback    
-        print(f"Error in flight_search: {e}\n{traceback.format_exc()}")
+        raise RuntimeError(f"Flight search failed: {e}") from e
 
 
 async def main():

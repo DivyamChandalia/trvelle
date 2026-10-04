@@ -1,0 +1,2392 @@
+{
+  "search_metadata": {
+    "id": "6ac17244bde97946bf9b739a",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/_dfLvmlcXfsgoecBqYTeBlSt0xoA54BUC8pF31KqBr8/6ac17244bde97946bf9b739a.json",
+    "markdown_endpoint": "https://serpapi.com/searches/_dfLvmlcXfsgoecBqYTeBlSt0xoA54BUC8pF31KqBr8/6ac17244bde97946bf9b739a.md",
+    "created_at": "2026-10-03T21:23:16.965Z",
+    "processed_at": "2026-10-03T21:23:16.966Z",
+    "google_hotels_url": "https://www.google.com/travel/search?q=singapore&hl=en&gl=us",
+    "raw_html_file": "https://serpapi.com/searches/_dfLvmlcXfsgoecBqYTeBlSt0xoA54BUC8pF31KqBr8/6ac17244bde97946bf9b739a.html",
+    "prettify_html_file": "https://serpapi.com/searches/_dfLvmlcXfsgoecBqYTeBlSt0xoA54BUC8pF31KqBr8/6ac17244bde97946bf9b739a.prettify",
+    "total_time_taken": {
+      "float": 2.456106662750244
+    }
+  },
+  "search_parameters": {
+    "engine": "google_hotels",
+    "q": "singapore",
+    "gl": "us",
+    "hl": "en",
+    "currency": "INR",
+    "check_in_date": "2026-11-15",
+    "check_out_date": "2026-11-19",
+    "adults": 2,
+    "children": 0
+  },
+  "search_information": {
+    "total_results": 346
+  },
+  "ads": [
+    {
+      "name": "PARKROYAL COLLECTION Marina Bay",
+      "source": "PARKROYAL COLLECTION Marina Bay",
+      "source_icon": "https://www.gstatic.com/travel-hotels/branding/15154745752652484190.png",
+      "link": "https://www.google.com/aclk?sa=l&ai=DChsSEwikk9eP5J6XAxUTgVoFHZbpBS8YACICCAEQBxoCdnU&co=1&gclid=EAIaIQobChMIpJPXj-SelwMVE4FaBR2W6QUvEA0YASABEgKKOPD_BwE&cid=CAASuwHkaEsBMSoZc16ZXw3BbhAEOUdzmMIr4YN5VV7rjA6_Z8TsNSfZg72KdTt9b-NAHtEIsRdh0uXEibOkDNzj9IdlCSXql1C3BuCUWX3slHrmxnUGA8ARi_hX86HYK4cWOP8CZBXZjwLpQKnCnJpDceNOWvPkbeFdUfBPtumAzhnR6KRfUMh03LztwBd7OrpMr9q8kzCD4cF56S4ftv7140pTE4Dnlc4LZl5a1l031C4j-GcqtUH5U29NPC8O&sig=AOD64_1Kem_bkt_-KtgnFQFoJQ0oe83iyg&adurl=",
+      "property_token": "CgsIlI2d2vaM3KD0ARAB",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=CgsIlI2d2vaM3KD0ARAB&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.291792,
+        "longitude": 103.857118
+      },
+      "hotel_class": 5,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQNm3xEtTWGpjsuhBwxkNfS4eGNaL8GW5aUzeKeT16u_uxtCQ&s=10",
+      "overall_rating": 4.5,
+      "reviews": 6845,
+      "price": "₹45,223",
+      "extracted_price": 45223,
+      "amenities": [
+        "Spa",
+        "Pool",
+        "Parking",
+        "Fitness center",
+        "Free Wi-Fi",
+        "Wi-Fi",
+        "Outdoor pool"
+      ]
+    },
+    {
+      "name": "PARKROYAL COLLECTION Pickering",
+      "source": "PARKROYAL COLLECTION Pickering",
+      "source_icon": "https://www.gstatic.com/travel-hotels/branding/15154745752652484190.png",
+      "link": "https://www.google.com/aclk?sa=l&ai=DChsSEwikk9eP5J6XAxUTgVoFHZbpBS8YACICCAEQBRoCdnU&co=1&gclid=EAIaIQobChMIpJPXj-SelwMVE4FaBR2W6QUvEA0YAiABEgLOUvD_BwE&cid=CAASuwHkaEsBMSoZc16ZXw3BbhAEOUdzmMIr4YN5VV7rjA6_Z8TsNSfZg72KdTt9b-NAHtEIsRdh0uXEibOkDNzj9IdlCSXql1C3BuCUWX3slHrmxnUGA8ARi_hX86HYK4cWOP8CZBXZjwLpQKnCnJpDceNOWvPkbeFdUfBPtumAzhnR6KRfUMh03LztwBd7OrpMr9q8kzCD4cF56S4ftv7140pTE4Dnlc4LZl5a1l031C4j-GcqtUH5U29NPC8O&sig=AOD64_3X8rOAVjLu2bnmhODxWLISfkUByw&adurl=",
+      "property_token": "CgsIzZXR-9vTpLqNARAB",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=CgsIzZXR-9vTpLqNARAB&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.2857589999999999,
+        "longitude": 103.846041
+      },
+      "hotel_class": 5,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRjmS6MrfTUvOQQsDWw_AIE6ysAaTpZyABtF0n_0hSel85Pxw&s=10",
+      "overall_rating": 4.6,
+      "reviews": 5670,
+      "price": "₹67,530",
+      "extracted_price": 67530,
+      "amenities": [
+        "Spa",
+        "Pool",
+        "Parking",
+        "Fitness center",
+        "Free Wi-Fi",
+        "Wi-Fi",
+        "Outdoor pool"
+      ]
+    },
+    {
+      "name": "Robertson Quay Hotel",
+      "source": "Hotels.com",
+      "source_icon": "https://www.gstatic.com/travel-hotels/branding/306127930749010778.png",
+      "link": "https://www.google.com/aclk?sa=l&ai=DChsSEwikk9eP5J6XAxUTgVoFHZbpBS8YACICCAEQDRoCdnU&co=1&gclid=EAIaIQobChMIpJPXj-SelwMVE4FaBR2W6QUvEA0YAyABEgJfn_D_BwE&cid=CAASuwHkaEsBMSoZc16ZXw3BbhAEOUdzmMIr4YN5VV7rjA6_Z8TsNSfZg72KdTt9b-NAHtEIsRdh0uXEibOkDNzj9IdlCSXql1C3BuCUWX3slHrmxnUGA8ARi_hX86HYK4cWOP8CZBXZjwLpQKnCnJpDceNOWvPkbeFdUfBPtumAzhnR6KRfUMh03LztwBd7OrpMr9q8kzCD4cF56S4ftv7140pTE4Dnlc4LZl5a1l031C4j-GcqtUH5U29NPC8O&sig=AOD64_219wrhMzWA7nP-5y4UVvsxJfZUgw&adurl=",
+      "property_token": "CgsIgsW4sIy6hoDoARAB",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=CgsIgsW4sIy6hoDoARAB&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.291256,
+        "longitude": 103.842051
+      },
+      "hotel_class": 3,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSxDhj0DZfpX7Zvo6rxipIN_QlpfJiDt12LrRcMEooh0-y4wQ&s=10",
+      "overall_rating": 3.5,
+      "reviews": 2931,
+      "price": "₹10,493",
+      "extracted_price": 10493,
+      "amenities": [
+        "Pool",
+        "Free parking",
+        "Free Wi-Fi"
+      ]
+    },
+    {
+      "name": "Hotel 81 Tristar",
+      "source": "Booking.com",
+      "source_icon": "https://www.gstatic.com/travel-hotels/branding/icon_184.png",
+      "link": "https://www.google.com/aclk?sa=l&ai=DChsSEwikk9eP5J6XAxUTgVoFHZbpBS8YACICCAEQAxoCdnU&co=1&gclid=EAIaIQobChMIpJPXj-SelwMVE4FaBR2W6QUvEA0YBCABEgLU-fD_BwE&cid=CAASuwHkaEsBMSoZc16ZXw3BbhAEOUdzmMIr4YN5VV7rjA6_Z8TsNSfZg72KdTt9b-NAHtEIsRdh0uXEibOkDNzj9IdlCSXql1C3BuCUWX3slHrmxnUGA8ARi_hX86HYK4cWOP8CZBXZjwLpQKnCnJpDceNOWvPkbeFdUfBPtumAzhnR6KRfUMh03LztwBd7OrpMr9q8kzCD4cF56S4ftv7140pTE4Dnlc4LZl5a1l031C4j-GcqtUH5U29NPC8O&sig=AOD64_1jS0LjYax6ZAQIEwgyFJe6yhHD1g&adurl=",
+      "property_token": "CgoIztXHgLe44t8WEAE",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=CgoIztXHgLe44t8WEAE&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.315502,
+        "longitude": 103.89737199999999
+      },
+      "hotel_class": 3,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSVRBGXKXKHhNcmWgo8fBbbHWkY5LtvUMw56JqjcGLCJTNtWQ&s=10",
+      "overall_rating": 3.9,
+      "reviews": 1192,
+      "price": "₹7,033",
+      "extracted_price": 7033,
+      "amenities": [
+        "Pool",
+        "Free Wi-Fi",
+        "Outdoor pool"
+      ],
+      "free_cancellation": true
+    },
+    {
+      "name": "Quincy Hotel Singapore",
+      "source": "Quincy Hotel Singapore",
+      "source_icon": "https://www.gstatic.com/travel-hotels/branding/82e2c223-0485-4e16-b6c8-48fb4186d88f.png",
+      "link": "https://www.google.com/aclk?sa=l&ai=DChsSEwikk9eP5J6XAxUTgVoFHZbpBS8YACICCAEQCRoCdnU&co=1&gclid=EAIaIQobChMIpJPXj-SelwMVE4FaBR2W6QUvEA0YBSABEgLH6fD_BwE&cid=CAASuwHkaEsBMSoZc16ZXw3BbhAEOUdzmMIr4YN5VV7rjA6_Z8TsNSfZg72KdTt9b-NAHtEIsRdh0uXEibOkDNzj9IdlCSXql1C3BuCUWX3slHrmxnUGA8ARi_hX86HYK4cWOP8CZBXZjwLpQKnCnJpDceNOWvPkbeFdUfBPtumAzhnR6KRfUMh03LztwBd7OrpMr9q8kzCD4cF56S4ftv7140pTE4Dnlc4LZl5a1l031C4j-GcqtUH5U29NPC8O&sig=AOD64_1AntMejGCtL0_4kVkm3RPCED-noA&adurl=",
+      "property_token": "CgsI6JOZob-k-_emARAB",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=CgsI6JOZob-k-_emARAB&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.307779,
+        "longitude": 103.835674
+      },
+      "hotel_class": 4,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSOHkJEbiKr8ZmWLngP4caD_TZ0mMkaNLwd8LTe8CWKHLC93w&s=10",
+      "overall_rating": 4.7,
+      "reviews": 1733,
+      "price": "₹15,496",
+      "extracted_price": 15496,
+      "amenities": [
+        "Pool",
+        "Free parking",
+        "Parking",
+        "Fitness center",
+        "Free Wi-Fi",
+        "Outdoor pool"
+      ]
+    },
+    {
+      "name": "Pan Pacific Serviced Suites Beach Road",
+      "source": "Pan Pacific Serviced Suites Beach Road, Singapore",
+      "source_icon": "https://www.gstatic.com/travel-hotels/branding/15154745752652484190.png",
+      "link": "https://www.google.com/aclk?sa=l&ai=DChsSEwikk9eP5J6XAxUTgVoFHZbpBS8YACICCAEQCxoCdnU&co=1&gclid=EAIaIQobChMIpJPXj-SelwMVE4FaBR2W6QUvEA0YBiABEgI-b_D_BwE&cid=CAASuwHkaEsBMSoZc16ZXw3BbhAEOUdzmMIr4YN5VV7rjA6_Z8TsNSfZg72KdTt9b-NAHtEIsRdh0uXEibOkDNzj9IdlCSXql1C3BuCUWX3slHrmxnUGA8ARi_hX86HYK4cWOP8CZBXZjwLpQKnCnJpDceNOWvPkbeFdUfBPtumAzhnR6KRfUMh03LztwBd7OrpMr9q8kzCD4cF56S4ftv7140pTE4Dnlc4LZl5a1l031C4j-GcqtUH5U29NPC8O&sig=AOD64_2Cu1MNeZvQKF1cb5oYpTWhfndCoA&adurl=",
+      "property_token": "CgsIpPO9xv2GoMntARAB",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=CgsIpPO9xv2GoMntARAB&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.299601,
+        "longitude": 103.860053
+      },
+      "hotel_class": 5,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTytsvwfQA_ZUTgMnOsq3mQPczdIP639JiDmX4Mfkgm8AbMuw&s=10",
+      "overall_rating": 4.4,
+      "reviews": 1508,
+      "price": "₹24,258",
+      "extracted_price": 24258,
+      "amenities": [
+        "Pool",
+        "Parking",
+        "Fitness center",
+        "Free Wi-Fi",
+        "Wi-Fi",
+        "Outdoor pool"
+      ]
+    },
+    {
+      "name": "Days Inn by Wyndham Singapore Novena",
+      "source": "Expedia.com",
+      "source_icon": "https://www.gstatic.com/travel-hotels/branding/ac238c97-1652-4830-8da8-bb8d8883af88.png",
+      "link": "https://www.google.com/aclk?sa=l&ai=DChsSEwikk9eP5J6XAxUTgVoFHZbpBS8YACICCAEQARoCdnU&co=1&gclid=EAIaIQobChMIpJPXj-SelwMVE4FaBR2W6QUvEA0YByABEgKQS_D_BwE&cid=CAASuwHkaEsBMSoZc16ZXw3BbhAEOUdzmMIr4YN5VV7rjA6_Z8TsNSfZg72KdTt9b-NAHtEIsRdh0uXEibOkDNzj9IdlCSXql1C3BuCUWX3slHrmxnUGA8ARi_hX86HYK4cWOP8CZBXZjwLpQKnCnJpDceNOWvPkbeFdUfBPtumAzhnR6KRfUMh03LztwBd7OrpMr9q8kzCD4cF56S4ftv7140pTE4Dnlc4LZl5a1l031C4j-GcqtUH5U29NPC8O&sig=AOD64_238YtTVmeup52NEa70QyPyVeCxjQ&adurl=",
+      "property_token": "CgsI_Zb3suSow9LZARAB",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=CgsI_Zb3suSow9LZARAB&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.326868,
+        "longitude": 103.84277
+      },
+      "hotel_class": 3,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSmyIokU-5vHoXEL0mj9Mx7gNeVfFWdgicfe4eUrh2NtUDCMw&s=10",
+      "overall_rating": 3.9,
+      "reviews": 31,
+      "price": "₹8,104",
+      "extracted_price": 8104,
+      "amenities": [
+        "Pool",
+        "Fitness center",
+        "Free Wi-Fi"
+      ],
+      "free_cancellation": true
+    },
+    {
+      "name": "Hotel Indigo Singapore Katong by IHG",
+      "source": "Hotel Indigo Singapore Katong by IHG",
+      "source_icon": "https://www.gstatic.com/travel-hotels/branding/8241981561293021293.png",
+      "link": "https://www.google.com/aclk?sa=l&ai=DChsSEwikk9eP5J6XAxUTgVoFHZbpBS8YACICCAEQDxoCdnU&co=1&gclid=EAIaIQobChMIpJPXj-SelwMVE4FaBR2W6QUvEA0YCCABEgISifD_BwE&cid=CAASuwHkaEsBMSoZc16ZXw3BbhAEOUdzmMIr4YN5VV7rjA6_Z8TsNSfZg72KdTt9b-NAHtEIsRdh0uXEibOkDNzj9IdlCSXql1C3BuCUWX3slHrmxnUGA8ARi_hX86HYK4cWOP8CZBXZjwLpQKnCnJpDceNOWvPkbeFdUfBPtumAzhnR6KRfUMh03LztwBd7OrpMr9q8kzCD4cF56S4ftv7140pTE4Dnlc4LZl5a1l031C4j-GcqtUH5U29NPC8O&sig=AOD64_0MyxyQa-0VnC8hxANYYBACqXwU0Q&adurl=",
+      "property_token": "CgsI2rKTivCsvaXAARAB",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=CgsI2rKTivCsvaXAARAB&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.304903,
+        "longitude": 103.904574
+      },
+      "hotel_class": 5,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSUzGcm_Q_Z3T4v8xMQC1lk5F4jAooRPlauYnSIEK3OziBRcg&s=10",
+      "overall_rating": 4.6,
+      "reviews": 1567,
+      "price": "₹28,174",
+      "extracted_price": 28174,
+      "amenities": [
+        "Pool",
+        "Pet-friendly",
+        "Parking",
+        "Fitness center",
+        "Free Wi-Fi",
+        "Wi-Fi",
+        "Outdoor pool"
+      ]
+    },
+    {
+      "name": "Maxwell Reserve Singapore, Autograph Collection",
+      "source": "Maxwell Reserve Singapore, Autograph Collection",
+      "source_icon": "https://www.gstatic.com/travel-hotels/branding/df3424c9-7799-4d27-aeb5-cdcabf8bf950.png",
+      "link": "https://www.google.com/aclk?sa=l&ai=DChsSEwikk9eP5J6XAxUTgVoFHZbpBS8YACICCAEQERoCdnU&co=1&gclid=EAIaIQobChMIpJPXj-SelwMVE4FaBR2W6QUvEA0YCSABEgIqcPD_BwE&cid=CAASuwHkaEsBMSoZc16ZXw3BbhAEOUdzmMIr4YN5VV7rjA6_Z8TsNSfZg72KdTt9b-NAHtEIsRdh0uXEibOkDNzj9IdlCSXql1C3BuCUWX3slHrmxnUGA8ARi_hX86HYK4cWOP8CZBXZjwLpQKnCnJpDceNOWvPkbeFdUfBPtumAzhnR6KRfUMh03LztwBd7OrpMr9q8kzCD4cF56S4ftv7140pTE4Dnlc4LZl5a1l031C4j-GcqtUH5U29NPC8O&sig=AOD64_2tmTFo1vdm49Oigl5Dw0eRpAxtJQ&adurl=",
+      "property_token": "CgoIi4yhuuSP1KEnEAE",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=CgoIi4yhuuSP1KEnEAE&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.278872,
+        "longitude": 103.84439499999999
+      },
+      "hotel_class": 5,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTyTUL-XABwMzXMXeeHWRI7pZ6CLZGRIJzZVYm-CbsRrMcQiw&s=10",
+      "overall_rating": 4.5,
+      "reviews": 799,
+      "price": "₹35,717",
+      "extracted_price": 35717,
+      "amenities": [
+        "Pool",
+        "Parking",
+        "Fitness center",
+        "Free Wi-Fi",
+        "Wi-Fi",
+        "Outdoor pool"
+      ]
+    }
+  ],
+  "properties": [
+    {
+      "type": "vacation rental",
+      "name": "POTATO Boutique Capsule @ Little India",
+      "link": "https://www.bluepillow.com/search/67a23c6a905c444f2d071581?dest=ago&cat=aprtment&lat=1.30847&lng=103.85112&language=en",
+      "property_token": "ChkQkPql0fjf-OIOGg0vZy8xMXhkM2NwdnljEAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQkPql0fjf-OIOGg0vZy8xMXhkM2NwdnljEAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.3084700107574463,
+        "longitude": 103.85111999511719
+      },
+      "rate_per_night": {
+        "lowest": "₹4,848",
+        "extracted_lowest": 4848,
+        "before_taxes_fees": "₹4,848",
+        "extracted_before_taxes_fees": 4848
+      },
+      "total_rate": {
+        "lowest": "₹19,392",
+        "extracted_lowest": 19392,
+        "before_taxes_fees": "₹19,392",
+        "extracted_before_taxes_fees": 19392
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹4,848",
+            "extracted_lowest": 4848
+          }
+        }
+      ],
+      "nearby_places": [
+        {
+          "name": "Singapore Changi Airport",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "23 min"
+            },
+            {
+              "type": "Public transport",
+              "duration": "1 hr"
+            }
+          ]
+        },
+        {
+          "name": "SaltBay Restaurant",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "1 min"
+            }
+          ]
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/s0a68c4SqGqvFTFYkCon7olw1lwHt2Zz6LnAy-6bqFFZHKuHAppIMxkV1a0PJB9vSvWq0yp4bfhA56BrqnBrscLJ355j2CLRXW-BnbNAajVU_WIs1oyI_elDsdgjWo0n_37zlgH-IylS9qnBcf-u0slSYFapKbo=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/56233487/-1/17ae51b272575d87fc83c4322c2b792d.jpg?ce=0&s=312x"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/aShuI6QEXXCqsk9Ur9_avDXTPhf_OLsWiQEknviH5BRZUOmsXeJCEQ9hkU2SSkt5DFybK03xBcPxUvevYHVUDUdjP38j3Kn_caWmyEGinhG9_kYfZxZxQV6z_zhnI9rGKS8x3M0ZWn3TAcyOHEEwj2PWH6YPuA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/56233487/-1/51b69603eaa5b98691b7dba147cb69a3.jpg?ce=0&s=312x"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/XQR1dIeJ3D7D84iPgC8Ii1SLZq91RFLWoDl9llWI8nBnPFp5C8mrXz3cnjIw9cVi0IycbufMYf6uxrD5XXFNarOqDvU5Ih7CQrYaTYqJkkAeTgj_k4yuhPm56GHuaCG_SsalK95ZBGCe2IrxEHe844ExrhhN0A=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/564154464.jpg?k=5c2e4d5f4f9d14422aa11f1a0d8f245bd1517742e587cee86bd14dfda81f255c&o=&s=312x"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/bobdh2va6zL7T5LyZgxbquyrVIDqYCg4Ql9dS7tUoAW3WvXX8zDs94x9Hq5dehOmh6J3GD2IrUEcJMGJvkHVkKxhTIxtqEz0QWzYoTFjtd32o5DJZW9E3T4qcXidjbeDYdjRckIV3XWopcO9En75CpxnBd3OAg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/564154460.jpg?k=120d1189c310544d778dd1d2fe6b5363a0fe33ca368017529823afe5aaecd690&o=&s=312x"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/pmnBsjIg8-y8k_0nOMHoWyTsRboo12yc-42RtFzgCGYd06lALPV802gePclHGkrr9RdasvnuA861qu6tI6oGxc8C4fXxXRxAwkXzif_VXlxWyr480jF1o4tU6rIglBhYvzAVB4OrnomgsXifd_TBuPfMIS-dcNc=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/567525558.jpg?k=5b316dd115d3ddf601187dcf081b66ab60c54fb50a34ac7222dd0de5d6e2adb8&o=&s=312x"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/DGQJ82Oy8lU3eCURYCU7dgz4xMA00mtJsRrgO9-gmI48jHnr7cbRpjwvb17GKjg02aBm8NCUnkBgnzFE2D2rlxysduNpvs4TEggW2ud9bE3K7atoDrcEe5qVPkW17cNMGE7bC2eZzC3Lb9oe27Jbsb4KNcFweg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/564154459.jpg?k=d2ba669a6232b80b5a52dd66268650f400c41dcecb724dda193f900dace3057a&o=&s=312x"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/CW1SdB1KrjgxVr0q8ckHJ0Aq35smCNiWvW9lRvsaEHJLTrqTj0qENW9xW0ILMtvPJah39gMskIgeloH5JIWWFBL3RYGoDG2RJ6uGO1RpqdAmB69u-jmRj7mMAm_OCIy662jh5cQVHvB_KtFRTEXMsb4fL-nZTA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/564153089.jpg?k=5734b9b401ab07260d3c6440c5d56bb3c256c5e5a282741fb402ef09efed3262&o=&s=312x"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/pySEdIRpymU4vgfaH_Nj0sRHkrn9A_9oxENn7Uhgph5xVy3MmJAT3yZErNQYyr6YgCLuF_gFUYyfIMvsByCwX45Hy0pV0pRQCRpOQxWpB_V_LvS1ok-f4fi9kseSsZZDNLmOl3Vm5n0NLgEKIxEbCjtnYCFQiw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/565747430.jpg?k=3662a2fd14beb7614dde3f08b5dc12446c4697ffa7c12d8e0c3e9e15c1b34f37&o=&s=312x"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/YF0TbQwsc88S59U6M95QBYg6G7oDpxLysp88gNvrV2UAbSEcmGpVnRxZli8zC7URI1ZiXCIBAoQVOeLeuafNyu39lnRNoenuIsnStj5p05cV0qrxW0tLGFeVe1itMLyPpNsddaPJefBjvaocUbhNvojSHPlBGw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/564154461.jpg?k=2c70339eb15b419bf407b81f81f61f1cebbf041bf9d96f52d955a637a3909daf&o=&s=312x"
+        }
+      ],
+      "location_rating": 4.5,
+      "amenities": [
+        "Kid-friendly",
+        "Kitchen",
+        "Smoke-free",
+        "Washer",
+        "Free parking",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle"
+      ],
+      "essential_info": [
+        "Sleeps 15",
+        "10 bedrooms"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQkPql0fjf-OIOGg0vZy8xMXhkM2NwdnljEAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQkPql0fjf-OIOGg0vZy8xMXhkM2NwdnljEAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "lyf Farrer Park Singapore - Side by Side (Studio Twin)",
+      "link": "https://www.bluepillow.com/search/627d21d9df4f49af9b3396fe/799277802?dest=bkng&cat=Apartment&lat=1.31274&lng=103.8556&language=en",
+      "property_token": "ChkQk4bSpK2euvl_Gg0vZy8xMW53NTN5bGRxEAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQk4bSpK2euvl_Gg0vZy8xMW53NTN5bGRxEAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.3127399682998657,
+        "longitude": 103.85559844970703
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "12:00 PM",
+      "rate_per_night": {
+        "lowest": "₹16,352",
+        "extracted_lowest": 16352,
+        "before_taxes_fees": "₹16,352",
+        "extracted_before_taxes_fees": 16352
+      },
+      "total_rate": {
+        "lowest": "₹65,408",
+        "extracted_lowest": 65408,
+        "before_taxes_fees": "₹65,408",
+        "extracted_before_taxes_fees": 65408
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹16,352",
+            "extracted_lowest": 16352
+          }
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2vCQblZ-TYea5rnfRUPDpp6VConKij71tPvO0hPXqPuUd1xo6jrS6jljrlPtnbxnut0mEKhrCpAi2XxOL-KUWru5rhCDvd9e8ayT-uAxRxKt3CMDOIYYFi_olLFgztRW_O67_Gs2OXJeIPTr8fSpk20yb-Av1zYeCHWXkVF_A2HZrHSyKtqbq0Yw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/333265737.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2UEaj6I3VgeDouaT_fNOHB4fCNtZ3PVyrb2UZDaHuyduLam5XGSl4S-3Krs-37onqB6mLvV3CMT2Y1QGbnnCB7APmZXKPFqXFk-OKXOmVud2riF2Kmi1mSUvjmPhZPuVNRjAsO_6CpzruF6ZXkCWrtfmrSt5z7KYChHeFAXcDntNBUB0zkzyHe=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/345724651.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1z6NfM2YSs4xCroXnBugz6JwBk0LlChDfwDRXnPmbcZBjZ84skM0HpJnuNvXE5phGWcT5yycJ_S0fAWeiwRqmRP6wfoBiLItbhuVVfqPWon5xUJqz8jFEFaiMgGJJS1Mqrh_haJBLYDb85Z9In2jOBGIa9jHyg00-ULigfT5SyGVe8RgCf91J8Yw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/329978508.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2Vzi7rjWvbT7wC4HRkyh-P_cU7024REXsfkQGVs7N90O4kjUV53PZUbWafRA_bETSWPwRFkhL2grQc2IDkpaLAdcMhoQ1TuE6waN3g9lUPldwVickhIZBOEcRwJ80HrAh6ie9ol4hZIhnNWT_bgkKg5mTACX9n8ZveP8lCPUcUyiWgK_Esafj6=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/345724640.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0OmVNbwK_QTk5-_q4ceHh66GbW18SPk0z3P8eRyxZ3Y_Di4oEeXcTdD8BaRdk1LE9yXuGXh00uAx6SWuQtwm09oy2gYDedZ4YY81s9CZm1Y-a_aEZ9wSCYVX9eYnpFjv1_p7nnU_PoJeQQ0OZC1cES-0E8t9L8FC-YxU_H-F9GC-J36ykk0DQKxQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/345724749.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1BBFE0zGXWZwLJ63Y7Ibucbzh7cmYd_6OEtbUhl38qP1kZyRbqXDGp7Txdar_0Le6JjhPViZrXEEolBixnHMulhRSkATZAdEOnRLsNL3bCzugyFdmgiGKAAX81l0UlRIs4cpyv3HmdkG4cmmqA0EJTJip7pRd5GdfA9XsaxJJPhhOK4hjyd8EWaw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/333263937.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3H8rukgFgt42jhTFxkR6CUuspQgy-aNDK9ENbtJzw9Koa7lq5jxLiuN8WOSPyYjQ04plzQ4JNzQgBA5X1cz0pmEcaT0doKVfZQc8O2ria7tY9g_sOtFbitVXo5dSiRA32qed3g6DYEu4cqksXNam9ldOrvyRjWRfSVlTTwR-9izmLiunjKjmD5=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/345724629.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW00fg6Dc8o0ItXspA7AjcV2DAsXh4D3qeYZoo3T5qcPSsfuO3YqTdFDHFtwlpO-yCiZvFWKQWR2md10lYWeEaRvefVBuqMuY5wEVJgIn2ZiqKDZKe2ZEvN0tCdskUogpBrWKRJ6yqt8pgHmaRhvYMuZXqQQ-xQEJd0m6hGDO2ehLQ2iEYBLc3eV-A=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/345731329.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2K6uOHn2yk0OqKfxlTCUkW20Bc4DoaN6wn4Fy57z-pcE0DOqpwSxyrIGAiHccEL8c6WZj6e3DpfgE6Reiw0eXdxt-ZLQlSqZHdmcKtw3ZHU097r2ncWpyae2JkWBBqz_d4SIqIewXTMao3DP6I63z0JAitXVakBNY53fvnMVmAuLqY2Z07j1s=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/333257242.jpg"
+        }
+      ],
+      "overall_rating": 5,
+      "reviews": 8,
+      "amenities": [
+        "Air conditioning",
+        "Kid-friendly",
+        "Crib",
+        "Kitchen",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free parking",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle"
+      ],
+      "essential_info": [
+        "Entire apartment",
+        "Sleeps 2",
+        "1 bedroom",
+        "1 bathroom",
+        "2 beds"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQk4bSpK2euvl_Gg0vZy8xMW53NTN5bGRxEAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQk4bSpK2euvl_Gg0vZy8xMW53NTN5bGRxEAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "Citadines Connect Rochester Singapore",
+      "property_token": "ChkQneaP36Ttvu0IGg0vZy8xMW1reXFfN2t6EAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQneaP36Ttvu0IGg0vZy8xMW1reXFfN2t6EAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.304550051689148,
+        "longitude": 103.78789520263672
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "11:00 AM",
+      "rate_per_night": {
+        "lowest": "₹21,891",
+        "extracted_lowest": 21891,
+        "before_taxes_fees": "₹20,084",
+        "extracted_before_taxes_fees": 20084
+      },
+      "total_rate": {
+        "lowest": "₹87,563",
+        "extracted_lowest": 87563,
+        "before_taxes_fees": "₹80,335",
+        "extracted_before_taxes_fees": 80335
+      },
+      "prices": [
+        {
+          "source": "Expedia.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/12590129945800583137.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹21,891",
+            "extracted_lowest": 21891,
+            "before_taxes_fees": "₹20,084",
+            "extracted_before_taxes_fees": 20084
+          }
+        }
+      ],
+      "nearby_places": [
+        {
+          "name": "Buona Vista",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "10 min"
+            }
+          ]
+        },
+        {
+          "name": "Singapore Changi Airport",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "35 min"
+            },
+            {
+              "type": "Public transport",
+              "duration": "1 hr 15 min"
+            }
+          ]
+        },
+        {
+          "name": "CALI Rochester Park – Pet-Friendly Restaurant & Bar",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "5 min"
+            }
+          ]
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/dh9Cc7ThtYEoAJJr2RC5Z6iSBG_u6E3XF20FPcSGdj0MsRi5FtSfU-fWQNQZIAkef6hAhmLxpeG3HGdtvwQtQjDUKubyG3rQVYm3jrPQR0SkZ4qJIl6e0tnR_eP7QfeX2Ln3lBpbN9DejnFce4kiTiVv3wh8Ag=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/89000000/88630000/88627800/88627722/16bdaabc.jpg"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/JKquiAgy35ssq9PxxjdLAgAOCUlbym-Z4EKey9w0L69APIhbyGiZIpGH_NRkNhEoxt942Rd4uBk7v5ZB0V_3cRKnLejdTp9bDjQSzlBpV0-DMXplm4WYu2LXj6XCa3MdUVBc5uIqBPLyDpZuW_XQFMjOvWmNDQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/89000000/88630000/88627800/88627722/06ecf438.jpg"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/95FZ5Eh-OaM_t6viMY4sLUpnA51azTrMHt1BX1Fy2jCGVefZsg85-QYHHR52QkqgQCMF4IYGeELbcO5ngHkRRAm_V-9BYCWxSfZcm-s_Oukh9RWIbyS_K7T2QGA8-6CXGigUcMoUwxer4YMdRlPhFRLy3bBZIw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/89000000/88630000/88627800/88627722/393f1d3b.jpg"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/ReXVt-Zy-FqBbPO2CyMuYeUUOVzFFyIAErc0lKiLO7VuVBvbVJFxLpL4Ajc9EwDtkIDaSMsttLIOPv6aErvT8374C3U4pDW5f59Zx3SY68URWQVh219q3u5kT4Dgq2oUPbSCvrWtHzRPbjNlpw_DlfkuFU6gJfk=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/89000000/88630000/88627800/88627722/af2de6eb.jpg"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/NmRYW4UldelLIuWrN1NTrwVnfZLqgB_u664n0oJMNztdGYX7k7d9E7msFgsy2zPpNay92JRhruQnnm_UqUsA4jdzVuKu2leH2pwjP8bnk_WUKaCrfLBUO_PjjQ2UFS-y9aHUw-dcgpnNIBvBB7__m7LHlU9sabA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/89000000/88630000/88627800/88627722/49fb09c2.jpg"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/5G1DCtNTCfphmIY5he3sLgY7VV9ZJ2kmVVJOd-FUHwOu9nO7RWx5-IwkC_CYjcrHVLt1MM5qFyzRpBN0KpvPRPt7AO47TqfMt4oEg0GJK449Oz1orvBaKuKvIl7QPz2O242J_sazILiFr-4ANkg9U0EKAI4Sgo8=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/89000000/88630000/88627800/88627722/a04b07ca.jpg"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/zHDR75POkUumbeohMeWZJfSXEZk3g4QGircyw4Xj93mmfpXeWE_lIeZgMuB-WYoMltVLn_5Pqn4OeKTr3dzqePVfuJzxtod7gJOYdH440MjtpubKDqckDPx_DUoS7Jqj2VTctYJ3tLSHvFf-t3bR1TJG2WoOYjg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/89000000/88630000/88627800/88627722/ea84548d.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/W9avquEGK7caBw-lj7Cj2yIbft8EC-uWx6GUJz8wKjJ87oRnVZGg4xrJd0z1igFKoshhqSvgMmzjdGDr66hKK3KKHJykRs2944pk24jLhoGx1BSrH9syBZR9uF-hjvFPbjX2NatE7YTqxpUR9H6T3Y5vvy0XKw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/89000000/88630000/88627800/88627722/986a2f9a.jpg"
+        }
+      ],
+      "overall_rating": 4.7,
+      "reviews": 304,
+      "location_rating": 3.5,
+      "amenities": [
+        "Air conditioning",
+        "Elevator",
+        "Fitness center",
+        "Ironing board",
+        "Outdoor pool",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No indoor pool",
+        "Not pet-friendly"
+      ],
+      "health_and_safety": {
+        "groups": [
+          {
+            "title": "Minimized contact",
+            "list": [
+              {
+                "title": "No-contact check-in and check-out",
+                "available": true
+              }
+            ]
+          }
+        ]
+      },
+      "essential_info": [
+        "Sleeps 2",
+        "1 bedroom",
+        "1 bathroom",
+        "1 bed"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQneaP36Ttvu0IGg0vZy8xMW1reXFfN2t6EAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQneaP36Ttvu0IGg0vZy8xMW1reXFfN2t6EAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "R Residences - Studio with Balcony",
+      "link": "https://www.bluepillow.com/search/654ca6a03011da1e8b76f07d?dest=bkng&cat=apartment&lat=1.2956&lng=103.83904&language=en",
+      "property_token": "ChkQ--jj0fKS2v4aGg0vZy8xMW4za2hxMXJjEAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQ--jj0fKS2v4aGg0vZy8xMW4za2hxMXJjEAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.2956000566482544,
+        "longitude": 103.83904266357422
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "12:00 PM",
+      "rate_per_night": {
+        "lowest": "₹17,380",
+        "extracted_lowest": 17380,
+        "before_taxes_fees": "₹17,380",
+        "extracted_before_taxes_fees": 17380
+      },
+      "total_rate": {
+        "lowest": "₹69,520",
+        "extracted_lowest": 69520,
+        "before_taxes_fees": "₹69,520",
+        "extracted_before_taxes_fees": 69520
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹17,380",
+            "extracted_lowest": 17380
+          }
+        }
+      ],
+      "nearby_places": [
+        {
+          "name": "Bef Kim Yam Rd",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "1 min"
+            }
+          ]
+        },
+        {
+          "name": "Singapore Changi Airport",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "26 min"
+            },
+            {
+              "type": "Public transport",
+              "duration": "1 hr 4 min"
+            }
+          ]
+        },
+        {
+          "name": "Kotuwa",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "5 min"
+            }
+          ]
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW29MgXrnFxEDx_PUwT7nV_n-O9rVS48SVwO26Jw-ujk688dXE2IfI9HANZlMUAaeM2s2u18QjHeBQkeclYxinabe4VfbI4paJYcwhfJPfF3H-nwOvwx6L_I_IYAdPuerrguAhwHNr2Tus-uhBT8_kR7wOcULLGaFp4SkGMLmDQnJ47Bjk0RzD47=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_cbbdb020_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2b8_XncosUKgr-GtPffHqt8gIVPKVwwzHPF5fcf3nYTQKJCjd_SHGQXDxmdgHG-tzKTEk4Tf1HBHiA6zKODMg7fHeP5fQ75eKBSxixsBBZMWs3MtENnes9CAaGgGzfQaSepUxCOuRR4tJjWO7ZiZ0vh67EaabS7LAvoW1JHp5iVIOA8XxV7wgF=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/470116598.jpg?k=8a9d233e76b753b52ec956685c83abf8784f3b2137f717db426e6b9fa24517aa&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW304idPQ8ySBpvg8SVnftQibbePrBjzeicVP1NJ9SuBdDlQl6rmhGxgq6NLJpn1KDse4rm1_dyIXp73s_boexl5Iz-OxiO11-QVd0_Ux_szaccSP_kqFccEkHh2SVYjKWmGuMh2iWRoxY2zgHpIcqk9wenSGQiQf_O3jQNmsUUT8N2zQI5SN7k=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_d4f7b82e_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0P964NfaRX9DgoNZomHn4vEXz8q4_wgMEtdlNqLma4JSV5wErj3NDs0zsfOWlyhc2EruJYgFtUgxB9vLWtno-45Z-1jOC9ePqvotOf1UfYsWTAoblBZni8m5FZZxYdt0G-jfDLCRE1qMkmGj9MKIs8s5ync9uL9azMGTqOH_46ZYpNiu8kjseiQw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/858941397.jpg?k=20d343163188abc0c22975e28c29fc83191dd1cbe5e858d59a7aebdbbaf1a3c5&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0VezDN700Kh9C8Dz8ssWWf4DmxMhec5lBeldL_F5cw7IKQRRh0ds0E6WqTBo7dfulPKqUPL8axq5nnaYUmLvBSO2e2awilHhor9yRN3eWpA7cpQh4EQ3aIHleoWuzqJyECsOohpzebOoOWnVpBQCR0Rxa0qA8UyMPT4mSlOzZhEpR_1olSA01Qsg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_e1ede24c_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1IryBCSK6yOfV_KtkEA-ibs7j0rRUD8IFjng8R6HZB2tfkujNtz8BbVG2lzXnV_8xMVFRYXvVz2tHRrsnMdKqy9xnfqq-7ZTzwz7IGfnOrm_zzGKHzyKCWZzKcHBY6tf_MjtKkzjb15GKKIAuHsHMqNzGjkyK8g61XOqUFO0NsYCJoxkBekPzo=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/470116963.jpg?k=ab534d54585c90292b9e51e0a60b16ba6275caf2f23787e33523a30b59545bbf&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2aBfaJJ1ROoa5Ti5eYAimedHNQPeKxkWvqpcuulSbOuNRVfFo2xX-6YfbC4J3z6YMjM2KcRRQqsYVwAcQeIcTgZmjpRvQPYEkNc4mOcjEfgX-q6NH0DgjI2CHml43PN-8NBzTuMzM6NAO_IcZxmrAzmXFjZMLlquslEqwTS20eKa94yNQ-83ZfbA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_0162439a_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW05hiZVLBADWvAdm1DSrZHYOYD1plio4HN1vzMJGO1tiGyXJz4zRpJ6fK73RRmDaRY5mmsqh43qHfyHERGhxlMg_ZuJCj8SN1J75g9NjXybKwdIHyycOMHNp8iO-8D7VOb5lwBv0ibniBzNKwlErAwN2OnIVuQdejPlXTBjdaZT7oVLeUMYQ3QL=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_afaadce7_z.jpg"
+        }
+      ],
+      "overall_rating": 3.2999997,
+      "reviews": 8,
+      "location_rating": 4.1,
+      "amenities": [
+        "Air conditioning",
+        "Crib",
+        "Ironing board",
+        "Kitchen",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle"
+      ],
+      "essential_info": [
+        "Entire apartment",
+        "Sleeps 5",
+        "1 bathroom",
+        "3 beds"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQ--jj0fKS2v4aGg0vZy8xMW4za2hxMXJjEAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQ--jj0fKS2v4aGg0vZy8xMW4za2hxMXJjEAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "Aura Hotel Purvis - Deluxe Queen Room",
+      "link": "https://www.bluepillow.com/search/69f9740aa8387c9ba63ad74d?dest=bkng&cat=Apartment&lat=1.35208&lng=103.81984&language=en",
+      "property_token": "ChkQ2NK_9-vOhe1HGg0vZy8xMW52eHI4bDNoEAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQ2NK_9-vOhe1HGg0vZy8xMW52eHI4bDNoEAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.35207998752594,
+        "longitude": 103.81983947753906
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "11:00 AM",
+      "rate_per_night": {
+        "lowest": "₹10,361",
+        "extracted_lowest": 10361,
+        "before_taxes_fees": "₹10,361",
+        "extracted_before_taxes_fees": 10361
+      },
+      "total_rate": {
+        "lowest": "₹41,446",
+        "extracted_lowest": 41446,
+        "before_taxes_fees": "₹41,446",
+        "extracted_before_taxes_fees": 41446
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹10,361",
+            "extracted_lowest": 10361
+          }
+        }
+      ],
+      "nearby_places": [
+        {
+          "name": "Singapore Changi Airport",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "32 min"
+            },
+            {
+              "type": "Public transport",
+              "duration": "1 hr 44 min"
+            }
+          ]
+        },
+        {
+          "name": "The Lookout",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "7 min"
+            }
+          ]
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3XSykXuQj27E5r-cY-X04fp_QMXbUGzlzulQ_gpBcnmE--hfkUWdLWJ2Jril0S_FrTEWSsXbr95y9lRAut-rWvNmEt0mkyS5o6NTv06uuQmtz1sqW5fzrzJVIZv80XsYf4ThojLsCRONKI4_R-B_7NRwGvDCI8wnXr6oGA6eQCX2a6GMeO3TOz=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/874929818.jpg?k=36a82303d218d715a2d3102f290b22c64217aa9ee6e9404ac17294c965899c82&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3G-R2t3lsqavIvFbbmKTEaMx7OYBBVm_OPpINsL9aYvKQ-8eqzWSNg8sBFtqUIUnF15GdAxh4EOZoYL8EH7QhEdnLLkQvtGFZYwYid2NwyFOZmr1dHnRRL2EZBtDVpL5OToSD58N4xpEinRzP4KPs8xMltBqQfWOCBTDyBtKLtyQQmiNwklUw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/813404664.jpg?k=567515e15c1b4c78c5d7dd5d3f27fb3b7cee61d457081d04d1352cab278cc5c4&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0d025UJRpDPZXYJLnYsT8_ChinFRThGBFY-Eqy9Qu7wcYwL2XZZth3g4yj8vuVgJ9NPk1fzjgqv_8t1FFPo7dg8euWwHBVxrOZiJAnyEuAb2Xsg58ylfUiIlRq2QEVZ5BUvWCQPO_YwwZpFbSLg1B9cpULnabWsH0xqUvgiNOol-qDtzyGsuZv=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/813404635.jpg?k=fe9348229620dda81a3da438a49d23e442026b9173cfaa3f09a698fab5082f8b&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2aGNPGKktr3cekOs2O65v0kLaN0wCGqur05KQ59vU20b3HqdmKjqYN0868uhG9ywCgHCePcEtM9TKUjXFcifyeEIloiWIQWBOH5SBpZ8zijtPMyXJmfQzVlMpHF50SDnMNE4aLYv8vw3AkJ1KMzsLqz337IKnIDz20EyJD6-rJ2AAP5CPwtFOX=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/813404659.jpg?k=1fd0d41c55b4a0e8482764f83f773744a80cdb26f2025a737c0f58cbf5f17009&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0i_HOEZ1Xg8REAfdSbwShCQljLfsakfpgPNwym31u-ZeeVI5TXTabajV_8LWXzXZnPjQe3xCTGw1GU0IojdMFWDOQghYmGkIO3FvlMPoZOidqCz618DUY9EqtoPhugk9aNGslWDbvN89P_P0oVa6E0WpH9Dk6LEALWYxzdZxV30IKLQeC7ra0=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/874929822.jpg?k=6821512afb37808bfaa331336be209412f7ec1b627c787f89f940f19806bc26a&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2ZbLnUWHWTNWnelNGecIWAs5eWmQbdp4FDBigtF-zXBR1wvTtScd1_QWThfLYi5I8BKb8bredKcWdSdjuRpNe393sztBOPZ-N-LidN0yfiiD2Gb9jaILzrG-TJJUO-4eJfPXO2v1rBWSeeN1qfN0fbG6gKxW9-l7vavEklQdIe5yDk3VBHvHUM=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/813404648.jpg?k=ad25dddf3b585c9b19662aba5cbf904c4a4b8d97f7dddedfd87d6e344c3ece93&o=&a=1538557"
+        }
+      ],
+      "location_rating": 2.4,
+      "amenities": [
+        "Air conditioning",
+        "Kid-friendly",
+        "Crib",
+        "Elevator",
+        "Fitness center",
+        "Ironing board",
+        "Kitchen",
+        "Microwave",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free parking"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle",
+        "No Wi-Fi"
+      ],
+      "essential_info": [
+        "Entire apartment",
+        "Sleeps 3",
+        "1 bedroom",
+        "1 bathroom",
+        "2 beds"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQ2NK_9-vOhe1HGg0vZy8xMW52eHI4bDNoEAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQ2NK_9-vOhe1HGg0vZy8xMW52eHI4bDNoEAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "Oakwood Studios Singapore - One Bedroom Deluxe",
+      "link": "https://www.bluepillow.com/search/59438ca07c00cb0e643630a0/192624102?dest=bkng&cat=Apartment&lat=1.30551&lng=103.83661&language=en",
+      "property_token": "ChoQz-Wbm6uvt6W1ARoNL2cvMTF6a3licmpwdxAC",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChoQz-Wbm6uvt6W1ARoNL2cvMTF6a3licmpwdxAC&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.3055100440979004,
+        "longitude": 103.83660888671875
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "12:00 PM",
+      "rate_per_night": {
+        "lowest": "₹22,647",
+        "extracted_lowest": 22647,
+        "before_taxes_fees": "₹22,647",
+        "extracted_before_taxes_fees": 22647
+      },
+      "total_rate": {
+        "lowest": "₹90,588",
+        "extracted_lowest": 90588,
+        "before_taxes_fees": "₹90,588",
+        "extracted_before_taxes_fees": 90588
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹22,647",
+            "extracted_lowest": 22647
+          }
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/IbU6-6VaYQm2dJA4rpn2q2iwrwcjiEiOBMUNgwbO_OiN5VQj4hpaP-P92fqhaEuB54-x4rHR_RlA5-LZEaMCINwD8IqSsv_BUPn5sE09uBMa9G42XmB2SNKfUTMLPRWa_e538rN3uoSTgENACcMzUcF3prDrWQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/452210774.jpg?k=62da31a928844ea6b51f36abf45cc9f73153090af78076f9743383e4505d4836&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/R04qoibC38sKkbWgyGYn4ROlRfGYtJpLOOynDjqTWuBoIFUX1eCGEi969WnjO28meVLkS8ncM5KU2IH56JuaQXWpgFs2o1bC3c58AfTXlvnZHoXeEZGdUMP9RgCgz8wJOXUh40kyrGrUu56ckB8xe1OJ9Ve3oQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/164774396.jpg?k=b5134a336f7f24eaa87df172405f26558d23d5c4d7eea81c8d7bce87f915fbbb&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/JfFo77pR3qapaZJBxw1ZZamxus9zJAwSaXocahHLC5iy4RRFMgNIWh-ZMDUSmH_QoYAhZLBzibv7md2ZmOu_aybMUOVx04YLoCUQbmeE9dbJ1-E0P_LwGcFQDWYJ0wPWJWs6l2Cp-E00v69mIgb6HH03JN5WXQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/181291657.jpg?k=90043b9dd47e18d47f147a3d5d3e4fa62367a6b79aefe212df9e45306ca15d3f&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/u45FSinGWW1jOYw3k-jm6mCh2pntWlzZv4T-weGuKWw7Gcc7lrF0ZNYJJSk9gHookAwusqz02BW-Zotx6zyCqc6I_VKDnokaKgRIKvdyEpB17alHdf1_HLh6X9UV7G6f-iuZB8Ta7yrJczSwMMe3YuIaRE_UikM=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/236242031.jpg?k=820be16ac74c40d04b56446b5cff5aff3487baa57fb2cf606ce3dc83f4860ffe&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/ED9DAYxJcOc2lYF1IlGHtsIPR0BjeeUXVm72yxg_YT48_ks22gPvG6cYOnMK-iY8IlnljOPVNeVhBeXRDF02bzdgK_jNiHgYdUE0XgnLNuwuKPdHKJxfzVVM8-ANYRAj-e6yjqX9vpBljk0RDhGj4R0mDwsjxw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/295729836.jpg"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/IS6KUiRF7-k54993wbEn08wJSuwesuI4yI-7W3-5je6Qa1vtCRlyrtMZr8N6GB9IvvKnAl5Bg3K69js9-nmiF8WDlYp8iaCsagS1Shcu4W8UvcQNosyotiEKwlyznpAFQ7_oNf_C1hRmtbPKjRDNYxdN_DmUGuo=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/91435082.jpg"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/AXK4sA8HNyoiEtm2NZN3pa0kVxu6g-2iUOPs7Z-Pvvg3EEPr3NZyM6O8A8edX5fgklRk8r7LxcRv3yzaJi_vCwREo2jjPwe-jUaqn9FHcz-eToZdY1t_GyMvWmsbFtQm8qbLMzL8Mu7DdK0zuVO5WQjxeG4hJnU=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/91435080.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/wE3cWrBqmI61mCaF-4mQTeZw-Ie9sVn2-Opxe3hYRWIHu1GyQfF7oeTJFzWWRGXqbtBYsaln7cbvPwTpZNQ856-7hIete0c0FJxlc2gje3NgXxwAEtLSe79mRfiyL9rqvVgf7t1oIcio3K01SceT2yXQideGNgQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/104135751.jpg?k=74948ab3c481c9fc1f67ce35f365ad32665304dc515c83adb8371a839ef3a98e&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/3i9CBRI_WYlxwpq4-EzcAp5sQgcI34lOR3HXMZH8k-wZgLEtHQOijoxWY0iSM7mUQOE_xP5xSdYC-O_wY3Tyzc6lrXDaSM75JKKENNRACqjwaZemugcI_iFHgP0pkbSArcEJRvpQCtgVl4oyFxUa4HVZxTef_A=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/768979654.jpg?k=72edf51a09d889614137c04202ad8fe35df8a6c3bd97a29c79b8f2a1c0557f25&o=&a=1538557"
+        }
+      ],
+      "overall_rating": 4.9,
+      "reviews": 8,
+      "amenities": [
+        "Air conditioning",
+        "Kid-friendly",
+        "Crib",
+        "Elevator",
+        "Ironing board",
+        "Kitchen",
+        "Microwave",
+        "Outdoor pool",
+        "Pet-friendly",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free parking",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle",
+        "No indoor pool"
+      ],
+      "essential_info": [
+        "Entire apartment",
+        "Sleeps 2",
+        "1 bedroom",
+        "1 bathroom",
+        "1 bed"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChoQz-Wbm6uvt6W1ARoNL2cvMTF6a3licmpwdxAC",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChoQz-Wbm6uvt6W1ARoNL2cvMTF6a3licmpwdxAC"
+    },
+    {
+      "type": "vacation rental",
+      "name": "Riverside Deluxe King /Twin Room Hotel with Gorgeous Skyline View Singapore",
+      "property_token": "ChkQ1djI85qQhu0OGg0vZy8xMXhndmxkZGY4EAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQ1djI85qQhu0OGg0vZy8xMXhndmxkZGY4EAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.2877299785614014,
+        "longitude": 103.8364028930664
+      },
+      "rate_per_night": {
+        "lowest": "₹34,953",
+        "extracted_lowest": 34953,
+        "before_taxes_fees": "₹34,953",
+        "extracted_before_taxes_fees": 34953
+      },
+      "total_rate": {
+        "lowest": "₹139,810",
+        "extracted_lowest": 139810,
+        "before_taxes_fees": "₹139,810",
+        "extracted_before_taxes_fees": 139810
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹34,953",
+            "extracted_lowest": 34953
+          },
+          "free_cancellation": true,
+          "free_cancellation_until_date": "Jun 15",
+          "free_cancellation_until_time": "8:00 AM"
+        }
+      ],
+      "nearby_places": [
+        {
+          "name": "Hotel Miramar",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "3 min"
+            }
+          ]
+        },
+        {
+          "name": "Singapore Changi Airport",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "26 min"
+            },
+            {
+              "type": "Public transport",
+              "duration": "1 hr 5 min"
+            }
+          ]
+        },
+        {
+          "name": "Princess Terrace",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "2 min"
+            }
+          ]
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/slusS7dzJyeGovfnXglRx4HaU37kRkF03jAsxdpN0sPOajYsqEdfPHCwYn2TCoPqoNHOHeFDzasm5UdU29t61F6lsLzk454QPtcUKcgO7m23hIFUD9rUlmh3FbrPoCA2CupRQES-onYe_ARz3sMTi_Qt3wQhQQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/111000000/110780000/110773800/110773710/022ce85f.jpg?impolicy=ccrop&w=1000&h=666&q=medium"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/DQJMqN3UuvNEB1kAhdS06hBWPGXYSN6iWjmaCQcbnUZHp__oU5IOSAcbcBpHMUbrbKgBMdSTJjO5q4hfjCsAxR-PEe-Ucs7KbwJEPEUMvItKFtvTW1-f0hqTgQ1BI4vXOaA37CrpymXyYej1mm49rfV4JzpQnD4=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/media.vrbo.com/lodging/111000000/110780000/110773800/110773710/d679a0de.jpg?impolicy=ccrop&w=1000&h=666&q=medium&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/peeeaLxCx0bMd1Rz0OyHFf2HpiPusWNT26E7djE6OLv8Papy3zevzFjQ2O4VDupmT_iz9NJ-R_u2u2BZ7VKjIeoLCsEuuOKkbEVzsibg2kzxLwsV6Ww-mILDNpM2F1IOwlp420GAtEUzUh8tYn_5VKIrKPpe2A=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/media.vrbo.com/lodging/111000000/110780000/110773800/110773710/d02b833b.jpg?impolicy=ccrop&w=1000&h=666&q=medium&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/15-nundg_soMggrbJCDtXX0mYmwFdR6m_nq4bgIGfhpHr_t3By317F6cJXQ4mVP3IWDBh7Yzhf5b9ptAMakUw_Oz5a1rYO-8DKRAM6lqyBfJUt0HTk44gOveAQJWzbVhMhTu5xybhtlR_Qk2KPZoFYNfyI46Rw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/media.vrbo.com/lodging/111000000/110780000/110773800/110773710/b03160b9.jpg?impolicy=ccrop&w=1000&h=666&q=medium&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/DqmYMXb16zYko6rFxyhKhNjfTJ0m3fgyGLYnGn5XMTxRPnfEDuIAwvXm0D5TSNc9xzGH9aLGW3_w2dgrmJquGvK3FAspjAeCDxFk6h_XnbwJGWvG9TX-ZDA7yDacvfKrRZZ0F6DkvYoJwYGUJOP1Iazrsizasw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/media.vrbo.com/lodging/111000000/110780000/110773800/110773710/b7e1f7d0.jpg?impolicy=ccrop&w=1000&h=666&q=medium&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/Cv65lEq_2XSYWvkHThBPMvB-ABwfrxwda38PeNLx6DNlKN1qj_fj2P9f5BKzWgLXDmGjP7B3i5HSCAqHMz75taf-4YWqevLI5IGunfWt5n5ifWsH3wDwioBUnZRIA-N2rW6sv94wwbcwqO7XO4lW7bkBIxgkCQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/111000000/110780000/110773800/110773710/d05d3ffa.jpg?impolicy=ccrop&w=1000&h=666&q=medium"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/AVsdZS8sdDAWcQaR2Ig330lyQuBjiShcc_VxSpfMuBNv-o6v9MPm6z879WE1_JmP7VZ0WCCU4mV7JfTwcRBUKHCtgu1lJLY-OKUj2CEl0j5iVQve7TjIHJpzknKH3yKQaWAB3KsQddGlPxur9GiNjz7WJ-t_Zg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/media.vrbo.com/lodging/111000000/110780000/110773800/110773710/987b76a4.jpg?impolicy=ccrop&w=1000&h=666&q=medium&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/cTD8oCraNAG4FczWnu8YHVeU8yycE4ZRQCaxHvxIzP3T4FcYoC-nFBTvxITDAHD4JOVIlRs9_Shl-I6xzANuGi_PbG9b1dQShO7wdvryxCcTKXUs4pGl_Vz8Fbzq8qF7NPSaB883TA6uEsvAQ_mNiGbmCGPYdQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/111000000/110780000/110773800/110773710/32c736db.jpg?impolicy=ccrop&w=1000&h=666&q=medium"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/LTPqpFekxb_y0GCk_7BnJ5B0RWO-noW4we_FL32jiTCANRdlc43HpTRDOESMsImCWmJFpZaWPmp8yQASmncb1QzRV2IEQAYJdmKKR_crbxOUXrvHWE4OBEY_OkKUKaf-bubBh3a7wjqB57rnrPYJbQiZLbZjsg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/media.vrbo.com/lodging/111000000/110780000/110773800/110773710/93239c53.jpg?impolicy=ccrop&w=1000&h=666&q=medium&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        }
+      ],
+      "location_rating": 4.3,
+      "amenities": [
+        "Air conditioning",
+        "Kitchen",
+        "Smoke-free",
+        "Washer"
+      ],
+      "excluded_amenities": [
+        "No parking",
+        "No Wi-Fi"
+      ],
+      "essential_info": [
+        "Entire house",
+        "Sleeps 2",
+        "1 bedroom",
+        "1 bathroom",
+        "1 bed"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQ1djI85qQhu0OGg0vZy8xMXhndmxkZGY4EAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQ1djI85qQhu0OGg0vZy8xMXhndmxkZGY4EAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "Oakwood Premier Raffles Place Singapore - Deluxe Room",
+      "link": "https://www.bluepillow.com/search/61ef1468113b0ba9fb96ee22?dest=bkng&cat=Apartment&lat=1.28386&lng=103.85008&language=en",
+      "property_token": "ChkQ9sffwNG_-P1PGg0vZy8xMXZyeHg3Y185EAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQ9sffwNG_-P1PGg0vZy8xMXZyeHg3Y185EAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.2838599681854248,
+        "longitude": 103.85008239746094
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "12:00 PM",
+      "rate_per_night": {
+        "lowest": "₹37,642",
+        "extracted_lowest": 37642,
+        "before_taxes_fees": "₹37,642",
+        "extracted_before_taxes_fees": 37642
+      },
+      "total_rate": {
+        "lowest": "₹150,569",
+        "extracted_lowest": 150569,
+        "before_taxes_fees": "₹150,569",
+        "extracted_before_taxes_fees": 150569
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹37,642",
+            "extracted_lowest": 37642
+          },
+          "free_cancellation": true,
+          "free_cancellation_until_date": "Jun 15",
+          "free_cancellation_until_time": "8:00 AM"
+        }
+      ],
+      "nearby_places": [
+        {
+          "name": "Raffles Place",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "3 min"
+            }
+          ]
+        },
+        {
+          "name": "Singapore Changi Airport",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "23 min"
+            },
+            {
+              "type": "Public transport",
+              "duration": "47 min"
+            }
+          ]
+        },
+        {
+          "name": "Quay House Restaurant",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "4 min"
+            }
+          ]
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2YvPi3EWIKfinbVVGgIhka5QIdx5V7Ht9kcb8FizpVzOAX3dtX8F8ugNNei5yBPQortmT9wzodo-H1giIfYpVSEAhyuCU_hJJBtixBQwuV1xkU5W8YnelGPJVnA-wqEgwt8Sd314DUJgSapbwFtfpKBlHVOuV1utbc2drCQ6r66i6MqVc_hhDX=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/838529303.jpg?k=31978f53b2749e4af480b0fb0fe5aba167d09f8c7853a05c2fbc2c1086eff370&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW38a8KPTW65jZNX88w8eawqhdKpz_s1QAsjYChUxIkHgrwWR6JEHIQZfWhog_WgIJ5qhPEbQnBMj2Riy11ssD-o3-eqkUg43zHzh4MC9zsO_qpsNjo2cu1wBwQgvq7DcnPwySWNshpWxo5Fq6SXMW21aqiOrf3YA9MeufnN3mI3jP5ZNjO_8MpKQg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/336320822.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1J-RWntNO-boC7-45JRrZb62C0_KuhvQrX6TRF-CYzaSAYbhEgKBnd-8Wx6Heehp5aCng8KLhR80-HVzlQ4GdfKzmNyOdNIDGgRMl-W31WxEZvF8vjuvlZ4aHJIZPkIOG49Tn63vL3hanHg2Uf-AquJqlMdtqjnSwjQ5xC8wtT4zfMOBbHp0hHUg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/335684775.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0STvFpq-Pkdo5Sy1gtemm3GbtMrX46Y2100nqxLJ480qXOKBuR5ZbMxmS49-LNbZ2EIeuP3L5GXwzO6TYlOA09zZYO_Z2TWMVzNAuim7exKCsv9KIDtaJDuR8ZT-7gRXLLc7CBfIqpf6IwIOBcUbiAo_mz8EwR7shCIowFeGnE9EId1aGpI0AM=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/838517128.jpg?k=6101b2e502d4a25b0127eab3a22b01e379a94465486bb14ccddc12e4a6a52be4&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2Mw4AtPTpM57bAuJn7Yseb34UTXJxbmuWC-OXdFOU4DJu8xJnt_ro5eRtitcChUb4YsZi30yy4A8kaCwOM9ByWitnct_UpBbtxw3PtQ1BIfjz4BF9_sgYv-8LpQaaCj7K0o_poiI8qLfEQXojXDr_brJJKDmujIPMLIxlHa7bkoCQ99BBTURS-=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/422738758.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW041XLAMTSdhPzb8Czps3QPDbHFHgVo4cLfAtUmbmM5z1dQfFbiqMiFOsczdF0LOf6nl2TqcO7aQIq73rDJlGE4qcC5ImYv4Y78XHN46RM93MycJwDZyTcLAFGos6mx0Ggv8PvHKLJ46SzJ5StkYxf7qnvWQNeAbix_7NHC_wPe1uk7SJQBTym2zA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/336320597.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0oIXaOfMLFjyNvGTMqrHoZwRDfz38Lz7IPP-_-DkytWoU4M5d-7S5veefbX_nnvyO5NXH2J4HadDcHKelwpRlJ25PObqPtvDomaaGfMcTdDoF-j7Li2DIJDu0HrdaxUhOE4e7bAjLvPn-XEaU0RRmCjNU-NpnMhuDqRrHfJOKfzg0yAeYL6TAy=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/838529301.jpg?k=cb6cce3b67dcd2a66c3bdc15dbd6c6055f30939380cf591aaa3bdd93caad8a92&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3eL12db662c5PSQIBFP02EtZEhFVDhEumPls1Vp9ZX0Ad4JOraxSBp90Qe_bjO5kfY1XcSH2viOVpqEw9yDmVGApxuaOD0O-ldM7HM2yfPYGepcyHjc0jpSNAAB1U1zqBSUdHP_hx2qzODZ6VlV6NVLKqW8eXEF7pINgfGqY8ostf9EQrwsOwe=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/346687801.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1-Hnqdj_X_F73r83ESFi5X7Wtw7DnzUG-kIFUEDFmf4P2ntR4XF90lL6Wp4dLkte249rBAGJyl_I906GoEyX5oLcanETPh4diurHb4PboFOcd1vyxG7luBxxOWu38yAwrgo18VmMasUwgfhETpSVzgyrVARKtd6nysOuj_uYCFFCYACLDIaUSz9A=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/838530265.jpg?k=14770e968ca56be1621f916767f0c2395ab090519bf154943e0def8c5429c870&o=&a=1538557"
+        }
+      ],
+      "overall_rating": 5,
+      "reviews": 8,
+      "location_rating": 4.7,
+      "amenities": [
+        "Air conditioning",
+        "Airport shuttle",
+        "Kid-friendly",
+        "Ironing board",
+        "Kitchen",
+        "Outdoor pool",
+        "Pet-friendly",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free parking",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No indoor pool"
+      ],
+      "health_and_safety": {
+        "groups": [
+          {
+            "title": "Minimized contact",
+            "list": [
+              {
+                "title": "No-contact check-in and check-out",
+                "available": true
+              }
+            ]
+          }
+        ]
+      },
+      "essential_info": [
+        "Entire apartment",
+        "Sleeps 3",
+        "1 bedroom",
+        "1 bathroom",
+        "2 beds"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQ9sffwNG_-P1PGg0vZy8xMXZyeHg3Y185EAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQ9sffwNG_-P1PGg0vZy8xMXZyeHg3Y185EAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "BLOOM apart-hotel - Two-Bedroom Apartment",
+      "link": "https://www.bluepillow.com/search/6949a8925c042e01bace083e/1539113104?dest=bkng&cat=House&lat=1.3538&lng=103.87844&language=en",
+      "property_token": "ChkQuu6Klv2R_tY4Gg0vZy8xMXp4cm02eWtkEAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQuu6Klv2R_tY4Gg0vZy8xMXp4cm02eWtkEAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.3538000583648682,
+        "longitude": 103.8784408569336
+      },
+      "check_in_time": "2:00 PM",
+      "check_out_time": "12:00 AM",
+      "rate_per_night": {
+        "lowest": "₹26,601",
+        "extracted_lowest": 26601,
+        "before_taxes_fees": "₹26,601",
+        "extracted_before_taxes_fees": 26601
+      },
+      "total_rate": {
+        "lowest": "₹106,404",
+        "extracted_lowest": 106404,
+        "before_taxes_fees": "₹106,404",
+        "extracted_before_taxes_fees": 106404
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 3,
+          "rate_per_night": {
+            "lowest": "₹26,601",
+            "extracted_lowest": 26601
+          }
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/UDZkmc8NxsdRuEGx97t32JUXci9lYy2oCDazxFT78HiofqhpiVyl_UamEuNXJdQ1rRiQ5Xry4fHscNhbS8tlXWXzqBiCaj7ysYCSOEaB-AaTx8K61xYDKvAc_AEfHLbiCKvzqxqMLXzEl6mpQTDJoaM0kCluwA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/841801115.jpg?k=4e0aeb493d59b743a1e7251bb13207ea401cce00b02d1d22027013c8b0a80332&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/b0YDW0FBBLAA3b-WuspG2M2gQWXwAfdNciqxkGHQkGWxwthKIan5N0gK_7kIEt96gLM-i6wa1Q5pAK7Uaq4mTSt5GKfKuamUdUw0Obo4iDW58Lm3jYKw6XxGvVUHll4L0Y01GTZlJ2mzkZcuiNzoPAMpdsXwbw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/841801109.jpg?k=1c0fb0f4c7ce8807d1590e857c1b8d5d7505e614188008de7ff5f375ac23b86b&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/9aMerJbRX_bM6rSSCpPwwBykgDInzuuqDyCP9pY9KrxnKGvQR_rRjhAaqhepcWYPs1GI8Uu05zenBvX_r7f7-Zi_gNJaoQsHI9yrExOF27z8WjW8rE3PON4Fvo9XVJViVmhD_RRMph6U9xQ1HOexRts9uqgT4g=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/841801110.jpg?k=35fe68f23aeccbc32adba48e5968407956413eb2be33e34b036fdacd47541fa4&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/dx1dH8kV1G9fQKI9nqpSIHv-X-XwJZS1W419c7ZaZUY8z9QvMhoI5fjBPAGXlwsBlgHL9q6bh7n-ASJqK0_AA95YlFUCtvcgidwrP_irgEsN1QdGysXHi_HXzhRVaTsDe_tcH22TirdPxcV88bk6zo2Xl5xjvA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/841801116.jpg?k=9955b87e76055e9b7458e7e6db23c0e942597d5bee3eef54de2caecb52737ec6&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/8l0kwk8G8kK8jpewYCPpAKu8CnTWqXk4Zz9_dpZxSA0WSHn2BwOy9n5RwBy2niDae-Va5zCAelyaDOZM-TGPrq9BMEE1YLEBh70JwWJEFdxG11BiBv-6JR4IRFAbcmPApU_l2IV3ORXW2jMeGNiOXbE9tq8CIA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/841801113.jpg?k=69cdb51a51a915e859d1b18ed74fc6cab8565b85e771e3cc1bb65bc325292fab&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/9GwqQ35hoXlBmA2-fnZB-uy4yQAi0_s81VlOmz08qfBdSkVQ8YMGR7CUVvcV4c4m4JDiEPhTL8ksAkcflEs2rH4g8ibF_4o7HesN3cEJgPF9qa7x5_IR5SvgIdO-pc9D4VyPsM-57g6MS2rq8hbMcTbY7LtSxw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/787126601.jpg?k=ac27dbbf600bf4beb1fffeb265f8da23fee35f255fe37c89e958754ec08d25f8&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/4GxZ2x2GjwZHrU3KZcoCBtjbmiI0ov7jsc0OLr9w9Tcl8t3HCErha6pv_oRF4OHi2NiWLtltEkaoIN98QS7ziscroWUUNGJTi6QveAq_CMLiC1CDdllW_mZe0DJciPf4PZxZHog5wvRB8u41CVZKZI5Llm3Nz9A=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/841801112.jpg?k=98e2ae05591e7758b4fa434ce62643ad26dff94314ac781ea7e404f0020ec94a&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/rnAXgXPDRbKS4_HSJgm0qWqFJYuXSMKkTiHGpFDHYepkyFkTto2t58i4am-yak1dzWBU84ZfUwMomrXTek9u45fJnKSATMe1tluqEmGKy1iq75pWaOU1zb36Y6Ej_qprgM3wJSpIt01MuvqBWscy7AMI0vVwFHM=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/841801117.jpg?k=60c543e3e7193711f7de685da2246eb0696fc948cd76060cc123052f1be364b1&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/Y2hdxdnzYibWB4YyQtXHfAC_YkZ-l-9e7sm7SsoY8H_Qgi6yB8TM-iMjm7-K_rNmvIGhr2WRH6xqhD9LJjZK0Ba7fgAIpVj9Vmspd461RjolZbnqgBiaKvxq88S6p8DbFr6sggaxY4aY3moxEXEyIg4g6xU7aw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/787126318.jpg?k=36b6729c7883cc82a16e9d2e8a113903155ab209615856802e7d85acd5cfab3e&o=&a=1538557"
+        }
+      ],
+      "amenities": [
+        "Air conditioning",
+        "Crib",
+        "Elevator",
+        "Fitness center",
+        "Kitchen",
+        "Microwave",
+        "Oven stove",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle",
+        "No Wi-Fi"
+      ],
+      "essential_info": [
+        "Entire house",
+        "Sleeps 3",
+        "2 bedrooms",
+        "1 bathroom",
+        "3 beds"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQuu6Klv2R_tY4Gg0vZy8xMXp4cm02eWtkEAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQuu6Klv2R_tY4Gg0vZy8xMXp4cm02eWtkEAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "EASTBAY SUITES @ East Coast",
+      "link": "https://www.bluepillow.com/search/67a242f1905c444f2d0c50c6?dest=ago&cat=Vacation+rental+%28other%29&lat=1.309&lng=103.91172&language=en",
+      "property_token": "ChkQsr6N4OOJkaETGg0vZy8xMXhmdDZ0N2ptEAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQsr6N4OOJkaETGg0vZy8xMXhmdDZ0N2ptEAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.309000015258789,
+        "longitude": 103.9117202758789
+      },
+      "rate_per_night": {
+        "lowest": "₹5,614",
+        "extracted_lowest": 5614,
+        "before_taxes_fees": "₹5,614",
+        "extracted_before_taxes_fees": 5614
+      },
+      "total_rate": {
+        "lowest": "₹22,455",
+        "extracted_lowest": 22455,
+        "before_taxes_fees": "₹22,455",
+        "extracted_before_taxes_fees": 22455
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹5,614",
+            "extracted_lowest": 5614
+          },
+          "free_cancellation": true,
+          "free_cancellation_until_date": "Jun 15",
+          "free_cancellation_until_time": "8:00 AM"
+        }
+      ],
+      "nearby_places": [
+        {
+          "name": "Caltex Stn",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "1 min"
+            }
+          ]
+        },
+        {
+          "name": "Singapore Changi Airport",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "15 min"
+            },
+            {
+              "type": "Public transport",
+              "duration": "37 min"
+            }
+          ]
+        },
+        {
+          "name": "Comida Mexicana Singapore",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "1 min"
+            }
+          ]
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/9ffqdNfGKX7EUfFyA6tjrZHeICxGzWC2IgtzzwIuQTD7Lb71qdutNKWrvdTtzQYECYfrXTKX-nQbIAJAZmVwnwO4w2D6vnHG07HuImmCTUX6OKZcVe9tHrAGORoxuDmPblDEUJ4aU9CnuHJKH_BR1WM4M6Or5g=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/63869358/0/d6742c618bd888418600b57c596ab787.jpg?ce=0&s=312x"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/Yi-ABeokZKfMtCFnzgEw-a66opQqv_nrx_RBWxgFulF1n1oUUjyRGySpWjRBGvWPjR5lZKx2taU0449fhh4mkEBPap4z63-_lowqIRLShwNUCeE4LzAC_xaaHkXcMs1EMZVYlSv-138XFsc_TFStFjXo5sOydw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/63869358/1006493133/08e5ae5bf57faecfd03c4f7a64c241d3.jpg?ce=0&s=312x"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/A7PP9s7VQKZLqbiH1gmSjSZJUrrIA8T9JjfF2xVlQDtXkr_vdQsf45fa8yUj9mShkhO8oQ2bNeDZVxzhTcBT2wmYH-lA8hdCvL-HWqYbq-NU6C0oQVPIXf1aBRaSSYuhXYfUMG-8h8nuTg_yq219M_Nud_CeoA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/63869358/0/910d5e4bf9ae91264b73e961f7b28c3f.jpg?ce=0&s=312x"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/DVJZlA8VOi6ctizM9p_AqB4xo5jybPqNpEojZpN0zBNKgdRSlHdn-d3pAmIp5mt1hVn9hTWIA-3AaZKu6swJXyiJJHamJ0UhqV2YEq6zxLwUuyvobmg8ZYESSIRBD59Tbh1LRABvd0Z4Ca11mRh64xHyrlaZUYU=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/63869358/0/1902577ddf9d4bfb23d3f81d88436b6c.jpg?ce=0&s=312x"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/1F2goe0XNcTo8l2uj9YQJF-mBZa7NOf_75LaO7g1kBC_7t5w-iSQHlfWvT50Vc3YjyrMgKXVhvpONzK2IkpupRhJENfzaTcrvle5F1dj5DqqFtIqcdinaVK2Iul813zE9DTkqDjaABJHqymj8EGx9FEByxQdNII=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/63869358/0/752b60ef5a54777725babf8681a8654c.jpg?ce=0&s=312x"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/WgOAAS1pj1_mimM6pjH2OylaTShFQGnvOicTrzRMvM9-v7hIJnYz10Rpjap-YJEw1PB9Hnph1P9VSQ95HxmkjhdwNc-wBKqo9HsZycr6daUZrW5E5gfFOxKyenQ1Th3gh_gU7AYdC9YxlmB-wweSx_V3_Eh4Idk=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/63869358/1000872339/f3ac5dfd9f96623fde49ec61ec3c0a58.jpg?ce=0&s=312x"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/jF8B7rNuZMMmyJ3pXK6_9LDhdSfjheAc6WIonwebnqtwEOZSXJsYXn2zYPHjQ8XGnYkO5BWHPpbJVQPcjfC0b0nItLhEYfWi9kqQAfgq4HTC64rpqN2xcFrntkeLpCAEHIwf3bivVpXedmiE6Y3t4EQLeNGOyw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/63869358/0/274f374dd92676a418d306e35d3b11ee.jpg?ce=0&s=312x"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/KvdQzE-aF8Vw-o56nrKRg3GjcXPw1TrEAdX0jXf5Izll9u85qKV3mncSOGflzoPEPBC2a7Bm8DeVHq_AZM2dgpMwrMWpnu-xD-dSE6UK5h2mfOVfZRekPBlfs8nkCkeO6PZvdPV4rCuFFkN87KVB1N22bCxkBQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/63869358/0/a53a6d54d6949c459a7ca052c568f774.jpg?ce=0&s=312x"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/vHOMdsmvgc_IfjReOPl7oW3S_FW_iYWvoQe-7IZPzrsZjfSEdF0aKX5104llDUfXJ2H3chn2N-i9aHKyMFFCO11w6GFaHg_NsOpvvo33VNbHtay_zwW-1LKdS8mXWCb7Po-mWgbiBECr2Wz2TLLbBIjfJdkfKQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://pix8.agoda.net/hotelImages/63869358/0/b170a0ded85192084ee2d7f861a36d44.jpg?ce=0&s=312x"
+        }
+      ],
+      "location_rating": 2.8,
+      "amenities": [
+        "Air conditioning",
+        "Kitchen",
+        "Washer",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle"
+      ],
+      "essential_info": [
+        "Entire house",
+        "Sleeps 15",
+        "10 bedrooms"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQsr6N4OOJkaETGg0vZy8xMXhmdDZ0N2ptEAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQsr6N4OOJkaETGg0vZy8xMXhmdDZ0N2ptEAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "Citadines Science Park Singapore - One-Bedroom Executive Loft",
+      "link": "https://www.bluepillow.com/search/65c9fd89671b07d23c69a618/1100833004?dest=bkng&cat=Apartment&lat=1.29162&lng=103.78751&language=en",
+      "property_token": "ChoQmIPf4NfD1uSvARoNL2cvMTF6eHJtMHJochAC",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChoQmIPf4NfD1uSvARoNL2cvMTF6eHJtMHJochAC&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.2916200160980225,
+        "longitude": 103.78751373291016
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "12:00 PM",
+      "rate_per_night": {
+        "lowest": "₹32,397",
+        "extracted_lowest": 32397,
+        "before_taxes_fees": "₹32,397",
+        "extracted_before_taxes_fees": 32397
+      },
+      "total_rate": {
+        "lowest": "₹129,588",
+        "extracted_lowest": 129588,
+        "before_taxes_fees": "₹129,588",
+        "extracted_before_taxes_fees": 129588
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹32,397",
+            "extracted_lowest": 32397
+          }
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/51gOL0dPk7pkBPrQSTHGN7jZ6hDuflED3O22hfFFrzw8t_ifRg4SsCUSegDWTM-ZR8xdrYkHb4FLaCt50CtSdvFEenu8w9XhKhZC6-59EoEcUWLmJnG-_niEikjBYzKwulrh9tqO0fsKNr1KASt5mzoR4Yt94A=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/520975649.jpg?k=19ff8f1fdddd8a91d27b0c2283e090125b45e0a69d40fec94ead607806d42c67&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/BahAlxJWS1eRJ3wgdIkm7sGfIPabtwyjZnXGE3MYY62EJ_osROAudE5BOOfZu4UitIJcstWMqljyJlusYp14tS4mTFz6mxex6g87w4cv52YP6azJ45RK7kkg9PP6TW88-rmb62wyYG8adEOYgG0vuasZJLRHJGc=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/520975772.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/49kEjOsCImnCPXcDH6foA5DHVYNLRBZIiw889B_9ktWuBG1hUWCOCmfAk5bmDbUHFhJ-rOGcgiwPiOG5dNJrnXoAIaFsXthhYNWWDZ2bc95l6HZd41rvlcvzpLef8hR7T910PpQLYoHREdVGi87q73GW7bwhPjE=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/528622297.jpg?k=9523e915653036d110fca3376e3bf1062fd43ecac2c398623d0d43b6116e47fc&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/od6fmopxHz8j8KmJ8YTnEG2NCGlAo1IT_aUumHo4t6j8XhFlYlq6iZerCWbtlSuT8p42CUXhnoNsrIk2a10LwmdUb9SoydAtXI3roR-1UZ0N7-JTVjkLXLyHq6mdnSIgnIGk50v0j7haPI7MPPX-wRRqVRHFGw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/538664746.jpg"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/oUEZe8cVs4H6vciCEPzGl_j6CV8n3XdMWKkCbIsA3q569XNyTTnQRzSz4q_FkeJCdLixhtoW7OkmrZkMHMP7ffYdz2JgPsC9ngsVpVO7GiHqmhnhHjrPdhHMKOOLU9P2ZVcy8nJPz42_FzKGMzgTPzLZ6u__tA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/520975834.jpg?k=cab1f9252067dda3ed02cdd1e133af650678619878816e1ad97ccf3025b2206b&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/037dGn5HBM3octI11yph7__6YwRu7i1HjxpsbSgS0RaEeTViEVc0AUTWXnIbDVZMfJiwFz3sa512cz05jCI1FhvZ__FPaG7vhHT3G0q-nhzDXj8oUWAtk4rvnzILIzUX2goQ8dwjnyazUwR4Z6zqbhD3Hy3hm2o=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/503250116.jpg"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/wzfDh_1mDzv3-TUgoisvmKZ0tN7jEPB2ckqzgwP6M9PFb4iCs2MyrwztHuEk8mfRwFIiQ8AWqpRFYvz6MCRjM5ySbLgbphqgv-DwqL2sc04sFub9FTHmXu_-FiXCM5ADXi4A3JqUFRep4P0549ps8y4wK83tVmU=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/520976027.jpg?k=76b292b30e9a006d2c9b3f762e0168f5b47e579b450c4dbf5dff69aed4e34094&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/LtUehBR9osl5ZvT_u4yeGv_rxiP1D2bXqjRaRsXpwJznX9_kF09m5D9bIFBVgTgdT-iwiK79KuhphBiLUb62giPF8jZwLkvYqqQkk7Q1TtWzx_WEctdvEopZjb-OJRPGJqt77k8-kkkS_AvE85BqJMxoZbHfUVQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/503250112.jpg"
+        }
+      ],
+      "overall_rating": 5,
+      "reviews": 8,
+      "amenities": [
+        "Air conditioning",
+        "Kid-friendly",
+        "Crib",
+        "Fitness center",
+        "Ironing board",
+        "Kitchen",
+        "Microwave",
+        "Outdoor pool",
+        "Oven stove",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free parking",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle",
+        "No indoor pool"
+      ],
+      "health_and_safety": {
+        "groups": [
+          {
+            "title": "Minimized contact",
+            "list": [
+              {
+                "title": "No-contact check-in and check-out",
+                "available": true
+              }
+            ]
+          }
+        ]
+      },
+      "essential_info": [
+        "Entire apartment",
+        "Sleeps 2",
+        "1 bedroom",
+        "1 bathroom",
+        "1 bed"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChoQmIPf4NfD1uSvARoNL2cvMTF6eHJtMHJochAC",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChoQmIPf4NfD1uSvARoNL2cvMTF6eHJtMHJochAC"
+    },
+    {
+      "type": "vacation rental",
+      "name": "Deluxe Studio Suite by RR - Studio Apartment",
+      "property_token": "ChoQw7ejj9eSjLDnARoNL2cvMTFsMmJfeW4yMBAC",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChoQw7ejj9eSjLDnARoNL2cvMTFsMmJfeW4yMBAC&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.2957299947738647,
+        "longitude": 103.839599609375
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "12:00 PM",
+      "rate_per_night": {
+        "lowest": "₹20,458",
+        "extracted_lowest": 20458,
+        "before_taxes_fees": "₹20,458",
+        "extracted_before_taxes_fees": 20458
+      },
+      "total_rate": {
+        "lowest": "₹81,832",
+        "extracted_lowest": 81832,
+        "before_taxes_fees": "₹81,832",
+        "extracted_before_taxes_fees": 81832
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹20,458",
+            "extracted_lowest": 20458
+          }
+        }
+      ],
+      "nearby_places": [
+        {
+          "name": "Bef Kim Yam Rd",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "1 min"
+            }
+          ]
+        },
+        {
+          "name": "Singapore Changi Airport",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "25 min"
+            },
+            {
+              "type": "Public transport",
+              "duration": "1 hr 3 min"
+            }
+          ]
+        },
+        {
+          "name": "Meta Restaurant",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "5 min"
+            }
+          ]
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/YalEXGzW2CVM1R3cdYKd5l9onrN-sISiXkp8P_BoCx7gI4TOQ-wEwl6wVsNZjNisXP6mKML4YEITNAkUnN2WVq3PmeglTmi8HvXqvNvU5_Uvop8biBAOm4sQawquMFQttnLiHATGpdX-3kQZap3uEzfQPwQZx5k=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/249055689.jpg?k=0929511f386d63a856bef8a3d10f99edf576861331a392c4f9e69cc8fee68e20&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/HPprsypAV4RYg33kSZx6IMBQFbHam2bHVSQ-3v1p90Etu4Y2IYA2sgB6NGE0vLfH69jHpcPcfuYOrD8DTOKC_SsQ6fi1s4INV7nZmP1XkvDH4_PRrcJL4rk0GjPNFy8xiBqigxja1kCS95yRBmufe2WMj4Z5UQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/249055709.jpg?k=246b353afcc0e36ae541b4a0469ea077c4e7ced279d9d6b7bd86dcf6f434fa14&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/8ddQDBgaOP1wZ_qJe3ys0UBip9WBv_YFgYw1iv8c-QRfdLrsOFCAp5gBrbhPCok_SV7D_50lubJK5XQmj0WWbcxRJgFJYsCF2ob3Q7xi1s7BpZwmmXShhXUrXuIBk2w16yzSo2OSYxfFNOH6Au0cHUBTxtT-9Sk=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/249055955.jpg?k=b56d38a23eeaf46e432765696262a219f12c7905636d76593dfd9ae4e8353a01&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/-6dZLBydgvWvcT881OezBPvp5D9cZdsexokSL5KyWeXgYZ9npPrGCoEjdJddrBLtqLTCPyXNon0fLIk8JUcxFnwPeKqnmxZIKVgwcRNMutpcvZ0EHl_Ok_2d6bR15EDCgwwnG4rglUEiTYrr9rkpfQAchGtk8K0=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/221262950.jpg?k=1eb6b04ccad4282a7337712953f9e991f08d6ffedc5751778e0a2e20d886c769&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/zi58p9cFtsIrvQzW5B7U_OxjS4uS4kLuCLKCP0RaMt3oNcZQvocyXGH1kUYwfpT6Z3JoAEMvd4mKDaT51eINOy6c9LYo854UfvBe3Ht6Iz9s7xxatv8M6GTBM1Pr8TMdUHvV0ffd9JXBQXriaxwcahGfNCsxLw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/q-xx.bstatic.com/xdata/images/hotel/max1024x683/221262950.jpg?k=1eb6b04ccad4282a7337712953f9e991f08d6ffedc5751778e0a2e20d886c769&o=&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/hSJzdqhHsNFmmJ1BA913zWaWDPQp5nUs-eZNqmpVc68pz7ukrAAFmFia1LVIlNVobEAd9UYeUQT2sFMILN6lZr8yOnDuSCI-06Ar67qpmV_NRTu2LT_wmv2Oy9lhbhj_sQWhs2diUPKHIoOLWHtEsIgALTo4zQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/q-xx.bstatic.com/xdata/images/hotel/max1024x683/249055798.jpg?k=f76cc3b543fe6f03c023248e3c9faaefa3279538b76df89e77227c3f5a4f0d4c&o=&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/hHZZ-A8wPbUwWwS8L4eG-5pjxVvaRc-L7hibCW0kCRejmQvIn5vJKaaKVrqBqK0cjRcc44AJxHZ2FhxjMR0fQGigzEGNWrjU2saQv3KYJoIPOoyo1hRdP9hAeRBO6jkGngljrQnmUoU5gop1dqIP9NvN6Gt7uA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/q-xx.bstatic.com/xdata/images/hotel/max1024x683/249056372.jpg?k=97adba093e343dcfa4580d439da410eaf7b70e489c23b8897c69540b8dc02917&o=&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/9OBE1i980NpA1OYgvRh1gPCR2LW6Wcu0GAs6EA3aJIP0RXuSVUd2Ke4UvuAMZ1ueFrkdMlNqnNzUBS0fXWYL_5Rieal812vziJMufsbF-7QJfYB3ECo9wkBzViB2OjzpWVE-xfcJKVSxNRbSgTTwAJ1vGP8N0Hc=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/q-xx.bstatic.com/xdata/images/hotel/max1024x683/249056317.jpg?k=3684fb23a9f9dd25cf56ea5c882d39c62d7e2e181aad0487af56ddf7fb482a78&o=&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/PrU7jcys9LueH3GfGwUcBtARKkPJp_0v8U4-RRhDKvUpXg0RHnYc_QbHaf95RMHe46lDgqn3CcQeUqtmBwhsajjWzvlheUhSuSMPnXZ8Rjmohj99r0lBgtITs7nZoc9v2tdShOyTRZzhrdJfNjnczi2pDXkidA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://freecancellationscdn-hsbgcwfragasdpfe.z01.azurefd.net/remote/q-xx.bstatic.com/xdata/images/hotel/max1024x683/249056202.jpg?k=eab6a17d68841cbfcc26f4ad7acd7b692bd1c028338a4f4140e41a455defa49b&o=&w=1024&h=683&mode=crop&scale=both&anchor=middlecenter&quality=80"
+        }
+      ],
+      "overall_rating": 4,
+      "reviews": 16,
+      "location_rating": 4.1,
+      "amenities": [
+        "Air conditioning",
+        "Crib",
+        "Elevator",
+        "Ironing board",
+        "Kitchen",
+        "Microwave",
+        "Oven stove",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle",
+        "No parking"
+      ],
+      "essential_info": [
+        "Entire house",
+        "Sleeps 5",
+        "1 bedroom",
+        "1 bathroom",
+        "2 beds"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChoQw7ejj9eSjLDnARoNL2cvMTFsMmJfeW4yMBAC",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChoQw7ejj9eSjLDnARoNL2cvMTFsMmJfeW4yMBAC"
+    },
+    {
+      "type": "vacation rental",
+      "name": "Owen House by Habyt - Junior Suite",
+      "link": "https://www.bluepillow.com/search/63990197c551970d3c779f0b/935542505?dest=bkng&cat=Apartment&lat=1.31161&lng=103.855&language=en",
+      "property_token": "ChkQvPufuMek2rZLGg0vZy8xMW53NTV6aDN0EAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQvPufuMek2rZLGg0vZy8xMW53NTV6aDN0EAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.3116099834442139,
+        "longitude": 103.8550033569336
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "11:00 AM",
+      "rate_per_night": {
+        "lowest": "₹17,102",
+        "extracted_lowest": 17102,
+        "before_taxes_fees": "₹17,102",
+        "extracted_before_taxes_fees": 17102
+      },
+      "total_rate": {
+        "lowest": "₹68,406",
+        "extracted_lowest": 68406,
+        "before_taxes_fees": "₹68,406",
+        "extracted_before_taxes_fees": 68406
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹17,102",
+            "extracted_lowest": 17102
+          }
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1Ap01fmUZa66vaqEuSWHXt1cr5V8dctA5XHh5wJlZDMQC8sRN5J_n6jaPQw56Mh-9YSiPN4rzGjsp5AS_X-YHzSnCAmcOLiKmgNlkI1jkcU9NEbiOYbmkMLXZy7CBNI2FWp2wHSjkC8Ji6b5VyMzvwVHs1dEDcdW9RUd_XfwODxQqsbr268vaXlA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/427774765.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3757cWYP91qEn3Suizx11p2Cn4iDKUGb5EKShXJ_fxaQmE5yPJXkpQXReTiQ3QszKvW2m8fMKJtklhpvmb0KwDk74uS0UEYCalhjKCAQNecsN_ci2QVQS-VzvixBUIb8PC74oFXkHSa5acK8sZRv_CqDUmxyNte3K11qxLyU748NtqMX2XKCHD=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/427775989.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0Giv3VMT7TrA3PCUV58QK28A2rNwrcuJKh6Fq1mDgOhMjfeu_Vr6r_dynepcDTMdt2mOVrzdoj2uE5eWTLF8VsMz9Ij-Sw8WjgJa7B5_urD0P1BpdZHM1kwPdGpE8x6R9EcCOTqHg5_H8zEcbwPcsewop4YJr9mYgwZAsf0xiFIduoylGRZBo=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/427774561.jpg?k=70a492f306dd020663121e0536045802012f9afef08f2ad808582f3d811dd8f5&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0ND5TDGHgJtmzLjnRwol00DWZ0w0kx8Wkc2rzxomfW_I4UBeHEvFka-xVBxImRDgmlQqWwCGK8UFd82RtGagZHlTH93qTOWApJAI16GNCU8ACColZBFKbOPP4YxPPVFw9-KexZK9hSbxP6wmpmm6bx82ZJuX45ldRltUWYGmZH5pAddiOcsixABw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/427774835.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1wV4WL51DfOENDiw6JiGKZwrAcGlhKdp9ZJUTT1oCbpex13r4C_Lxk00yOZ1Tfmfjj_7QoAxZb-cf6knj8ZrIujVpYjOXT6NL6DQIOY0pSwEKnRCLGYONno3_cL-Me1R0T409a2eKwk5W_qe6lQhjIPrtnyHrsFzTNU2rUC_zH2-K7wH9DlFu-dg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/427776510.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2zsJncLRBcg0zueXqtDyTU-1njD7MCyFPGU4xHARuCq1DewJF03h9wVVGH7uU3Kx9HDSAnWH6dkBcMbD7Cj23kNRYWgHDLEpKu5DWXB9fWITc__Se21pO4gFtE9NJheSzyMzBh0P5LyWLTcJm1_g4nZBWP-D9JdvcQVma2Egj5cNn58fF2X1MgRg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/427774818.jpg?k=7654e153811b65ec7d5ebd17ba86695bb1a693bf89eb776b001c49d6f06cbca2&o=&a=1538557"
+        }
+      ],
+      "overall_rating": 4.9,
+      "reviews": 8,
+      "amenities": [
+        "Air conditioning",
+        "Kid-friendly",
+        "Crib",
+        "Elevator",
+        "Kitchen",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free parking",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle"
+      ],
+      "health_and_safety": {
+        "groups": [
+          {
+            "title": "Minimized contact",
+            "list": [
+              {
+                "title": "No-contact check-in and check-out",
+                "available": true
+              }
+            ]
+          }
+        ]
+      },
+      "essential_info": [
+        "Entire apartment",
+        "Sleeps 2",
+        "1 bedroom",
+        "1 bathroom",
+        "1 bed"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQvPufuMek2rZLGg0vZy8xMW53NTV6aDN0EAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQvPufuMek2rZLGg0vZy8xMW53NTV6aDN0EAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "ISA Hotel Amber Road",
+      "property_token": "ChkQpvCV1q-9z91oGg0vZy8xMXpoNHdoY3E1EAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQpvCV1q-9z91oGg0vZy8xMXpoNHdoY3E1EAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.3007910251617432,
+        "longitude": 103.90111541748047
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "11:00 AM",
+      "rate_per_night": {
+        "lowest": "₹24,637",
+        "extracted_lowest": 24637,
+        "before_taxes_fees": "₹22,603",
+        "extracted_before_taxes_fees": 22603
+      },
+      "total_rate": {
+        "lowest": "₹98,547",
+        "extracted_lowest": 98547,
+        "before_taxes_fees": "₹90,410",
+        "extracted_before_taxes_fees": 90410
+      },
+      "prices": [
+        {
+          "source": "Vrbo.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/icon_1850600648__vrbo.com.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹24,637",
+            "extracted_lowest": 24637,
+            "before_taxes_fees": "₹22,603",
+            "extracted_before_taxes_fees": 22603
+          }
+        }
+      ],
+      "nearby_places": [
+        {
+          "name": "Amber Gdns",
+          "transportations": [
+            {
+              "type": "Walking",
+              "duration": "5 min"
+            }
+          ]
+        },
+        {
+          "name": "Singapore Changi Airport",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "20 min"
+            },
+            {
+              "type": "Public transport",
+              "duration": "45 min"
+            }
+          ]
+        },
+        {
+          "name": "Godmama at Parkway Parade - Modern Peranakan Restaurant Singapore",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "10 min"
+            }
+          ]
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1xW7O_qotMDWKRC5OXdKUuHWjYWnMS3DqEFn4m_zHJsg0skesfQ9puE_K94SE5V2LF6-n-TwxCrhuHGxDiMYmx6IFMk6ylYpgwsdYO24heqTChBvM_OgH3w-z6JBS_tjN2Sl_HRJBBbEDojfc8jQ_mc8hG0YArfeWJJl6LHZSnDsRLE_YO7Kwx=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/96000000/95080000/95075100/95075070/1f2b49cb.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1peplAfpLZtGPnVUOF1RIjxp_0mVz2B-lTbP55Wyemecu8yiuUqn7nnxvvvbpX27yMGWnOPxCj712dUwcrpRUerT3A3V55rT0RcO_PZtkGg6diIldqxEEOdiiEhuQjb2Ah0wxdNGgsRyV_MOebkf_3GiZKMWL8lxtUV9eP_PV9d1wGQOtXcuEI=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://images.trvl-media.com/lodging/96000000/95080000/95075100/95075070/2c568eed_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1z6EvzD6bHar6tCz64tiN2VejAcPH8Fdu7yjcOaQl_bgiZMsbMZJKFSheiPkiRYbYxttK2MdrHWlMEpKSMRpnoxBtGuirjZjCxCzRwtsu_mwFowWj92WgbgSJC9oJ82if77HAYMBM5AWaK82pO_k-WWjeCAxPnyru__1yUxfsxu_Q-9Jsa5_fF=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/96000000/95080000/95075100/95075070/338eb6e1.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2-QX6c_mhbW_dSIfpNCREceQnCREw635795ujElnZIosd9tlCnu1_nQdr1bTL4HxqFygW8w7V3LZs8R9vttw5MJ-WLXI4We_Vbca1YY_HhSmqb3bSsQEBgLIHZ7dND9X_FIWIcUVPYNWKt7-EjB2WeM1S67RTO0HKve9SOS38fmCVH1bs3SW0=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/96000000/95080000/95075100/95075070/b4e1979a.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2iDa5Clc_Vv5d8idTZgaWRTuh_YUBQg-xuFjb97988bmKSli2bU-TLdQxpRGxPLsAifZuRLRIqQoaS7V9hKAS8AgnbZ4FzLhb898sQ8CwBmDI4jOuU2zi8howMqDdDjTFN7ikNxYNg8wEnoYYB6dHChvZlumn2BDNCIHBtc_FKq8HgH3BIjGa6Cg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://images.trvl-media.com/lodging/96000000/95080000/95075100/95075070/4b7f3ce6_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW363idNKbg67NuS1jF40G4mHIOXW00eMNK15-GRjlsKbdBavGXuuCtQ6x2V22ocysVwGDjRjbT4QAswFafNwWqFHdH_TeFaW1ZtsbgE7twk2AI9FmEn4bh-mp0DfOk5p3jwmvggy9-9hj6fvvWmhfP2i0Cb5g4vvVMideNWxxPOMyIQLYKytJYN=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/96000000/95080000/95075100/95075070/e6f6fd82.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW04yPx43MybuajmvLVvGXBwcibdH0SkmgfYWFqUvxyDZoy6zhXvGYjgj5zVE5iiQ04t25lJbEG-gL9pJIo2d1mxOpPz8vqu9oELVeJC9ZPM-TBx9yHOeGcUtNOFE4LOVVBgPiQax2v7LRwiuqc_15eNPr2lwZE8y4bYTyFWVVU6yXHkr0nI0-_R=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/96000000/95080000/95075100/95075070/0ca1fe2d.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW24TMFi8WqTm81Li3tnfPYreXtVSfMxKEKfGHXLsi5RvYNPIjEa6UX7bdvHohwtzOVGOgX7WYuOuPko8jD438blBhoNxFyMg2EQfS9rFWiW9I2rpo9zs3hyMxjz8CRL9-oTetR0wA3_U2WtRYK5NDcdYqiTf7pbpgxj0Saw_axUOurjkwuYo5UHwA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://images.trvl-media.com/lodging/96000000/95080000/95075100/95075070/c1c3bddb_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0S-ryURDYTVoQ4wD0W2lJa6R3A6etintLlKg20XCM7Cafdd4pHRbhAqgrYB1Tcl58PdLn3rZGLEMq07AI1P6zb6sC7WYdXaxXuLN3mLEr9pETHnCquEU-7KH9cOkHqzxZsvy7WRVOthgW80g8PrF8aKufkkW9ECAjdJiJfmmpdkNMapNDH3_9Ang=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://media.vrbo.com/lodging/96000000/95080000/95075100/95075070/ac31b21e.jpg"
+        }
+      ],
+      "overall_rating": 3.2999997,
+      "reviews": 20,
+      "location_rating": 3.3,
+      "amenities": [
+        "Air conditioning",
+        "Pet-friendly",
+        "Cable TV",
+        "Washer",
+        "Free parking",
+        "Free Wi-Fi"
+      ],
+      "essential_info": [
+        "Sleeps 2",
+        "1 bedroom",
+        "2 bathrooms",
+        "1 bed"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQpvCV1q-9z91oGg0vZy8xMXpoNHdoY3E1EAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQpvCV1q-9z91oGg0vZy8xMXpoNHdoY3E1EAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "ISA Hotel Amber Road - Deluxe Queen Room",
+      "link": "https://www.bluepillow.com/search/64c8cc4ba1247fa35c628e81/1002560702?dest=bkng&cat=Apartment&lat=1.30075&lng=103.90113&language=en",
+      "property_token": "ChkQ17bbvMD_s6dNGg0vZy8xMW53NTR5N19jEAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQ17bbvMD_s6dNGg0vZy8xMW53NTR5N19jEAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.3007500171661377,
+        "longitude": 103.90113067626953
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "11:00 AM",
+      "rate_per_night": {
+        "lowest": "₹31,392",
+        "extracted_lowest": 31392,
+        "before_taxes_fees": "₹31,392",
+        "extracted_before_taxes_fees": 31392
+      },
+      "total_rate": {
+        "lowest": "₹125,566",
+        "extracted_lowest": 125566,
+        "before_taxes_fees": "₹125,566",
+        "extracted_before_taxes_fees": 125566
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹31,392",
+            "extracted_lowest": 31392
+          }
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1s_Qo-VrT0Gig_Z47hpgMQepxMlkx_uxrEbepqf4idXPnV9SgC-KkhGYrnCWUM4NJJiIIV4rs8GE8ag7ypKkYeYKNy6q69bs08M0K-CgjEAN5mkKp2i3LEeFlC5AJLiwHP3HlmSJcfNYpaoOXLhTeH4j3RbXmb2Q4EmaupISKBZFwmsgIT_yer=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_6a4e4f8a_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3MGd3U716LWRJluaDmlivvaCfVZBdAUx0YEhGsazONFVOAJOR64noEu5AOFCVFp7GWu9kpjSXU7UwSj68A6uz3y6CjdV4O81SYCi1-Tq0BRfMccfHdFOTe5WlcSP0zCzV91-N76dNN6zL5nRa_94OoeOyawQxbBccoc-RN-YISP1ThrwrTSzCBPw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_e6f6fd82_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1HIqI5gCV9i_UEETdJNwDbG5RyThA3aB2ur8we-wNOjfJQJlhNHAOWEvI9HVTAoqXxBbFmcbCvCfm1vAP-hls3xm10SNHaI_t-BtmVLos_YN9iqPyKLj7TEcF4bUwjl8eePJ8HJs3gaQ3nsQZCncwJQYBSVky7HgXeoeRX9kLoqZVTgrq_Onp9zQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_24545bd6_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3cWEMDXeHgVeckeCnww6Zv_Nmulep77n6fDplGvvSoewMu092T6JqVwrfENfq5W3HWpzyrwRvllAXCBjrSrSjKpO2c3hOz-XHmX6Y9B5ZbeFSfdP-gsKlv7sB1TvIFpbXKwITFD6lfx-EESmP7puGmovMMLESs1edIPKFHZwAlyLJnTUVxJ9oegQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_f80f3a35_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2wMJNz3PKk2MVdNxtOHPd7q6ARtA2GTIpU5AyipUqGBbSZWxk1IjEvL-xIVGemG1uMMvTRC-TNtvw_GY5HRM0wgNEqrkOaoR8qlULqLC8WpTlDw-hf6xfP1H-YEqsHgtw_r7MC3CXH3f6QOobZF209QjWciF-ex46Qe6mSLk7PryZV4-H2ZyP5=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_4cc81f29_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0KrXq_0PIlVsyJU8-ZjodVpa5GH_AXNo3NBPF6_OCitc8kgI67uopRmTp5CvyXVue5ocd5rljivl4VRW0CTgYOaS9veG1S2RvWjT4pEbbZrX71rAaJVCLRTT_KVlW4Z6xMECNjJ92fNqNhDtuo69QICoGg4Qr3GqbXhUqOqh_ob7Fi8s_rswBS=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_40b0bde6_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0M27bjqfTvhyz6Ce88Xls-nAQVcBhJFtU3tbTr8mGl_VGY0kczU51GN8f40oqpPWRIAeePnmmar7630E4QjZh4GxalerI0X0kwnfD3TzFx6wzNrLF0GUBEHvjyJimQLQqJa8hTDAckIV--jkPFzU2URH3hB4Zfd0IlCrSWEIzgqI6YEzB9VCw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_e067f074_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1hTYmkIhrRxa2DrDL2D_MdWWfeQ_ibkEwFmV60lp1E_A8b4h04AIk6jOYGHbpU9ReQOXR6bKVvED4pCw2g0XG-qRq1i8hW9mghzIIla87oyK74wkMihgv1j7LXzlpX4qUQ1XHTezCkW2yz6scPxJKBr4R4zU_Ff8KlNwvrVTCBsJ_uZn-9ePDM=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_c4d8e41c_z.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3oSJuheyb3Q5ETlPapipXGzRLo737LCToVGedz6_ApgcuHQYPJELFoIEdxzsofgKB1_iMT9vAfFsmCEJKCoYO7nfgDTAwPQQ-e1p4TgFlYb2EF4ewqmpvoPiDgTOyXFJXbTd4ZcNfkl5uBk-M4tL1ECH8BTQdJFSP6TXBQb0FOb9dgjbIPPGSq2g=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/ex_70092d16_z.jpg"
+        }
+      ],
+      "overall_rating": 4.55,
+      "reviews": 8,
+      "amenities": [
+        "Air conditioning",
+        "Kid-friendly",
+        "Crib",
+        "Kitchen",
+        "Microwave",
+        "Pet-friendly",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free parking",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle"
+      ],
+      "health_and_safety": {
+        "groups": [
+          {
+            "title": "Minimized contact",
+            "list": [
+              {
+                "title": "No-contact check-in and check-out",
+                "available": true
+              }
+            ]
+          }
+        ]
+      },
+      "essential_info": [
+        "Entire apartment",
+        "Sleeps 2",
+        "1 bedroom",
+        "1 bathroom",
+        "1 bed"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQ17bbvMD_s6dNGg0vZy8xMW53NTR5N19jEAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQ17bbvMD_s6dNGg0vZy8xMW53NTR5N19jEAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "Tiny Away Escape at Lazarus - 1980",
+      "link": "https://www.booking.com/hotel/sg/tiny-away-escape-at-lazarus-1980.en-gb.html?aid=2068758&utm_source=seogooglelocal&utm_medium=description&utm_term=hotel-14598390&utm_campaign=en-gb&label=seogooglelocal-link-imagesaow-hotel-14598390_grp-2_gendate-20260930",
+      "property_token": "ChkQ1JXYpKWtp6N9Gg0vZy8xMW5obGhzMmw2EAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQ1JXYpKWtp6N9Gg0vZy8xMW5obGhzMmw2EAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.2227245569229126,
+        "longitude": 103.85453796386719
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "11:30 AM",
+      "rate_per_night": {
+        "lowest": "₹25,791",
+        "extracted_lowest": 25791,
+        "before_taxes_fees": "₹24,849",
+        "extracted_before_taxes_fees": 24849
+      },
+      "total_rate": {
+        "lowest": "₹103,164",
+        "extracted_lowest": 103164,
+        "before_taxes_fees": "₹99,397",
+        "extracted_before_taxes_fees": 99397
+      },
+      "prices": [
+        {
+          "source": "Booking.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/61aadbe1-e141-4d2e-a831-b6a18727e130.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹25,791",
+            "extracted_lowest": 25791,
+            "before_taxes_fees": "₹24,849",
+            "extracted_before_taxes_fees": 24849
+          },
+          "free_cancellation": true,
+          "free_cancellation_until_date": "Jun 15",
+          "free_cancellation_until_time": "8:00 AM"
+        }
+      ],
+      "nearby_places": [
+        {
+          "name": "Singapore Changi Airport",
+          "transportations": [
+            {
+              "type": "Taxi",
+              "duration": "50 min"
+            }
+          ]
+        },
+        {
+          "name": "Moutarde"
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2-5S3AECU5B71VrVaeXvvYXL4LS_2PBZwN02saMAY7ou_N-FA76ulsv7HwOeFA9t12NpfIexHZN5vyMNo3-XbZKnuKl6R8Q6NrghgU9yh19beEFNKGij5SnzoF8Xf0I_bqgZzFpssyZ6X_rsKvqqRWxfdiCYDnLg-6fms8xLP2I4pNzqdtzSx05w=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://xx.bstatic.com/xdata/w/hotel/840x460_watermarked_standard/UlYQ71XUYidBU98C57k0u8wqgdnF1p32gnd12X6bXwLuJt730HABWvdKiAPplzaXBnv-a6IJrX4Id2Uhctj0Zmdf8IU_iyKHT0DDq-eYvWDdmkOubnSwZA==.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1ExGQJUEF4DacFNRtFUZJWqOj9XjA_3YxIv6yNeSxSF_-b3q1GJeaqnOlI-oCoj0eOYe_Ev6cg8XEopce8p1T2OH4FoKAkh9OqldPjg571toXCywW2jFA7oyXIrXBHlzAnLCjEctAC9NB1zRZCDXXkONNlgTCzt6R4vB1n5SBWMhwSfEIrHjUTlQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://xx.bstatic.com/xdata/w/hotel/840x460_watermarked_standard/UlYG65CxyC0DxSPBu1o0Xqtn9HbIN12e6DcfKZgNq4JOZQkdbZ9PhUpYrZCevQ_R8da8UFr46Q2vz1joeshTC9QURPamNukwsqktsVTaUAR52_mfR_Ii-Q==.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW32qUD6y4ApKVfZ76-ImQpzUZ-Hdui2Iz3ZDAfR9aocI8u0uY5epXaI6id2M1nly1bLL8IrDbe637uN4-NcVkmjUyw6QTBBTn74eAenlzScV5KRRXe4FnfRKYI-VoeR0OYEc4jpumvjkWyMZrEJp5KbZ5n4wzTtBj1GNXPTuSmWqeU49_ODxG5fSw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://xx.bstatic.com/xdata/w/hotel/840x460_watermarked_standard/UlYQ71XUYidBUw3VMG2tDRPJ1pz_2nIfAN8aHoQpYYWTpfVXR5hxdcC-5G5TEOGR6Mt-Z6gd88AvsGyEjCipEepGe5yBjfhm9_kxXCDn4u89hlwFRrJFrw==.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2Be4FjnOpzsCCUjT2BrQH-qxx8jpoYEZEFyI4dmSnWl25pOo-huW_vR-qPg683ReAi9Y89U6bZhIIh2FJCyywNOSdOlagLLkpzu0vBS4VcsJcZPvm4YZy5NcuIuIxF3-204K0f0e3v7X5gmW-RXMOlfnc9XgpbiGWqPM-DnWWqPCNfSZN0YiJvoQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://xx.bstatic.com/xdata/w/hotel/840x460_watermarked_standard/UlYQ71XUYidBU3RMwRsHKCqCosoQVWk7PPvb2Qf06Wxhc1BRiXJvQbBoyJsQaehXDraZllttfh3Qb7ErbWW6iyMqI7qlFP5eYunOBXa3V4mdQwWr16ebrw==.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW11NA_aOvgNUp6pc5wwkp_gwU44jUXevFXFOwxb7wCK0JNcOi8aYV8qkp7o8xtzQApdr8N6D1_1O_atnvkqoiN07UzJ8T47QkTeRyMzwug5jgczg-ZwxLNZuVNBsi1kn_hWBz5uqjab8hrNgZUSkcjH7XcFqfW7P_7dOWwALy-b5xbYvylLbgsJ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://xx.bstatic.com/xdata/w/hotel/840x460_watermarked_standard/UlYG65CxyC0Dxa-UehNk6SyP0abmqc49IRoSo0ljBZG7sj_f8Afg4Qw_JNwjf2_bTtSa5HdqdDTKxozZ24IhY6u97yLNdCIGKig3R2hR51Zd_VnJy8gDnQ==.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0BdY-mst3Uo5MwmTf8g-y-M-LdQyd3JxSF_MYEYOotXErFBi4in_wYeoDzcpiNkXthbDqfbrnCOmpTA4qXRZ54pDhL4UMQaU1nv-zJVkg27_6hyih01XjJv0iDcSOeP4HOhWIBhrMylxRdWZAZYSH063A1rMW9l5KXxf7NG4UVhxbSdjNRtm6YUQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://xx.bstatic.com/xdata/w/hotel/840x460_watermarked_standard/UlYQ71XUYidBU02Lskey0LpUbm5FZ-rWfuoTBk1CPmuPON_vTd5KhAJVSJAaPTnW74ZNaNhk50GKv9-pO6HsqkkoDq5B168nc0Hd5VM0wh6iUgPp3OSLDg==.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW0_mN6VxtdqmCqCf0QYtDYPrvjh3MhWwmkZ_9pr4iH1tZqg7lS3VuPsmmDC_wAcjZQNphvnDiffZg74iXVfhaZo9ceKoKlNiKwyfp6Vo4YNCC_HNWO7Zl2KvYsNUXJxquvkzAxhkw9k-Eq9Kghi5k1LhJFPX27cQ5ZO1cppzoMwon2WhXMl7qjg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://xx.bstatic.com/xdata/w/hotel/840x460_watermarked_standard/UlYQ71XUYidBUy8h8MSkZaOixUvWMvmXVlG7PvooRYl0oMTn0Pz_1jD_IL7Sf51LaQhHdMyCgxYWR0proF7J50hrRB2VIQLcejk_9OhPgoh1ePZs2E3uSQ==.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3XWRzWVJwso6tVdx_RWfFRFfqpaXEsB5dIVNW3qwvL3Y4Gk5ZRuFn9YBWffI5dh07yh6NVi4zJjF9HizgycWPIPPbI_Wp2UNjGFHA-GGEtf6HCdRi_1O3ewPnjtW6iil3vRisqSgnQh_GRcnk_Sr2F0x60EOQc9CWU-UT6yERVVZeESTh-0j_l=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://xx.bstatic.com/xdata/w/hotel/840x460_watermarked_standard/UlYQ71XUYidBU0DdyNuwpRjd24Y9JrOeubGbi2KhfqBMd0xT2fxBzJpk9RPXOHaeyYXARpNeJiWYHBFJt4AomEQ3pKX4RimBLgyuXU1qYtOx0SizMxVasQ==.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW318o6EuDkqtETdYqMk74bmMzb1g2IqJp9PsNP-BRMtE73urLsgTjp4nx9vLg7L7xIAH7n8Id0LJ9bYdnQ7_r3sXGVV0BmKswGSq4wRrddHcdXwyuGRlUWzXhlDLNx4DHSS4e90CVvqGmglrEP1F_1Ym2G7754AVH2854yiYUzAwJjTUVJsCOlH=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://xx.bstatic.com/xdata/w/hotel/840x460_watermarked_standard/UlYQ71XUYidBUwxujtkwQIr9wdpkxQdp6zAne1SIdaP6ICHhQjwrqgZ1jiDlpZOpC_9cG6HSBJrKtgneB5pdy2WeRHQAmcBbnyTHVbGRHZsE-xbixaqD0A==.jpg"
+        }
+      ],
+      "location_rating": 2.4,
+      "amenities": [
+        "Air conditioning",
+        "Kitchen",
+        "Microwave",
+        "Outdoor grill",
+        "Patio",
+        "Cable TV"
+      ],
+      "excluded_amenities": [
+        "No crib",
+        "No elevator",
+        "No fitness center",
+        "No heating",
+        "No ironing board",
+        "No oven stove",
+        "Not pet-friendly",
+        "Not smoke-free",
+        "No washer",
+        "Not wheelchair accessible"
+      ],
+      "essential_info": [
+        "Entire cottage",
+        "Sleeps 4",
+        "1 bedroom",
+        "1 bathroom",
+        "2 beds",
+        "161 sq ft"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQ1JXYpKWtp6N9Gg0vZy8xMW5obGhzMmw2EAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQ1JXYpKWtp6N9Gg0vZy8xMW5obGhzMmw2EAI"
+    },
+    {
+      "type": "vacation rental",
+      "name": "lyf Farrer Park Singapore - Two of a Kind (2 Bedroom Family Room)",
+      "link": "https://www.bluepillow.com/search/627d21d9df4f49af9b3396fe/799277803?dest=bkng&cat=Apartment&lat=1.31274&lng=103.8556&language=en",
+      "property_token": "ChoQr4eH_eXLg5ucARoNL2cvMTF6eXdfdzd5NhAC",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChoQr4eH_eXLg5ucARoNL2cvMTF6eXdfdzd5NhAC&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.3127399682998657,
+        "longitude": 103.85559844970703
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "12:00 PM",
+      "rate_per_night": {
+        "lowest": "₹31,146",
+        "extracted_lowest": 31146,
+        "before_taxes_fees": "₹31,146",
+        "extracted_before_taxes_fees": 31146
+      },
+      "total_rate": {
+        "lowest": "₹124,585",
+        "extracted_lowest": 124585,
+        "before_taxes_fees": "₹124,585",
+        "extracted_before_taxes_fees": 124585
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹31,146",
+            "extracted_lowest": 31146
+          }
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/MUVKPYOZaz2m9UuFQUgU6y4qYVKEwzQ_BmRRKzdb0lDG5k7OH4JUEvfPk2DmvtppBrfPzquq98LPlvFkJp9H0VwH5lZDmvzGQxSyUdX0cr38DgZiw8UXkT9sBrE_Gw2bNe5iYnu5epDSg9cVNh7mvPN-bQf-ZaM=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/333265737.jpg"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/FcnMi1rvcB5Wvp4-ZDmLWx3KQoO0S4dIaYBK_SXWe_x0cUYoPe160CUvXO3QVv7qIFNpbgkRBbqxeiZNhftCeE9M35OUjbo_k-_ckvKlIrxlOgJK-Ezr3iSSbrFZeIICeo6eoaBC6AuQ0T5EFCHyQcPC39L3mWg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/345724651.jpg"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/ZZCO8u_WEivDUL7izSD-UJJ73qTz70zHM3LH0ilkZOm5dqk-5DhY6rrqZRMLSPSmjSGSv2x-TYZB-vFMb3fRZoF_Yhoo8xqpGkUK_RyLs-DdREeITgj6cSRp8VCu0aLeWgifXqXUwO5sIwfq8lEnUQzd8-XuJq8=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/329978508.jpg"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/X1T8WCS3KX4ruJd5ipRrQTq-_r96Fa8i0lyogg0mOWdasQ_zz2wjzHRJyxU77cRHLCNocIqbrX_sT2Uf9JGkIpbi26Xa7FbraDQ0qlf-yBtq2ZYr8LWc1vQNIynvyN9RPWJrHmkE-UumhO1ND-7kiiUKKWt5I7o=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/345724640.jpg"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/yMFXY6aqZawEUpmUXaOr_03h4DSpWod_lsUk-crCrfZwiN3ru4MjjQxrjFiml2t-gz1mBHkcNDbT_Ddmysi_bHuG8jE6wc5ycunjYSz338kBBE10d3esGTzx0khN69UjoUpIyFOg_l1Bs1T-kJCDqgIjEYDqt5M=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/345724749.jpg"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/i-cjmt84L3Qrz8ImQ5fwgEUkWI-J4HdC4OVp9RHSBqM6TBrewFodkJJCbCn5QPE1hvjB45CYBAHojOr4oeDSNu1LyA-y_JhM_uDNbiagz_vst-eTlVvrGToG-nkTZwISKPyDGO5JwD8Z38hPn8A1QiNQl_xpd1s=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/333263937.jpg"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/9MCDMGUtctbbw4aI9plviJBfsuCoXPq-V2frwCcxzt8V_9sTI3r0hepGeA83a_kU6QxL17b0hYZEcxpU_MYWIA9eUUvYGSw7DzV2-lvPZcvlNacUc6scJFBPhPa8Qr3C_UQ-uBR_EiVv723QwwUNv57T_W78hA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/345724629.jpg"
+        },
+        {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/p4iLRSOF6TC0BjjAj_Gj9UJtSX-yfKP6dtiET3ivoP4jBfQ_aUkZY6XQJZacN-8_3FHD6qgHh_vQheBfeMg3T4L6dVIYdRTjbiyEm7wAzo1MVkVnBgiINimN2tXVrT2DgGtHV1PI3EzbYUWPLFhQazDfy4co3b0=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/345731329.jpg"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/36nV4zArh6E_JPcD7WVJ1WE4p_8Yf9Dqx6B6aK0wS7P26Sumuy77m2dKK4zF5Ti5dl-x9zjxpXmedZ7Aa2giDewpYI2RhMZDRCsIRBtKMlXxiafVYb3iKieSAFJodQlO6ryWh1eH08TJU78Nex1MnPZm5DxqdA=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://static.cupid.travel/hotels/333257242.jpg"
+        }
+      ],
+      "overall_rating": 5,
+      "reviews": 8,
+      "amenities": [
+        "Air conditioning",
+        "Kid-friendly",
+        "Crib",
+        "Elevator",
+        "Kitchen",
+        "Microwave",
+        "Oven stove",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free parking",
+        "Free Wi-Fi"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle"
+      ],
+      "essential_info": [
+        "Entire apartment",
+        "Sleeps 4",
+        "2 bedrooms",
+        "2 bathrooms",
+        "2 beds"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChoQr4eH_eXLg5ucARoNL2cvMTF6eXdfdzd5NhAC",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChoQr4eH_eXLg5ucARoNL2cvMTF6eXdfdzd5NhAC"
+    },
+    {
+      "type": "vacation rental",
+      "name": "Aura Hotel Purvis - Standard Queen Room",
+      "link": "https://www.bluepillow.com/search/69f9740aa8387c9ba63ad74d/1533780107?dest=bkng&cat=Apartment&lat=1.35208&lng=103.81984&language=en",
+      "property_token": "ChkQoYXSvrm-8sFhGg0vZy8xMXp4cm10YzVjEAI",
+      "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&property_token=ChkQoYXSvrm-8sFhGg0vZy8xMXp4cm10YzVjEAI&q=singapore",
+      "gps_coordinates": {
+        "latitude": 1.35207998752594,
+        "longitude": 103.81983947753906
+      },
+      "check_in_time": "3:00 PM",
+      "check_out_time": "11:00 AM",
+      "rate_per_night": {
+        "lowest": "₹10,058",
+        "extracted_lowest": 10058,
+        "before_taxes_fees": "₹10,058",
+        "extracted_before_taxes_fees": 10058
+      },
+      "total_rate": {
+        "lowest": "₹40,234",
+        "extracted_lowest": 40234,
+        "before_taxes_fees": "₹40,234",
+        "extracted_before_taxes_fees": 40234
+      },
+      "prices": [
+        {
+          "source": "Bluepillow.com",
+          "logo": "https://www.gstatic.com/travel-hotels/branding/190ff319-d0fd-4c45-bfc8-bad6f5f395f2.png",
+          "num_guests": 2,
+          "rate_per_night": {
+            "lowest": "₹10,058",
+            "extracted_lowest": 10058
+          }
+        }
+      ],
+      "images": [
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/zxerUTFuRAuPON9RksuOTPsl-MeE9Rascit_tVK3Pvzs60u8bKkS61lsyjqEHXmNKNzbK-CTtgI3w-dstsEg00XiXzRM0-7UbHvdJ63vLwUG2DxcdhDHsQO9GtEPhhin2S9hNtypOTa7njW-VhJ9NM6BgwDz6QI=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/874929818.jpg?k=36a82303d218d715a2d3102f290b22c64217aa9ee6e9404ac17294c965899c82&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/zeyMWgUNAZNkxZQed4NPajOdM8AkPn0c2GgQbkYcalgvLXZgAtkDBbr_CD_dAth9jOP7NIFvnSNNuz_ZQUBjshFJq8RxVylqdoKxJI9FFjYAwCoDD_ZRYTL95lvSimIkS_MQHiPr8xA7zHGxnW_pfFnwEB_JIw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/813404664.jpg?k=567515e15c1b4c78c5d7dd5d3f27fb3b7cee61d457081d04d1352cab278cc5c4&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/rucn7V_v9yeGvUXHixnqguKMBCVHf0yctGs7SPuylyVKJ00iu6LPbuvvZg7qmvcTh__8Yx4j0MVgoXsA2roLeJ-Y67iMOC5PRYd4KbIsj1jb2WiK1iVAjGiLdVr3jiynJoINa_-9689hSdS70lHMggg2cbZKIV0=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/813404635.jpg?k=fe9348229620dda81a3da438a49d23e442026b9173cfaa3f09a698fab5082f8b&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/proxy/tocwgmc4BMlcDHsY4OnbKKQmwgDHJw9IMkKLMFazBQ13h4pRWyFq3S3mJQtIGOe1hmnTHJc61ajEmsVt8ery5eqQxtLOT-Vm7PNOOo_LuaaZUdEeqkaqmCnM-IfDKyZRs13FXp7LQaPulwT2xQAJuAsS7elFvw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/813404659.jpg?k=1fd0d41c55b4a0e8482764f83f773744a80cdb26f2025a737c0f58cbf5f17009&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/czNj4BKNZ3y-kRXfTosrXzbpU75XNiwWcK_lwoCOOmxDeO_eujWU-91ujJseDhx1X-kXeTMbc3jWPh29OH1eK1tEt6BEeWcCUEqWDRV1yhk2UmQVxKHsGMsJDyLQ1bb4kj7IxxpBsO34hY4aeE-ztJYLl6vTgw=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/874929822.jpg?k=6821512afb37808bfaa331336be209412f7ec1b627c787f89f940f19806bc26a&o=&a=1538557"
+        },
+        {
+          "thumbnail": "https://lh5.googleusercontent.com/proxy/NF05nzTQ92a-VYEjfYTI6iPGjT4D0x5iTQ9Lnb3ULGV9AB7e7RjOvjDhve6vxjjmYbw5Rt3f5AbWp8clAGz93amqrVlJWkRBA23503x6yYPRb0yKiHxORhMxd4WAG3WLZuoISAmhxaCDylpuR-WKvcWTXXVzew=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/813404648.jpg?k=ad25dddf3b585c9b19662aba5cbf904c4a4b8d97f7dddedfd87d6e344c3ece93&o=&a=1538557"
+        }
+      ],
+      "amenities": [
+        "Air conditioning",
+        "Kid-friendly",
+        "Crib",
+        "Elevator",
+        "Fitness center",
+        "Ironing board",
+        "Kitchen",
+        "Smoke-free",
+        "Cable TV",
+        "Washer",
+        "Wheelchair accessible",
+        "Free parking"
+      ],
+      "excluded_amenities": [
+        "No airport shuttle",
+        "No Wi-Fi"
+      ],
+      "essential_info": [
+        "Entire apartment",
+        "Sleeps 2",
+        "1 bedroom",
+        "1 bathroom",
+        "1 bed"
+      ],
+      "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChkQoYXSvrm-8sFhGg0vZy8xMXp4cm10YzVjEAI",
+      "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChkQoYXSvrm-8sFhGg0vZy8xMXp4cm10YzVjEAI"
+    }
+  ],
+  "serpapi_pagination": {
+    "current_from": 1,
+    "current_to": 18,
+    "next_page_token": "CBI=",
+    "next": "https://serpapi.com/search.json?adults=2&check_in_date=2026-11-15&check_out_date=2026-11-19&children=0&currency=INR&engine=google_hotels&gl=us&hl=en&next_page_token=CBI%3D&q=singapore"
+  }
+}

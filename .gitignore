@@ -10,3 +10,5 @@ logs/
 .env.*
 !.env.example
 cache/
+
+model-bridge/node_modules/

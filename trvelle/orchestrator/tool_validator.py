@@ -25,6 +25,8 @@ TOOL_SCHEMAS = {
     "trip_segment": TripSegmentInput,
     # External tools that don't need validation
     "tavily_search": None,
+    "web_search": None,
+    "brave_place_search": None,
 }
 
 class ToolValidationError(Exception):
@@ -65,33 +67,33 @@ class ToolValidator:
                 # FlightSearchInput expects search_params key
                 if "search_params" in tool_args:
                     validated = schema.model_validate(tool_args["search_params"])
-                    return True, None, {"search_params": validated.model_dump()}
+                    return True, None, {"search_params": validated.model_dump(mode="json")}
                 else:
                     validated = schema.model_validate(tool_args)
-                    return True, None, {"search_params": validated.model_dump()}
+                    return True, None, {"search_params": validated.model_dump(mode="json")}
             
             elif tool_name == "hotel_search":
                 # HotelSearchInput expects search_params key
                 if "search_params" in tool_args:
                     validated = schema.model_validate(tool_args["search_params"])
-                    return True, None, {"search_params": validated.model_dump()}
+                    return True, None, {"search_params": validated.model_dump(mode="json")}
                 else:
                     validated = schema.model_validate(tool_args)
-                    return True, None, {"search_params": validated.model_dump()}
+                    return True, None, {"search_params": validated.model_dump(mode="json")}
             
             elif tool_name == "itinerary_tool":
                 # Itinerary tool expects itinerary key
                 if "itinerary" in tool_args:
                     validated = schema.model_validate(tool_args["itinerary"])
-                    return True, None, {"itinerary": validated.model_dump()}
+                    return True, None, {"itinerary": validated.model_dump(mode="json")}
                 else:
                     validated = schema.model_validate(tool_args)
-                    return True, None, {"itinerary": validated.model_dump()}
+                    return True, None, {"itinerary": validated.model_dump(mode="json")}
             
             else:
                 # For researcher_agent and trip_segment, validate directly
                 validated = schema.model_validate(tool_args)
-                return True, None, validated.model_dump()
+                return True, None, validated.model_dump(mode="json")
                 
         except ValidationError as e:
             error_msg = self._format_validation_error(e)

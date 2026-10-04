@@ -26,7 +26,6 @@ def load_environment(env_file: Optional[Path] = env_file_path) -> Dict[str, str]
         ValueError: If required environment variables are missing.
     """
     env_vars = {}
-    print(f"Loading environment variables from {env_file}")
     if env_file and env_file.exists():
         logger.info(f"Loading environment variables from {env_file}")
         with open(env_file) as f:
@@ -35,10 +34,10 @@ def load_environment(env_file: Optional[Path] = env_file_path) -> Dict[str, str]
                 if line and not line.startswith("#"):
                     try:
                         key, value = line.split("=", 1)
-                        os.environ[key.strip()] = value.strip()
+                        os.environ.setdefault(key.strip(), value.strip())
                         env_vars[key.strip()] = value.strip()
                     except ValueError:
-                        logger.warning(f"Skipping invalid line in env file: {line}")
+                        logger.warning('Skipping an invalid environment entry')
 
     for var in REQUIRED_ENV_VARS:
         value = os.getenv(var)

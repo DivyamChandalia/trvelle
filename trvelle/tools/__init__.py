@@ -1,3 +1,6 @@
+from trvelle.utils import load_environment
+load_environment()
+
 from .flight_search import mcp as flight_search_mcp
 from .itinerary_tool import mcp as itinerary_tool_mcp
 from .researcher_agent_tool import mcp as researcher_agent_tool_mcp

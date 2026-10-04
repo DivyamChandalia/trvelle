@@ -1,0 +1,707 @@
+{
+  "search_metadata": {
+    "id": "6ac172959ae4916a2949df31",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/g2IAgjQsDoHHZB8wR6st0AZ9Kc5SPrV8Zhm_-I-rBGg/6ac172959ae4916a2949df31.json",
+    "markdown_endpoint": "https://serpapi.com/searches/g2IAgjQsDoHHZB8wR6st0AZ9Kc5SPrV8Zhm_-I-rBGg/6ac172959ae4916a2949df31.md",
+    "created_at": "2026-10-03 21:24:37 UTC",
+    "processed_at": "2026-10-03 21:24:37 UTC",
+    "google_flights_url": "https://www.google.com/travel/flights?hl=en&gl=us&curr=INR&tfs=CBwQAhoeEgoyMDI2LTExLTE1agcIARIDQkxScgcIARIDU0lOGh4SCjIwMjYtMTEtMTlqBwgBEgNTSU5yBwgBEgNCTFJAAUABSAFwAZgBAQ&tfu=EgIIAg",
+    "raw_html_file": "https://serpapi.com/searches/g2IAgjQsDoHHZB8wR6st0AZ9Kc5SPrV8Zhm_-I-rBGg/6ac172959ae4916a2949df31.html",
+    "prettify_html_file": "https://serpapi.com/searches/g2IAgjQsDoHHZB8wR6st0AZ9Kc5SPrV8Zhm_-I-rBGg/6ac172959ae4916a2949df31.prettify",
+    "total_time_taken": 3.27
+  },
+  "search_parameters": {
+    "engine": "google_flights",
+    "hl": "en",
+    "gl": "us",
+    "type": "1",
+    "departure_id": "BLR",
+    "arrival_id": "SIN",
+    "outbound_date": "2026-11-15",
+    "return_date": "2026-11-19",
+    "travel_class": 1,
+    "adults": 2,
+    "children": 0,
+    "infants_in_seat": 0,
+    "infants_on_lap": 0,
+    "currency": "INR",
+    "sort_by": "2"
+  },
+  "other_flights": [
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-15 21:20"
+          },
+          "arrival_airport": {
+            "name": "Colombo Bandaranaike International Airport",
+            "id": "CMB",
+            "time": "2026-11-15 22:50"
+          },
+          "duration": 90,
+          "airplane": "Airbus A320",
+          "airline": "SriLankan",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UL.png",
+          "travel_class": "Economy",
+          "flight_number": "UL 172",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 190 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Colombo Bandaranaike International Airport",
+            "id": "CMB",
+            "time": "2026-11-16 12:10"
+          },
+          "arrival_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-16 18:40"
+          },
+          "duration": 240,
+          "airplane": "Airbus A320",
+          "airline": "SriLankan",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UL.png",
+          "travel_class": "Economy",
+          "flight_number": "UL 308",
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Stream media to your device",
+            "Carbon emissions estimate: 509 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 800,
+          "name": "Colombo Bandaranaike International Airport",
+          "id": "CMB"
+        }
+      ],
+      "total_duration": 1130,
+      "carbon_emissions": {
+        "this_flight": 700000,
+        "typical_for_this_route": 527000,
+        "difference_percent": 33
+      },
+      "price": 75780,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UL.png",
+      "departure_token": "WyJDalJJWHpOeVZrWjRZbFpxTFRCQlNHOVBZMmRDUnkwdExTMHRMUzB0TFhCcVltZGlOMEZCUVVGQlIzSkNZM0JaVG1ReVkyOUJFZ3RWVERFM01ueFZURE13T0JvTENJVFFCQkFBR2dOSlRsSTRISERQNWdRPSIsW1siQkxSIiwiMjAyNi0xMS0xNSIsIkNNQiIsbnVsbCwiVUwiLCIxNzIiXSxbIkNNQiIsIjIwMjYtMTEtMTYiLCJTSU4iLG51bGwsIlVMIiwiMzA4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-15 23:20"
+          },
+          "arrival_airport": {
+            "name": "Kuala Lumpur International Airport",
+            "id": "KUL",
+            "time": "2026-11-16 06:10"
+          },
+          "duration": 260,
+          "airplane": "Boeing 737",
+          "airline": "Batik Air",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/OD.png",
+          "travel_class": "Economy",
+          "flight_number": "OD 242",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 511 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Kuala Lumpur International Airport",
+            "id": "KUL",
+            "time": "2026-11-16 08:25"
+          },
+          "arrival_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-16 09:30"
+          },
+          "duration": 65,
+          "airplane": "Boeing 737",
+          "airline": "Batik Air",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/OD.png",
+          "travel_class": "Economy",
+          "flight_number": "OD 801",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 118 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 135,
+          "name": "Kuala Lumpur International Airport",
+          "id": "KUL"
+        }
+      ],
+      "total_duration": 460,
+      "carbon_emissions": {
+        "this_flight": 630000,
+        "typical_for_this_route": 527000,
+        "difference_percent": 20
+      },
+      "price": 76284,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/OD.png",
+      "departure_token": "WyJDalJJWHpOeVZrWjRZbFpxTFRCQlNHOVBZMmRDUnkwdExTMHRMUzB0TFhCcVltZGlOMEZCUVVGQlIzSkNZM0JaVG1ReVkyOUJFZ3RQUkRJME1ueFBSRGd3TVJvTENQelRCQkFBR2dOSlRsSTRISERhNmdRPSIsW1siQkxSIiwiMjAyNi0xMS0xNSIsIktVTCIsbnVsbCwiT0QiLCIyNDIiXSxbIktVTCIsIjIwMjYtMTEtMTYiLCJTSU4iLG51bGwsIk9EIiwiODAxIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-15 23:20"
+          },
+          "arrival_airport": {
+            "name": "Kuala Lumpur International Airport",
+            "id": "KUL",
+            "time": "2026-11-16 06:10"
+          },
+          "duration": 260,
+          "airplane": "Boeing 737",
+          "airline": "Batik Air",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/OD.png",
+          "travel_class": "Economy",
+          "flight_number": "OD 242",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 511 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Kuala Lumpur International Airport",
+            "id": "KUL",
+            "time": "2026-11-16 09:10"
+          },
+          "arrival_airport": {
+            "name": "Kualanamu International Airport",
+            "id": "KNO",
+            "time": "2026-11-16 09:15"
+          },
+          "duration": 65,
+          "airplane": "Boeing 737",
+          "airline": "Batik Air",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/ID.png",
+          "travel_class": "Economy",
+          "flight_number": "ID 7263",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "In-seat USB outlet",
+            "Stream media to your device",
+            "Carbon emissions estimate: 110 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Kualanamu International Airport",
+            "id": "KNO",
+            "time": "2026-11-16 10:30"
+          },
+          "arrival_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-16 13:00"
+          },
+          "duration": 90,
+          "airplane": "Airbus A320",
+          "airline": "Batik Air",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/ID.png",
+          "travel_class": "Economy",
+          "flight_number": "ID 7147",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "In-seat USB outlet",
+            "Stream media to your device",
+            "Carbon emissions estimate: 158 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 180,
+          "name": "Kuala Lumpur International Airport",
+          "id": "KUL"
+        },
+        {
+          "duration": 75,
+          "name": "Kualanamu International Airport",
+          "id": "KNO"
+        }
+      ],
+      "total_duration": 670,
+      "carbon_emissions": {
+        "this_flight": 782000,
+        "typical_for_this_route": 527000,
+        "difference_percent": 48
+      },
+      "price": 99313,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/ID.png",
+      "departure_token": "WyJDalJJWHpOeVZrWjRZbFpxTFRCQlNHOVBZMmRDUnkwdExTMHRMUzB0TFhCcVltZGlOMEZCUVVGQlIzSkNZM0JaVG1ReVkyOUJFaE5QUkRJME1ueEpSRGN5TmpOOFNVUTNNVFEzR2dzSThZY0dFQUFhQTBsT1VqZ2NjTDJsQmc9PSIsW1siQkxSIiwiMjAyNi0xMS0xNSIsIktVTCIsbnVsbCwiT0QiLCIyNDIiXSxbIktVTCIsIjIwMjYtMTEtMTYiLCJLTk8iLG51bGwsIklEIiwiNzI2MyJdLFsiS05PIiwiMjAyNi0xMS0xNiIsIlNJTiIsbnVsbCwiSUQiLCI3MTQ3Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-15 21:05"
+          },
+          "arrival_airport": {
+            "name": "Netaji Subhash Chandra Bose International Airport",
+            "id": "CCU",
+            "time": "2026-11-15 23:45"
+          },
+          "duration": 160,
+          "airplane": "Airbus A320neo",
+          "airline": "IndiGo",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+          "travel_class": "Economy",
+          "flight_number": "6E 975",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 225 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Netaji Subhash Chandra Bose International Airport",
+            "id": "CCU",
+            "time": "2026-11-16 02:15"
+          },
+          "arrival_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-16 09:05"
+          },
+          "duration": 260,
+          "airplane": "Airbus A320neo",
+          "airline": "IndiGo",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+          "travel_class": "Economy",
+          "flight_number": "6E 1015",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 387 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 150,
+          "name": "Netaji Subhash Chandra Bose International Airport",
+          "id": "CCU"
+        }
+      ],
+      "total_duration": 570,
+      "carbon_emissions": {
+        "this_flight": 612000,
+        "typical_for_this_route": 527000,
+        "difference_percent": 16
+      },
+      "price": 104676,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+      "departure_token": "WyJDalJJWHpOeVZrWjRZbFpxTFRCQlNHOVBZMmRDUnkwdExTMHRMUzB0TFhCcVltZGlOMEZCUVVGQlIzSkNZM0JaVG1ReVkyOUJFZ3cyUlRrM05YdzJSVEV3TVRVYUN3amtzUVlRQUJvRFNVNVNPQnh3L2RBRyIsW1siQkxSIiwiMjAyNi0xMS0xNSIsIkNDVSIsbnVsbCwiNkUiLCI5NzUiXSxbIkNDVSIsIjIwMjYtMTEtMTYiLCJTSU4iLG51bGwsIjZFIiwiMTAxNSJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-15 01:10"
+          },
+          "arrival_airport": {
+            "name": "Suvarnabhumi Airport",
+            "id": "BKK",
+            "time": "2026-11-15 06:25"
+          },
+          "duration": 225,
+          "airplane": "Airbus A350",
+          "airline": "THAI",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TG.png",
+          "travel_class": "Economy",
+          "flight_number": "TG 326",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 360 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Suvarnabhumi Airport",
+            "id": "BKK",
+            "time": "2026-11-15 07:45"
+          },
+          "arrival_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-15 11:15"
+          },
+          "duration": 150,
+          "airplane": "Airbus A350",
+          "airline": "THAI",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TG.png",
+          "travel_class": "Economy",
+          "flight_number": "TG 403",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 236 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 80,
+          "name": "Suvarnabhumi Airport",
+          "id": "BKK"
+        }
+      ],
+      "total_duration": 455,
+      "carbon_emissions": {
+        "this_flight": 597000,
+        "typical_for_this_route": 527000,
+        "difference_percent": 13
+      },
+      "price": 105736,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TG.png",
+      "departure_token": "WyJDalJJWHpOeVZrWjRZbFpxTFRCQlNHOVBZMmRDUnkwdExTMHRMUzB0TFhCcVltZGlOMEZCUVVGQlIzSkNZM0JaVG1ReVkyOUJFZ3RVUnpNeU5ueFVSelF3TXhvTENJaTZCaEFBR2dOSlRsSTRISERLMlFZPSIsW1siQkxSIiwiMjAyNi0xMS0xNSIsIkJLSyIsbnVsbCwiVEciLCIzMjYiXSxbIkJLSyIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIlRHIiwiNDAzIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-15 10:20"
+          },
+          "arrival_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-15 17:40"
+          },
+          "duration": 290,
+          "airplane": "Airbus A321neo",
+          "airline": "IndiGo",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+          "travel_class": "Economy",
+          "flight_number": "6E 1457",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 405 kg"
+          ]
+        }
+      ],
+      "total_duration": 290,
+      "carbon_emissions": {
+        "this_flight": 405000,
+        "typical_for_this_route": 527000,
+        "difference_percent": -23
+      },
+      "price": 108580,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+      "departure_token": "WyJDalJJWHpOeVZrWjRZbFpxTFRCQlNHOVBZMmRDUnkwdExTMHRMUzB0TFhCcVltZGlOMEZCUVVGQlIzSkNZM0JaVG1ReVkyOUJFZ1kyUlRFME5UY2FDd2lrMEFZUUFCb0RTVTVTT0J4dzB2QUciLFtbIkJMUiIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIjZFIiwiMTQ1NyJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-15 20:00"
+          },
+          "arrival_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-16 03:20"
+          },
+          "duration": 290,
+          "airplane": "Airbus A321neo",
+          "airline": "IndiGo",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+          "travel_class": "Economy",
+          "flight_number": "6E 1247",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 405 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 290,
+      "carbon_emissions": {
+        "this_flight": 405000,
+        "typical_for_this_route": 527000,
+        "difference_percent": -23
+      },
+      "price": 108580,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/6E.png",
+      "departure_token": "WyJDalJJWHpOeVZrWjRZbFpxTFRCQlNHOVBZMmRDUnkwdExTMHRMUzB0TFhCcVltZGlOMEZCUVVGQlIzSkNZM0JaVG1ReVkyOUJFZ1kyUlRFeU5EY2FDd2lrMEFZUUFCb0RTVTVTT0J4dzB2QUciLFtbIkJMUiIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIjZFIiwiMTI0NyJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-15 23:10"
+          },
+          "arrival_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-16 06:15"
+          },
+          "duration": 275,
+          "airplane": "Airbus A350",
+          "airline": "Singapore Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SQ.png",
+          "travel_class": "Economy",
+          "flight_number": "SQ 511",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 416 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 275,
+      "carbon_emissions": {
+        "this_flight": 416000,
+        "typical_for_this_route": 527000,
+        "difference_percent": -21
+      },
+      "price": 137722,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SQ.png",
+      "departure_token": "WyJDalJJWHpOeVZrWjRZbFpxTFRCQlNHOVBZMmRDUnkwdExTMHRMUzB0TFhCcVltZGlOMEZCUVVGQlIzSkNZM0JaVG1ReVkyOUJFZ1ZUVVRVeE1Sb0xDUHF6Q0JBQUdnTkpUbEk0SEhDQTNRZz0iLFtbIkJMUiIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIlNRIiwiNTExIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-15 23:25"
+          },
+          "arrival_airport": {
+            "name": "Kuala Lumpur International Airport",
+            "id": "KUL",
+            "time": "2026-11-16 06:20"
+          },
+          "duration": 265,
+          "airplane": "Airbus A320neo",
+          "airline": "AirAsia",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AK.png",
+          "travel_class": "Economy",
+          "flight_number": "AK 52",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 386 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Kuala Lumpur International Airport",
+            "id": "KUL",
+            "time": "2026-11-16 08:10"
+          },
+          "arrival_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-16 09:20"
+          },
+          "duration": 70,
+          "airplane": "Airbus A320neo",
+          "airline": "AirAsia",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AK.png",
+          "travel_class": "Economy",
+          "flight_number": "AK 705",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 107 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 110,
+          "name": "Kuala Lumpur International Airport",
+          "id": "KUL"
+        }
+      ],
+      "total_duration": 445,
+      "carbon_emissions": {
+        "this_flight": 493000,
+        "typical_for_this_route": 527000,
+        "difference_percent": -6
+      },
+      "price": 156156,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AK.png",
+      "departure_token": "WyJDalJJWHpOeVZrWjRZbFpxTFRCQlNHOVBZMmRDUnkwdExTMHRMUzB0TFhCcVltZGlOMEZCUVVGQlIzSkNZM0JaVG1ReVkyOUJFZ3BCU3pVeWZFRkxOekExR2dzSS9NTUpFQUFhQTBsT1VqZ2NjTUh5Q1E9PSIsW1siQkxSIiwiMjAyNi0xMS0xNSIsIktVTCIsbnVsbCwiQUsiLCI1MiJdLFsiS1VMIiwiMjAyNi0xMS0xNiIsIlNJTiIsbnVsbCwiQUsiLCI3MDUiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Kempegowda International Airport Bengaluru",
+            "id": "BLR",
+            "time": "2026-11-15 11:50"
+          },
+          "arrival_airport": {
+            "name": "Singapore Changi Airport",
+            "id": "SIN",
+            "time": "2026-11-15 19:05"
+          },
+          "duration": 285,
+          "airplane": "Airbus A350",
+          "airline": "Singapore Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SQ.png",
+          "travel_class": "Economy",
+          "flight_number": "SQ 509",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 416 kg"
+          ]
+        }
+      ],
+      "total_duration": 285,
+      "carbon_emissions": {
+        "this_flight": 416000,
+        "typical_for_this_route": 527000,
+        "difference_percent": -21
+      },
+      "price": 179426,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SQ.png",
+      "departure_token": "WyJDalJJWHpOeVZrWjRZbFpxTFRCQlNHOVBZMmRDUnkwdExTMHRMUzB0TFhCcVltZGlOMEZCUVVGQlIzSkNZM0JaVG1ReVkyOUJFZ1ZUVVRVd09Sb0xDT0w1Q2hBQUdnTkpUbEk0SEhDZnJ3cz0iLFtbIkJMUiIsIjIwMjYtMTEtMTUiLCJTSU4iLG51bGwsIlNRIiwiNTA5Il1dXQ=="
+    }
+  ],
+  "price_insights": {
+    "lowest_price": 75780,
+    "price_level": "high",
+    "typical_price_range": [
+      39500,
+      72000
+    ]
+  },
+  "airports": [
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "BLR",
+            "name": "Kempegowda International Airport Bengaluru"
+          },
+          "city": "Bengaluru",
+          "country": "India",
+          "country_code": "IN",
+          "image": "https://encrypted-tbn2.gstatic.com/images?q=tbn%3AANd9GcQIQIUfZg6v3rdHMVD96D5vTNuXwVO7zsdZy0l7s2uiyV-xuK8nJlokAp_ChoLy9r0vjJWcOOBkEvBI2g",
+          "thumbnail": "https://encrypted-tbn2.gstatic.com/images?q=tbn%3AANd9GcSFrS_QMxzjURYrYSPiuRW9uR9imYuBAhdE49jwKag7Ucgl0en4CNAtP0hf1MDSGdvhAw2s1-2w71_b-pcIyFOM1F1yMSPQLO5_XlgJc_4"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "SIN",
+            "name": "Singapore Changi Airport"
+          },
+          "city": "Singapore",
+          "country": "Singapore",
+          "country_code": "SG",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn%3AANd9GcTPxNDQYUBDKl_Cnb-2R_TakwdFGzKIpvsMBeDdYwNHK_c2jUY6LVQ5R_mwZDf9hOuu6iHgYjrL87eDZw",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn%3AANd9GcSp10Y3G-u5LPBzRWABhOUD7BGcBspacZc2r31UP6QmzLmyprerN-6BZ5wZkdsDXngRuIYCPQI8Ny3uYjbRegATm48AJfppuLgpsc0mhsE"
+        }
+      ]
+    },
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "SIN",
+            "name": "Singapore Changi Airport"
+          },
+          "city": "Singapore",
+          "country": "Singapore",
+          "country_code": "SG",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn%3AANd9GcTPxNDQYUBDKl_Cnb-2R_TakwdFGzKIpvsMBeDdYwNHK_c2jUY6LVQ5R_mwZDf9hOuu6iHgYjrL87eDZw",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn%3AANd9GcSp10Y3G-u5LPBzRWABhOUD7BGcBspacZc2r31UP6QmzLmyprerN-6BZ5wZkdsDXngRuIYCPQI8Ny3uYjbRegATm48AJfppuLgpsc0mhsE"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "BLR",
+            "name": "Kempegowda International Airport Bengaluru"
+          },
+          "city": "Bengaluru",
+          "country": "India",
+          "country_code": "IN",
+          "image": "https://encrypted-tbn2.gstatic.com/images?q=tbn%3AANd9GcQIQIUfZg6v3rdHMVD96D5vTNuXwVO7zsdZy0l7s2uiyV-xuK8nJlokAp_ChoLy9r0vjJWcOOBkEvBI2g",
+          "thumbnail": "https://encrypted-tbn2.gstatic.com/images?q=tbn%3AANd9GcSFrS_QMxzjURYrYSPiuRW9uR9imYuBAhdE49jwKag7Ucgl0en4CNAtP0hf1MDSGdvhAw2s1-2w71_b-pcIyFOM1F1yMSPQLO5_XlgJc_4"
+        }
+      ]
+    }
+  ]
+}

@@ -7,7 +7,10 @@ Separated by agent type to reduce token usage.
 SUPERVISOR_TOOL_INSTRUCTIONS = """
 ## Supervisor Agent Tool Usage Guidelines
 
-You have access to the following tools: `flight_search`, `researcher_agent`, `itinerary_tool`, `tavily_search`
+You have access to the following tools: `flight_search`, `researcher_agent`, `itinerary_tool`, `web_search`
+
+Use `web_search` for practical travel research. It honors the run's configured
+Brave or Tavily provider and applies Tavily fallback and shared search budgets.
 
 When calling tools, you MUST follow these strict formatting rules to avoid validation errors:
 
@@ -123,7 +126,10 @@ When calling tools, you MUST follow these strict formatting rules to avoid valid
 RESEARCHER_TOOL_INSTRUCTIONS = """
 ## Researcher Agent Tool Usage Guidelines
 
-You have access to the following tools: `trip_segment`, `hotel_search`, `tavily_search`
+You have access to the following tools: `trip_segment`, `hotel_search`, `web_search`.
+When enabled, `brave_place_search` also matches attraction names and locations
+to sourced place details and available photos. Use `web_search` for travel
+research; it honors the selected provider and applies Tavily fallback.
 
 When calling tools, you MUST follow these strict formatting rules to avoid validation errors:
 
@@ -218,8 +224,8 @@ TOOL_USAGE_INSTRUCTIONS = f"""
 When calling tools, you MUST follow these strict formatting rules to avoid validation errors:
 
 **IMPORTANT: Tool Availability by Agent Type:**
-- **Supervisor Agent Tools:** `flight_search`, `researcher_agent`, `itinerary_tool`, `tavily_search`
-- **Researcher Agent Tools:** `trip_segment`, `hotel_search`, `tavily_search`
+- **Supervisor Agent Tools:** `flight_search`, `researcher_agent`, `itinerary_tool`, `web_search`
+- **Researcher Agent Tools:** `trip_segment`, `hotel_search`, `web_search`, optional `brave_place_search`
 
 {SUPERVISOR_TOOL_INSTRUCTIONS}
 

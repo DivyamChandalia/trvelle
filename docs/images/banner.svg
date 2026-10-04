@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="300" viewBox="0 0 1280 300" role="img" aria-labelledby="title desc">
+  <title id="title">Trvelle — the travel planning engine</title>
+  <desc id="desc">A pale blue banner with the Trvelle mark and a dotted route connecting research, planning and an editable itinerary.</desc>
+  <rect width="1280" height="300" rx="24" fill="#eaf2ff"/>
+  <circle cx="1180" cy="15" r="170" fill="#dce9fc"/>
+  <circle cx="1210" cy="290" r="105" fill="#d1e1f8"/>
+  <g transform="translate(56 53) scale(1.15)" fill="#0a2035">
+    <path d="M0.5 17L8.5 27V41L0.5 32V17Z"/>
+    <path d="M45.5 17L37.5 27V41L45.5 32V17Z"/>
+    <path d="M0.5 0L23 25L45.5 0V12L23 37L0.5 12V0Z"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#0a2035">
+    <text x="126" y="90" font-size="38" font-weight="700" letter-spacing="1">TRVELLE</text>
+    <text x="56" y="151" font-size="31" font-weight="700">The travel planning engine.</text>
+    <text x="56" y="187" font-size="18" fill="#526b88">Real searches. Durable agents. An editable plan.</text>
+    <text x="56" y="254" font-size="13" fill="#526b88" letter-spacing="2">PYTHON · FASTAPI · POSTGRESQL · MCP</text>
+  </g>
+  <g stroke="#6983a5" stroke-width="2.5" fill="none">
+    <path d="M765 154H1010" stroke-dasharray="2 9" stroke-linecap="round"/>
+    <circle cx="765" cy="154" r="18" fill="#f6f9ff"/>
+    <circle cx="888" cy="154" r="18" fill="#f6f9ff"/>
+    <circle cx="1010" cy="154" r="18" fill="#f6f9ff"/>
+    <path d="M758 154l5 5 9-10M881 154l5 5 9-10M1003 154l5 5 9-10"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="14" text-anchor="middle" fill="#526b88">
+    <text x="765" y="201">Research</text><text x="888" y="201">Plan</text><text x="1010" y="201">Refine</text>
+  </g>
+</svg>

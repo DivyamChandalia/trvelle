@@ -1,7 +1,7 @@
 # create_db.py
 
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 # Import all your models from the models.py file
@@ -16,23 +16,17 @@ def create_tables():
 
     DATABASE_URL = os.getenv("DB_URI")
 
-    print(f"Attempting to connect to: {DATABASE_URL.split('@')[1]}") # Print without sensitive password
-
-    try:
-        # Create an SQLAlchemy engine
-        engine = create_engine(DATABASE_URL)
-
-        # Create all tables defined in your Base
-        # This will check the database and create tables if they don't exist.
-        # It will NOT alter existing tables. For migrations, use Alembic.
-        Base.metadata.create_all(engine)
-
-        # print(f"Successfully created tables in database '{DB_NAME}' on '{DB_HOST}'.")
-
-    except Exception as e:
-        print(f"Error creating tables: {e}")
-        print("Please ensure PostgreSQL is running and the database/user exist and are accessible.")
-        print("Also check your DATABASE_URL connection string.")
+    engine = create_engine(DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1))
+    # Serialize versioned, additive migrations across API, worker and MCP startup.
+    with engine.begin() as connection:
+        connection.execute(text("SELECT pg_advisory_xact_lock(710742901)"))
+        connection.execute(text("CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, applied_at TIMESTAMPTZ DEFAULT now())"))
+        Base.metadata.create_all(connection)
+        if not connection.execute(text("SELECT 1 FROM schema_migrations WHERE version=1")).scalar():
+            connection.execute(text("ALTER TABLE messages ADD COLUMN IF NOT EXISTS superseded BOOLEAN NOT NULL DEFAULT false"))
+            connection.execute(text("ALTER TABLE researcher_agents ADD COLUMN IF NOT EXISTS run_id UUID"))
+            connection.execute(text("INSERT INTO schema_migrations(version) VALUES(1)"))
+    engine.dispose()
 
 def delete_tables():
     """
@@ -40,7 +34,7 @@ def delete_tables():
     Use with caution as this will remove all data in the tables.
     """
     DATABASE_URL = os.getenv("DB_URI")
-    engine = create_engine(DATABASE_URL)
+    engine = create_engine(DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1))
     
     # Drop all tables
     Base.metadata.drop_all(engine)

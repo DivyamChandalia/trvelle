@@ -1,3 +1,5 @@
+from trvelle.utils import load_environment
+load_environment()
 import contextlib
 from fastapi import FastAPI
 from .flight_search import mcp as flight_search_mcp
@@ -28,4 +30,5 @@ app.mount("/hotel_search/", hotel_search_mcp.streamable_http_app())
 app.mount("/itinerary_tool/", itinerary_tool_mcp.streamable_http_app())
 app.mount("/researcher_agent_tool/", researcher_agent_tool_mcp.streamable_http_app())
 app.mount("/trip_segment_tool/", trip_segment_tool_mcp.streamable_http_app())
-uvicorn.run(app, port=8000)
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)

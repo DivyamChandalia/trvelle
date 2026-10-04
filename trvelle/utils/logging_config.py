@@ -75,6 +75,8 @@ def configure_logging(
         force_enable: Force enable logging even in production.
     """
 
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
     if not force_enable and not is_debug_mode():
         # Set root logger to CRITICAL to effectively disable all logging
         root_logger = logging.getLogger()

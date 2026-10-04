@@ -6,7 +6,8 @@ import asyncio
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field, field_validator
 import json
-from serpapi import GoogleSearch
+import re
+from .search_gateway import gateway
 from human_id import generate_id
 # from ..utils import get_logger
 # logger = get_logger(__name__)
@@ -94,7 +95,7 @@ class HotelSearchInput(BaseModel):
 class HotelSearch:
     def __init__(self):
         self.api_key = os.getenv("SERPAPI_API_KEY")
-        self.use_cache = True
+        self.use_cache = False
 
     def format_hotel_data_simple(self, hotels):
         """Format hotel data into a readable string."""
@@ -143,6 +144,13 @@ class HotelSearch:
                 if len(hotel['amenities']) > 5:
                     amenities_str += f" and {len(hotel['amenities']) - 5} more"
                 output.append(f"Amenities: {amenities_str}")
+
+            images = hotel.get('images') or []
+            if images:
+                output.append(f"Photos: {len(images)} provider images are available.")
+                photo = images[0].get('original_image') or images[0].get('thumbnail')
+                if photo:
+                    output.append(f"Photo URL: {photo}")
             
             # Nearby places
             if 'nearby_places' in hotel and hotel['nearby_places']:
@@ -172,20 +180,7 @@ class HotelSearch:
         return "\n".join(output)
     
     def _fetch_results(self, params, cache_file):
-        """Loads from cache_file if present, otherwise calls SerpAPI and caches."""
-        if self.use_cache:
-            if os.path.exists(cache_file):
-                with open(cache_file, "r") as f:
-                    return redact_secrets(json.load(f))
-        
-        search = GoogleSearch(params)
-        results = redact_secrets(search.get_dict())
-        
-        if self.use_cache:
-            os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-            with open(cache_file, "w") as f:
-                json.dump(results, f, indent=2)
-        return results
+        return gateway.request('serpapi', params)
 
     def hotel_search(self, search_params: HotelSearchInput):
         """Perform hotel search using SerpAPI."""
@@ -194,12 +189,19 @@ class HotelSearch:
             search_params_dict = search_params.model_dump(exclude_none=True)
         else:
             search_params_dict = {k: v for k, v in search_params.items() if v is not None}
+        destination = search_params_dict.pop('_destination', None)
+        # A researcher can cover several cities. Its scope must never replace
+        # an explicit city/property query (e.g. Rome becomes Rome and Florence).
+        query = ' '.join(str(search_params_dict.get('q') or '').split())
+        query = re.split(r'\s+(?:near|close\s+to|within\s+walking\s+distance\s+of)\s+', query, maxsplit=1, flags=re.I)[0].strip()
+        search_params_dict['q'] = query
+        combined = destination and re.search(r'\s+(?:and|&|\+|to|→|/)\s+', destination, re.I)
+        stay_destination = destination if destination and not combined and destination.casefold() in query.casefold() else query
         
         # Add required SerpAPI parameters
         search_params_dict["engine"] = "google_hotels"
         search_params_dict["api_key"] = self.api_key
         search_params_dict["output"] = "json"
-        search_params_dict["source"] = "python"
         
         # Remove max_results from params (it's for our processing, not SerpAPI)
         max_results = search_params_dict.pop("max_results", 5)
@@ -207,6 +209,7 @@ class HotelSearch:
         # Fetch results
         cache_file = f"cache/hotel_search_results.json"
         raw_results = self._fetch_results(search_params_dict, cache_file)
+        raw_results['stay_context'] = {'destination': stay_destination}
         
         # Extract hotels from results
         hotels = raw_results.get("properties", [])
@@ -215,10 +218,15 @@ class HotelSearch:
         max_results = min(max_results, len(hotels))  # SerpAPI max is 20 results
         hotels = hotels[:max_results]
         for hotel in hotels:
-            hotel['choose_uid'] = generate_id()
+            import hashlib
+            identity = hotel.get('property_token') or hotel.get('link') or (hotel.get('name', '') + json.dumps(hotel.get('gps_coordinates', {}), sort_keys=True))
+            offer_identity = json.dumps([identity, search_params_dict.get('check_in_date'), search_params_dict.get('check_out_date'),
+                                         search_params_dict.get('adults', 2), search_params_dict.get('children', 0)], ensure_ascii=False)
+            hotel['choose_uid'] = 'hotel-' + hashlib.sha256(offer_identity.encode()).hexdigest()[:20]
         
         # Format output
         formatted_output = self.format_hotel_data_simple(hotels)
+        formatted_output = f"Stay: {search_params_dict.get('q')} · {search_params_dict.get('check_in_date')} to {search_params_dict.get('check_out_date')} · {search_params_dict.get('adults', 2)} adults\n" + formatted_output
         
         return {"result": formatted_output, "raw": raw_results}
 
@@ -240,7 +248,7 @@ async def hotel_search(search_params: HotelSearchInput):
     else:
         search_params_dict = search_params
 
-    results = searcher.hotel_search(search_params_dict)
+    results = await asyncio.to_thread(searcher.hotel_search, search_params_dict)
     return results
 
 
