@@ -10,6 +10,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import secrets
 import time
 import uuid
@@ -49,6 +50,42 @@ class ModelAccounts:
         self.pending = {}
         self.locks = {}
         self.catalogs = {}
+        self.migration_locks = {}
+
+    def check_link_ready(self, owner):
+        if any(pending.get("status") in ("connecting", "verifying")
+               for (identifier, _), pending in self.pending.items() if identifier == str(owner)):
+            raise AccountError("Finish or cancel your model sign-in before linking your guest account.")
+
+    def copy_credentials(self, source_owner, target_owner):
+        """Idempotent copy: retain source until the database ownership move commits."""
+        import shutil
+        self.check_link_ready(source_owner)
+        self.check_link_ready(target_owner)
+        source, target = self.load(source_owner), self.load(target_owner)
+        for field in ("keys", "oauth", "roles"):
+            target[field] = {**source.get(field, {}), **{key: value for key, value in target.get(field, {}).items() if value}}
+        source_dir, target_dir = self.directory(source_owner) / "claude", self.directory(target_owner) / "claude"
+        if source_dir.is_dir() and not (target_dir / ".credentials.json").exists():
+            for file in source_dir.rglob("*"):
+                if file.is_symlink():
+                    continue
+                destination = target_dir / file.relative_to(source_dir)
+                if file.is_dir():
+                    destination.mkdir(parents=True, exist_ok=True, mode=0o700)
+                    os.chmod(destination, 0o700)
+                elif file.is_file() and not destination.exists():
+                    destination.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+                    shutil.copyfile(file, destination)
+                    os.chmod(destination, 0o600)
+        self.save(target_owner, target)
+        self.catalogs.clear()
+
+    def finish_credential_move(self, source_owner):
+        import shutil
+        self.save(source_owner, {"keys": {}, "roles": {}, "oauth": {}})
+        shutil.rmtree(self.directory(source_owner) / "claude", ignore_errors=True)
+        self.catalogs.clear()
 
     def directory(self, owner):
         path = self.root / str(uuid.UUID(str(owner)))
@@ -87,16 +124,45 @@ class ModelAccounts:
         data = self.load(owner)
         chatgpt = data["oauth"].get("chatgpt", {})
         pending = self.pending.get((str(owner), "chatgpt"), {})
+        sharing = "chatgpt.tokens.use.direct" in chatgpt.get("scopes", [])
+        token = bool(chatgpt.get("access_token"))
+        expired = bool(chatgpt.get("expires_at") and chatgpt["expires_at"] <= time.time() + 60)
+        renewable = bool(chatgpt.get("refresh_token") or chatgpt.get("pending_refresh"))
+        readiness = "ready" if token and sharing else "permission_required" if token else "disconnected"
+        if token and sharing and (chatgpt.get("invalid_refresh") or (expired and not renewable)):
+            readiness = "expired"
+        refresh_at = chatgpt.get("earliest_refresh_at")
+        if token and expired and refresh_at:
+            try:
+                from datetime import datetime
+                reset = float(refresh_at) if isinstance(refresh_at, (int, float)) else datetime.fromisoformat(refresh_at.replace("Z", "+00:00")).timestamp()
+                if reset > time.time():
+                    readiness = "refresh_pending"
+            except (ValueError, TypeError):
+                pass
+        messages = {
+            "expired": "Reconnect ChatGPT to renew access to your models.",
+            "permission_required": "Reconnect and allow Trvelle to use your ChatGPT plan.",
+            "refresh_pending": "ChatGPT has asked us to wait before renewing access.",
+            "ready": "Local model connection. Your website login is separate.",
+            "disconnected": "Connect your own ChatGPT account for local planning.",
+        }
         return {
             "roles": data["roles"],
             "keys": {p: bool(data["keys"].get(p)) for p in PROVIDERS[:4]},
             "accounts": {
                 "chatgpt": {
-                    "status": pending.get("status")
-                    or ("connected" if chatgpt.get("access_token") else "disconnected"),
-                    "sharing": "chatgpt.tokens.use.direct" in chatgpt.get("scopes", []),
+                    "status": pending.get("status") if pending.get("status") in ("connecting", "verifying")
+                    else ("connected" if token else "disconnected"),
+                    "sharing": sharing,
+                    "readiness": readiness,
+                    "can_plan": readiness == "ready",
+                    "can_connect": True,
+                    "message": messages[readiness],
                     "email": chatgpt.get("email"),
                     "error": pending.get("error"),
+                    "sign_in_url": pending.get("url") if pending.get("status") == "connecting" else None,
+                    "tunnel_command": pending.get("tunnel_command") if pending.get("status") == "connecting" else None,
                 },
                 "claude": {"status": "disconnected"},
             },
@@ -151,7 +217,10 @@ class ModelAccounts:
     async def start_chatgpt(self, owner):
         slot = (str(owner), "chatgpt")
         if self.pending.get(slot, {}).get("status") in ("connecting", "verifying"):
-            return {"url": self.pending[slot]["url"]}
+            return {"url": self.pending[slot]["url"], "tunnel_command": self.pending[slot].get("tunnel_command")}
+        ssh_host = os.getenv("TRVELLE_MODEL_SSH_HOST", "")
+        if ssh_host and not re.fullmatch(r"[a-zA-Z0-9_][a-zA-Z0-9_.-]*@[a-zA-Z0-9][a-zA-Z0-9.-]*", ssh_host):
+            raise AccountError("The server's model connection SSH host is misconfigured.")
         previous = self.load(owner)["oauth"].get("chatgpt", {})
         host_path = self.root / "host-id"
         if not host_path.exists():
@@ -243,6 +312,8 @@ class ModelAccounts:
                     client_id=client_id,
                     subject=claims["sub"],
                     email=claims.get("email"),
+                    # Keep account-specific successful model checks on reauthorization.
+                    verified_models=previous.get("verified_models", {}),
                 )
                 self.save(owner, data)
                 pending.update(status="connected", error=None)
@@ -263,6 +334,9 @@ class ModelAccounts:
                 writer.close()
 
         server = await asyncio.start_server(callback, "127.0.0.1", 0, limit=8192)
+        callback_port = server.sockets[0].getsockname()[1]
+        if ssh_host:
+            pending["tunnel_command"] = f"ssh -o ExitOnForwardFailure=yes -N -L 127.0.0.1:{callback_port}:127.0.0.1:{callback_port} {ssh_host}"
         redirect = (
             f"http://127.0.0.1:{server.sockets[0].getsockname()[1]}/auth/callback"
         )
@@ -299,7 +373,7 @@ class ModelAccounts:
                 )
 
         pending["task"] = asyncio.create_task(expire())
-        return {"url": pending["url"]}
+        return {"url": pending["url"], "tunnel_command": pending.get("tunnel_command")}
 
     @staticmethod
     def checked_tokens(tokens):
@@ -325,6 +399,8 @@ class ModelAccounts:
                 "scopes", []
             ) or not saved.get("access_token"):
                 raise AccountError("Connect ChatGPT and authorize plan usage first")
+            if saved.get("invalid_refresh"):
+                raise AccountError("ChatGPT session expired. Please reconnect.")
             if (
                 not saved.get("pending_refresh")
                 and saved["expires_at"] > time.time() + 60
@@ -345,6 +421,8 @@ class ModelAccounts:
                     raise AccountError("ChatGPT refresh is awaiting its provider reset")
             tokens = saved.get("pending_refresh")
             if tokens is None:
+                if not saved.get("refresh_token"):
+                    raise AccountError("ChatGPT session expired. Please reconnect.")
                 async with httpx.AsyncClient(timeout=20) as client:
                     response = await client.post(
                         "https://auth.openai.com/api/accounts/oauth/token",
@@ -356,7 +434,22 @@ class ModelAccounts:
                         },
                     )
                     if response.is_error:
-                        raise AccountError("ChatGPT session expired. Please reconnect.")
+                        try:
+                            payload = response.json()
+                        except ValueError:
+                            payload = {}
+                        if response.status_code in (401, 403) or payload.get("error") in ("invalid_grant", "invalid_token"):
+                            saved["invalid_refresh"] = True
+                            self.save(owner, data)
+                            raise AccountError("ChatGPT session expired. Please reconnect.")
+                        if response.status_code == 429:
+                            from .model_router import ProviderError, reset_time
+                            deadline, _ = reset_time(ProviderError(429, payload, dict(response.headers)), time.time())
+                            if deadline:
+                                saved["earliest_refresh_at"] = deadline
+                                self.save(owner, data)
+                            raise AccountError("ChatGPT refresh is awaiting its provider reset")
+                        raise AccountError("ChatGPT access could not be renewed. Please try again shortly.")
                     tokens = response.json()
                 saved["pending_refresh_received_at"] = time.time()
                 saved["pending_refresh"] = tokens
@@ -378,16 +471,9 @@ class ModelAccounts:
             return saved["access_token"]
 
     async def disconnect_chatgpt(self, owner):
-        pending = self.pending.pop((str(owner), "chatgpt"), {})
-        if pending.get("server"):
-            pending["server"].close()
-        if pending.get("task"):
-            pending["task"].cancel()
+        await self.cancel_sign_in(owner, "chatgpt")
         data = self.load(owner)
         saved = data["oauth"].get("chatgpt", {})
-        if pending.get("callback_task") and not pending["callback_task"].done():
-            pending["callback_task"].cancel()
-            await asyncio.gather(pending["callback_task"], return_exceptions=True)
         renewable = saved.get("pending_refresh", {}).get("refresh_token") or saved.get(
             "refresh_token"
         )
@@ -418,6 +504,17 @@ class ModelAccounts:
         data["oauth"].pop("chatgpt", None)
         self.save(owner, data)
         self.catalogs.clear()
+
+    async def cancel_sign_in(self, owner, provider):
+        """Close the pending local flow without revoking an existing connection."""
+        pending = self.pending.pop((str(owner), provider), {})
+        if pending.get("server"):
+            pending["server"].close()
+            await pending["server"].wait_closed()
+        tasks = [pending[name] for name in ("task", "callback_task") if pending.get(name) and not pending[name].done()]
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
 
     async def close(self):
         tasks = []

@@ -1,5 +1,6 @@
 """Readable display text and a concise, evidence-free itinerary completion message."""
 import re
+from datetime import date, timedelta
 
 
 def readable_text(value):
@@ -17,20 +18,27 @@ def readable_trip(trip):
         if isinstance(value, list):
             return [notes(entry) for entry in value]
         return readable_text(value)
-    return {**trip, 'daily_plan': [{**day, 'items': [
+    try:
+        start = date.fromisoformat(str(trip.get('summary', {}).get('dates', {}).get('start')))
+    except (ValueError, TypeError):
+        start = None
+    return {**trip, 'daily_plan': [{**day, **({'date': (start + timedelta(days=index)).isoformat()} if start and not day.get('date') else {}), 'items': [
         {**item, **{key: notes(item[key]) for key in ('title', 'description', 'content', 'visitor_information', 'visitor_details') if key in item}}
-        for item in day.get('items', [])]} for day in trip.get('daily_plan', [])]}
+        for item in day.get('items', [])]} for index, day in enumerate(trip.get('daily_plan', []))]}
 
 
 def itinerary_chat_text(trip):
     days = trip.get('daily_plan') or []
     origin = str(trip.get('summary', {}).get('origin') or '')
     cities = list(dict.fromkeys(city.strip() for day in days if day.get('destination')
-        for city in re.split(r'\s*(?:→|->)\s*', re.split(r'\s+[—–]\s+', str(day['destination']))[0])
+        and not (day.get('items') and all(item.get('card_type') == 'flight' for item in day['items']))
+        for city in re.split(r'\s*(?:→|->)\s*', re.split(r'\s+[—–]\s+|\s*\|\s*', str(day['destination']))[0])
+        if not re.match(r'^\d{1,2}\s+\w+', city.strip())
         if city.strip() and not (origin and re.search(r'\b' + re.escape(city.strip()) + r'\b', origin, re.I))))
     travelers = trip.get('summary', {}).get('travelers')
     description = f"{len(days)}-day " if days else ''
-    description += (' → '.join(cities) + ' ') if cities else ''
+    title = str(trip.get('trip_name') or '').strip() if days else ''
+    description += (title + ' ') if title else (' → '.join(cities) + ' ') if cities else ''
     description += 'draft' if trip.get('planning_status') == 'partial' else 'itinerary'
     party = f" for {travelers} {'traveler' if travelers == 1 else 'travelers'}" if travelers else ''
     ending = 'is saved' if trip.get('planning_status') == 'partial' or not days else 'is ready'

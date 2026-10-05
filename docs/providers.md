@@ -26,6 +26,10 @@ npm ci --prefix model-bridge
 
 An adapter being present does not guarantee that an account can access a model. Catalog availability and completed access checks determine which models the interface can offer. Connecting to a subscription is distinct from using a paid API key.
 
+Website authentication is email/password or guest access. ChatGPT and Claude connections authorize **local model use**, independently of website login. Their account state includes explicit readiness, renewable/expired access and local bridge availability. Cancelling a sign-in closes the pending flow while retaining any existing credentials; disconnecting revokes/removes the connection.
+
+Guest linking copies encrypted keys, OAuth registration/tokens, model-role choices and isolated Claude configuration before moving chat/message/run ownership. Existing destination credentials win. The source is retained until the ownership transaction commits. Active guest planning and pending model sign-in are blocked. The website records the verified source/destination relationship and can finish an interrupted link after sign-in; browser callers cannot supply a source identity to the generic backend proxy.
+
 ### Automatic and shared routing
 
 Automatic selection prefers an eligible connected model account, with Sol preferred over Astra for the orchestrator, then available fallback routes. Researchers receive a lower role recommendation where the provider offers one. Recommendations use the current catalog and family heuristics rather than benchmark scores.
@@ -36,7 +40,7 @@ Explicit model assignments are strict. An unavailable selection reports its fail
 
 ### Cooldowns
 
-Provider/model cooldowns are tied to the credential and persisted in `.runtime/model-routing.sqlite3`. Reported reset and retry times are honored. Temporary app timeouts are distinguished from provider quota resets. A cooling-down model is skipped, avoiding repeated requests that cannot succeed.
+Provider/model cooldowns are tied to the credential and persisted in `.runtime/model-routing.sqlite3`. Reported reset and retry times are honored, including ChatGPT token-refresh responses. An invalid refresh grant requires reconnection instead of repeating the same rejected grant. Temporary app timeouts are distinguished from provider quota resets. A cooling-down model is skipped, avoiding repeated requests that cannot succeed.
 
 ## Search cache and accounting
 

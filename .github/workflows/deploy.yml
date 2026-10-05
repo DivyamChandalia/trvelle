@@ -1,0 +1,56 @@
+name: Test and deploy
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: deploy-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: USER
+          POSTGRES_PASSWORD: YOUR_DATABASE_PASSWORD
+          POSTGRES_DB: trvelle
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U USER" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_URI: postgresql://USER:YOUR_DATABASE_PASSWORD@localhost:5432/trvelle
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv
+      - run: uv sync --locked
+      - run: uv run python tests/run.py
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy tested source to Oracle VM
+        env:
+          DEPLOY_KEY: ${{ secrets.ORACLE_DEPLOY_KEY }}
+          KNOWN_HOSTS: ${{ secrets.ORACLE_KNOWN_HOSTS }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DEPLOY_KEY" ] || [ -z "$KNOWN_HOSTS" ]; then
+            echo "Configure ORACLE_DEPLOY_KEY and ORACLE_KNOWN_HOSTS repository secrets."
+            exit 1
+          fi
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/trvelle_deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          git archive "$RELEASE_SHA" | ssh -i ~/.ssh/trvelle_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o ServerAliveInterval=30 ubuntu@144.24.127.147 "backend $RELEASE_SHA"

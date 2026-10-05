@@ -2,7 +2,8 @@ from mcp.server.fastmcp import FastMCP
 from fastapi import FastAPI
 from typing import List, Optional, Dict, Any, Literal
 from pydantic import AliasChoices, BaseModel, Field, field_validator, model_validator
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+from datetime import date as CalendarDate
 import logging
 import yaml
 import uuid
@@ -91,7 +92,7 @@ class PlannedItem(BaseModel):
 
 class DailyPlan(BaseModel):
     day: int = Field(description="Day number of the itinerary (e.g., 1, 2, ...)")
-    date: Optional[date] = None
+    date: Optional[CalendarDate] = None
     destination: Optional[str] = None
     items: List[PlannedItem] = Field(description="Typed flight/hotel/activity/transfer/meal/free_time/note items. Activities need a location and suggested start/end time. Only actual place activities need visitor details.")
 
@@ -168,6 +169,14 @@ class Itinerary(BaseModel):
     summary: TripSummary
     requirements: TripRequirements = Field(default_factory=TripRequirements, description='Traveler constraints, distinct from verified provider details. Preserve requested private room, bed configuration and minimum review rating.')
     daily_plan: List[DailyPlan] = Field(default_factory=list)
+
+    @model_validator(mode='after')
+    def fill_missing_day_dates(self):
+        start = self.summary.dates.start
+        for index, day in enumerate(self.daily_plan):
+            if day.date is None:
+                day.date = start + timedelta(days=index)
+        return self
 
     @field_validator('daily_plan')
     def validate_daily_plan_day_order(cls, daily_plan):

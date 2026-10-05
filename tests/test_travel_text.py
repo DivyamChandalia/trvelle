@@ -1,9 +1,29 @@
 import unittest
 from trvelle.utils.travel_text import readable_text, readable_trip, itinerary_chat_text
-from trvelle.tools.itinerary_tool import PlannedItem
+from trvelle.tools.itinerary_tool import PlannedItem, Itinerary
 
 
 class TravelTextTests(unittest.TestCase):
+    def test_missing_calendar_dates_follow_trip_start(self):
+        plan = Itinerary.model_validate({'trip_name': 'Japan', 'summary': {'dates': {'start': '2027-04-24', 'end': '2027-04-25'}},
+                                         'daily_plan': [{'day': 1, 'items': []}, {'day': 2, 'items': []}]})
+        self.assertEqual([day.date.isoformat() for day in plan.daily_plan], ['2027-04-24', '2027-04-25'])
+        raw=plan.model_dump(mode='json'); raw['daily_plan'][0]['date']=None
+        self.assertEqual(readable_trip(raw)['daily_plan'][0]['date'], '2027-04-24')
+        self.assertIsNone(raw['daily_plan'][0]['date'])
+    def test_connection_airport_and_day_labels_do_not_become_trip_origin(self):
+        trip = {'trip_name': 'Japan at an Easy Pace — Mumbai, Tokyo, Kyoto & Nara',
+                'planning_status': 'partial', 'summary': {'origin': 'Mumbai', 'travelers': 6},
+                'daily_plan': [{'destination': 'Mumbai → Bangkok', 'items': [{'card_type': 'flight'}]},
+                               {'destination': '25 April → Tokyo | 25 April'},
+                               {'destination': 'Tokyo → Kyoto | 28 April'}]}
+        text = itinerary_chat_text(trip)
+        self.assertIn('Japan at an Easy Pace', text)
+        self.assertNotIn('Bangkok', text)
+        self.assertNotIn('25 April', text)
+        self.assertIn('for 6 travelers is saved', text)
+        trip.pop('trip_name')
+        self.assertEqual(itinerary_chat_text(trip), 'Your 3-day Tokyo → Kyoto draft for 6 travelers is saved.')
     def test_joined_clock_times_get_spaces_without_changing_the_schedule(self):
         self.assertEqual(readable_text('Prebook taxi, aim airport by07:30 for09:50 flight.'), 'Prebook taxi, aim airport by 07:30 for 09:50 flight.')
         self.assertEqual(readable_text('Leave at9:50am or07:30for09:50.'), 'Leave at 9:50 am or 07:30 for 09:50.')

@@ -9,9 +9,9 @@
 ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-4169E1?logo=postgresql&logoColor=white)
 ![MCP](https://img.shields.io/badge/Tools-MCP-536B89)
 
-[Website repository](https://github.com/HyperToken9/trvelle-website) · [Local setup](#run-locally) · [API](#api-at-a-glance) · [Architecture](docs/architecture.md) · [Provider guide](docs/providers.md)
+[Website repository](https://github.com/HyperToken9/trvelle-website) · [Local setup](#run-locally) · [API](#api-at-a-glance) · [Architecture](docs/architecture.md) · [Provider guide](docs/providers.md) · [Acceptance checks](docs/completion-checks.md)
 
-![The connected website displaying a saved itinerary, selected flights and hotel details](docs/images/itinerary-and-hotels.png)
+![The connected website showing saved itinerary, flight and hotel evidence](docs/images/workspace-finish.png)
 
 *The screenshots show the companion website consuming this backend's saved Italy demo. They include real historical search responses and explicitly unconfirmed details; they do not represent current availability.*
 
@@ -176,7 +176,24 @@ uv run --locked python scripts/check-secrets.py
 git diff --check
 ```
 
-The suite covers ownership, prompt branches, itinerary revisions, durable runs, selected offers, scoped detail lookups, matching, caching, spending limits and model adapters. Recorded travel acceptance fixtures replay without contacting search or model providers. Their quotes are historical evidence; see [tests/fixtures/README.md](tests/fixtures/README.md).
+The suite covers guest credential/history migration and interrupted-link retries, pending authorization cancellation, expired/refreshable connection states, reported refresh resets, ownership, prompt branches, itinerary revisions, durable runs, selected offers, scoped detail lookups, matching, caching, spending limits and model adapters. Recorded travel acceptance fixtures replay without contacting search or model providers. Their quotes are historical evidence; see [tests/fixtures/README.md](tests/fixtures/README.md).
+
+Browser acceptance uses the sibling website checkout and an isolated stack:
+
+```bash
+# Install the website dependencies and Playwright Chromium first.
+uv run --locked python tests/browser.py
+```
+
+The harness creates/drops a disposable PostgreSQL database, uses a local SMTP inbox, starts the API and website on ports 18001/13000, and starts no worker. Website accounts, mail and model-connection files are temporary. Search replay fails closed, and model catalogs are mocked. This checks real sign-up/login/reset, guest linking and isolation, saved drafts/scroll, activity edits/versions, session expiry, mobile focus and reduced motion without spending search credits.
+
+A separate, explicitly invoked live inference check uses your connected account with historical flight/hotel evidence:
+
+```bash
+uv run --locked python tests/live_model.py --owner YOUR_BACKEND_USER_UUID
+```
+
+It makes at most one researcher and one planner call (each bounded to four minutes), calls no search provider, validates the structured result and writes an ignored `.runtime/acceptance-live-model.json`. It does not publish into a user's chat, and historical quotes are not current availability. Use this only when you intend to spend model allowance.
 
 For deliberate travel-tool replay, set `TRVELLE_SEARCH_MODE=replay` and `TRVELLE_REPLAY_DIR=tests/fixtures/search`. Missing fixtures fail closed. Replay mode affects search tools; it does not disable model inference.
 

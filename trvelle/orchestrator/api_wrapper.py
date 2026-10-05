@@ -5,7 +5,7 @@ import json
 import os
 import uuid
 from datetime import datetime, timezone
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, AsyncExitStack
 from fastapi import FastAPI, Depends, Header, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from .streaming import with_keepalive
@@ -112,29 +112,58 @@ app.include_router(runs_router)
 class GuestMigration(BaseModel):
     guest_id: uuid.UUID
 
+
+def check_guest_planning(guest_id, destination=False):
+    from trvelle.database.models import PlanningRun
+    from .personal_models import get_accounts
+    from .model_accounts import AccountError
+    with db_handler.db_session() as db:
+        if db.query(PlanningRun).filter_by(user_id=guest_id).filter(PlanningRun.status.in_(['queued', 'running'])).first():
+            raise HTTPException(409, 'Stop account planning before linking this guest. Your chats are retained.' if destination else 'Stop guest planning before linking this account. Your chats are retained.')
+    try:
+        get_accounts().check_link_ready(guest_id)
+    except AccountError as error:
+        raise HTTPException(409, str(error)) from None
+
+
+@app.post('/guest_migrate/check', dependencies=[Depends(authorize)])
+async def check_guest_migration(body: GuestMigration):
+    check_guest_planning(body.guest_id)
+    return {'ready': True}
+
+
 @app.post('/guest_migrate', dependencies=[Depends(authorize)])
 async def migrate_guest(body: GuestMigration, user_id: uuid.UUID = Header()):
     from trvelle.database.models import User, ChatSession, Message, PlanningRun
+    from .personal_models import get_accounts
+    from .model_accounts import AccountError
     if body.guest_id == user_id:
         return {'migrated': True}
-    with db_handler.db_session() as db:
-        if db.get(User, body.guest_id) is None:
-            return {'migrated': True}
-        if db.get(User, user_id) is None:
-            db.add(User(user_id=user_id))
-            db.flush()
-        if db.query(PlanningRun).filter_by(user_id=body.guest_id).filter(PlanningRun.status.in_(['queued', 'running'])).first():
-            raise HTTPException(409, 'Stop guest planning before linking this account. Your chats are retained.')
-        db.query(ChatSession).filter_by(user_id=body.guest_id).update({'user_id': user_id})
-        db.query(Message).filter_by(user_id=body.guest_id).update({'user_id': user_id})
-        db.query(PlanningRun).filter_by(user_id=body.guest_id).update({'user_id': user_id})
-        db.commit()
-    from .personal_models import get_accounts
     accounts = get_accounts()
-    source, target = accounts.load(body.guest_id), accounts.load(user_id)
-    for field in ('keys', 'oauth', 'roles'):
-        target[field] = {**source.get(field, {}), **{key: value for key, value in target.get(field, {}).items() if value}}
-    accounts.save(user_id, target)
+    async with accounts.migration_locks.setdefault(str(body.guest_id), asyncio.Lock()), AsyncExitStack() as locks:
+        for owner in sorted((str(body.guest_id), str(user_id))):
+            await locks.enter_async_context(accounts.locks.setdefault(owner, asyncio.Lock()))
+        check_guest_planning(body.guest_id)
+        check_guest_planning(user_id, destination=True)
+        with db_handler.db_session() as db:
+            db.execute(text("SELECT pg_advisory_xact_lock(hashtext(:source))"), {'source': str(body.guest_id)})
+            if db.query(PlanningRun).filter_by(user_id=body.guest_id).filter(PlanningRun.status.in_(['queued', 'running'])).first():
+                raise HTTPException(409, 'Stop guest planning before linking this account. Your chats are retained.')
+            try:
+                # Retain the source until the ownership transaction commits.
+                accounts.copy_credentials(body.guest_id, user_id)
+            except AccountError as error:
+                raise HTTPException(409, str(error)) from None
+            if db.get(User, body.guest_id) is not None:
+                if db.get(User, user_id) is None:
+                    db.add(User(user_id=user_id))
+                    db.flush()
+                db.query(ChatSession).filter_by(user_id=body.guest_id).update({'user_id': user_id})
+                db.query(Message).filter_by(user_id=body.guest_id).update({'user_id': user_id})
+                db.query(PlanningRun).filter_by(user_id=body.guest_id).update({'user_id': user_id})
+            db.commit()
+        # Safe after interruption, including guests who have only credentials.
+        accounts.finish_credential_move(body.guest_id)
     return {'migrated': True}
 
 @app.get("/chat_history", dependencies=[Depends(authorize)])
@@ -235,7 +264,7 @@ class ModelRolesRequest(BaseModel):
 
 class AccountRequest(BaseModel):
     provider: str = Field(pattern=r"^(chatgpt|claude)$")
-    action: str = Field(pattern=r"^(connect|disconnect)$")
+    action: str = Field(pattern=r"^(connect|disconnect|cancel)$")
 
 @app.get('/model_settings', dependencies=[Depends(authorize)])
 async def model_settings(user_id: uuid.UUID = Header()):
@@ -279,6 +308,9 @@ async def model_account(body: AccountRequest, user_id: uuid.UUID = Header()):
     try:
         if body.action == 'connect':
             return await (service.start_chatgpt(user_id) if body.provider == 'chatgpt' else service.start_claude(user_id))
+        if body.action == 'cancel':
+            await service.cancel_sign_in(user_id, body.provider)
+            return {'cancelled': True}
         await (service.disconnect_chatgpt(user_id) if body.provider == 'chatgpt' else service.disconnect_claude(user_id))
     except AccountError as error:
         raise HTTPException(422, str(error)) from None

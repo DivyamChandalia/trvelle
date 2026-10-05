@@ -178,8 +178,28 @@ class PersonalTests(unittest.IsolatedAsyncioTestCase):
             "personal-google-key",
         )
 
+    async def test_vm_connection_exposes_tunnel_before_authorization(self):
+        with patch.dict(os.environ, {"TRVELLE_MODEL_SSH_HOST": "ubuntu@144.24.127.147"}):
+            response = await self.service.start_chatgpt(self.owner)
+            redirect = urlsplit(parse_qs(urlsplit(response["url"]).query)["redirect_uri"][0])
+            self.assertIn(f"127.0.0.1:{redirect.port}:127.0.0.1:{redirect.port}", response["tunnel_command"])
+            self.assertTrue(response["tunnel_command"].endswith(" ubuntu@144.24.127.147"))
+            self.assertEqual(await self.service.start_chatgpt(self.owner), response)
+            state = self.service.state(self.owner)["accounts"]["chatgpt"]
+            self.assertEqual(state["sign_in_url"], response["url"])
+            self.assertIsNone(self.service.state(self.other)["accounts"]["chatgpt"]["sign_in_url"])
+
+    async def test_vm_ssh_host_rejects_shell_arguments(self):
+        with patch.dict(os.environ, {"TRVELLE_MODEL_SSH_HOST": "ubuntu@host; echo unsafe"}):
+            with self.assertRaises(AccountError):
+                await self.service.start_chatgpt(self.owner)
+        self.assertNotIn((self.owner, "chatgpt"), self.service.pending)
+
     async def test_pkce_state_rejected_then_verified_account_saved(self):
         service = self.service
+        previous = service.load(self.owner)
+        previous["oauth"]["chatgpt"] = {"verified_models": {"gpt-6.1-sol": {"verified_at": 123}}}
+        service.save(self.owner, previous)
         response = await service.start_chatgpt(self.owner)
         params = parse_qs(urlsplit(response["url"]).query)
         self.assertEqual(params["client_id"], ["dynamic_agent_client"])
@@ -225,6 +245,7 @@ class PersonalTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn(b"200 OK", result)
         self.assertTrue(service.state(self.owner)["accounts"]["chatgpt"]["sharing"])
         self.assertEqual(await service.chatgpt_token(self.owner), "access-secret")
+        self.assertEqual(service.load(self.owner)["oauth"]["chatgpt"]["verified_models"], previous["oauth"]["chatgpt"]["verified_models"])
         self.assertNotIn("access-secret", json.dumps(service.state(self.owner)))
         self.assertEqual(service.verify_identity.call_args.args[2], params["nonce"][0])
 

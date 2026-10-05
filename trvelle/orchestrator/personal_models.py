@@ -134,9 +134,14 @@ class PersonalModels(ModelAccounts):
                 await process.wait()
 
     async def claude_state(self, owner):
+        try:
+            self.claude_command()
+        except AccountError:
+            return {"status": "disconnected", "readiness": "unavailable", "can_plan": False, "can_connect": False,
+                    "message": "Install the local Claude bridge to connect Claude on this machine."}
         pending = self.pending.get((str(owner), "claude"), {})
         if pending.get("status") == "connecting":
-            return {"status": "connecting"}
+            return {"status": "connecting", "readiness": "connecting", "can_plan": False, "can_connect": True}
         try:
             data = json.loads(await self.claude_run(owner, ["auth", "status"]))
             _, directory = self.claude_env(owner)
@@ -147,11 +152,17 @@ class PersonalModels(ModelAccounts):
                 if data.get("loggedIn") and data.get("authMethod") == "claude.ai"
                 else "disconnected",
                 "email": data.get("email"),
+                "readiness": "ready" if data.get("loggedIn") and data.get("authMethod") == "claude.ai" else "disconnected",
+                "can_plan": bool(data.get("loggedIn") and data.get("authMethod") == "claude.ai"),
+                "can_connect": True,
+                "message": "Local connection through Claude Code. Your website login is separate.",
             }
-        except AccountError:
-            return {"status": "disconnected", "error": pending.get("error")}
+        except (AccountError, ValueError, OSError, asyncio.TimeoutError):
+            return {"status": "disconnected", "readiness": "error", "can_plan": False, "can_connect": True,
+                    "error": pending.get("error") or "Claude access could not be checked. Try connecting again."}
 
     async def start_claude(self, owner):
+        self.claude_command()
         slot = (str(owner), "claude")
         if self.pending.get(slot, {}).get("status") == "connecting":
             return {
@@ -167,7 +178,7 @@ class PersonalModels(ModelAccounts):
                 )
                 pending.update(status="connected", error=None)
                 self.catalogs.clear()
-            except AccountError:
+            except (AccountError, OSError, asyncio.TimeoutError):
                 pending.update(
                     status="disconnected",
                     error="Claude sign-in failed or timed out. Please reconnect.",
