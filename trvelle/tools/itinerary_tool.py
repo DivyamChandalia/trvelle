@@ -53,12 +53,27 @@ class ActivityCard(CardItem):
 # --- Daily Plan Model ---
 
 class ItemCost(BaseModel):
-    price: float = Field(ge=0, allow_inf_nan=False, description='Numeric cost; zero only when explicitly free. Omit cost entirely when unknown.')
+    price: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description='Verified numeric price, or upper bound used for budgeting an estimate. Zero only for a known free visit.')
+    min_price: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description='Lower bound of an approximate price range when no published price is verified.')
+    max_price: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description='Upper bound of the approximate range, in the same currency and scope.')
     currency: str = Field(pattern=r'^[A-Z]{3}$')
     scope: Literal['per_person', 'party']
     status: Literal['quoted', 'estimate'] = 'estimate'
     source_url: Optional[str] = None
+    basis: Optional[str] = Field(default=None, description='Brief evidence or rationale for the estimate, e.g. typical admission cost from model knowledge; never describe model knowledge as a live quote.')
     coverage_key: Optional[str] = Field(None, description='Shared identifier for a combined ticket or pass, so its price is counted once across covered activities.')
+
+    @model_validator(mode='after')
+    def valid_price_or_range(self):
+        if self.min_price is not None or self.max_price is not None:
+            if self.min_price is None or self.max_price is None or self.min_price > self.max_price:
+                raise ValueError('A price range needs ordered lower and upper bounds.')
+            if self.status != 'estimate':
+                raise ValueError('Price ranges must be marked as estimates.')
+            self.price = self.max_price  # Budget conservatively; display the range.
+        elif self.price is None:
+            raise ValueError('Provide a price or an approximate range.')
+        return self
 
 
 class PlannedItem(BaseModel):
@@ -76,7 +91,7 @@ class PlannedItem(BaseModel):
     visitor_information: Optional[str | Dict[str, Any]] = Field(None, validation_alias=AliasChoices('visitor_information', 'visitor_details'), description="Optional sourced visit notes: opening hours/closures, ticket or reservation rules, dress code and accessibility where relevant. Use plain text or a dictionary of notes; keep uncertain or future-date information explicitly unconfirmed. Omit for ordinary strolls/rest when no special visitor rules apply.")
     source_url: Optional[str] = Field(None, description="Official attraction or other source URL supporting visit notes, if researched. Do not invent a URL.")
     visitor_information_sources: Optional[List[Dict[str, str]]] = Field(None, description="Supporting researched sources, each with title and url, when available.")
-    cost: Optional[ItemCost] = Field(None, description='Optional researched ticket, meal or transport cost. Specify currency, party/per-person scope and quote/estimate status. Never invent an unavailable price or put prices in visitor notes.')
+    cost: Optional[ItemCost] = Field(None, description='Check published activity admission prices first. If unavailable, use a reasonable model-knowledge range with min_price, max_price, status estimate and basis. Specify currency and party/per-person scope. Never claim an estimate is a quote or invent sources. Keep prices out of visitor notes.')
 
     @field_validator('title', 'description', mode='before')
     @classmethod
@@ -93,8 +108,14 @@ class PlannedItem(BaseModel):
 class DailyPlan(BaseModel):
     day: int = Field(description="Day number of the itinerary (e.g., 1, 2, ...)")
     date: Optional[CalendarDate] = None
-    destination: Optional[str] = None
+    destination: Optional[str] = Field(default=None, description="City or city-to-city route only, without dates or day headings. Use the final destination of a flight journey, not its connection airport. Put the calendar date in date.")
     items: List[PlannedItem] = Field(description="Typed flight/hotel/activity/transfer/meal/free_time/note items. Activities need a location and suggested start/end time. Only actual place activities need visitor details.")
+
+    @field_validator('destination')
+    @classmethod
+    def destination_without_calendar(cls, value):
+        from trvelle.utils.travel_text import clean_destination
+        return clean_destination(value)
 
     @field_validator("items", mode="before")
     @classmethod

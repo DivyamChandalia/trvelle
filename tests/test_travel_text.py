@@ -1,9 +1,20 @@
 import unittest
-from trvelle.utils.travel_text import readable_text, readable_trip, itinerary_chat_text
-from trvelle.tools.itinerary_tool import PlannedItem, Itinerary
+from trvelle.utils.travel_text import readable_text, readable_trip, itinerary_chat_text, clean_destination
+from trvelle.tools.itinerary_tool import PlannedItem, Itinerary, DailyPlan
 
 
 class TravelTextTests(unittest.TestCase):
+    def test_destinations_remove_calendar_prose_across_saved_and_new_plans(self):
+        for label, expected in [('Tokyo | 25 April', 'Tokyo'), ('25 April → Tokyo | 25 April', 'Tokyo'),
+                                ('Tokyo → Kyoto — Wednesday 28 April', 'Tokyo → Kyoto'),
+                                ('Sunday 25 April 2027: Tokyo', 'Tokyo'), ('Nara day trip | 2 May', 'Nara day trip'),
+                                ('Bangkok', 'Bangkok'), ('2027-04-25 → Tokyo', 'Tokyo')]:
+            self.assertEqual(clean_destination(label), expected)
+            raw = {'daily_plan': [{'destination': label, 'items': []}]}
+            self.assertEqual(readable_trip(raw)['daily_plan'][0]['destination'], expected)
+            self.assertEqual(raw['daily_plan'][0]['destination'], label)
+        day = DailyPlan.model_validate({'day': 1, 'destination': 'Tokyo | 25 April', 'items': []})
+        self.assertEqual(day.destination, 'Tokyo')
     def test_missing_calendar_dates_follow_trip_start(self):
         plan = Itinerary.model_validate({'trip_name': 'Japan', 'summary': {'dates': {'start': '2027-04-24', 'end': '2027-04-25'}},
                                          'daily_plan': [{'day': 1, 'items': []}, {'day': 2, 'items': []}]})

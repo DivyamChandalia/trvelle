@@ -8,6 +8,25 @@ from trvelle.utils.currency import present_currency
 
 
 class BudgetTests(unittest.TestCase):
+    def test_approximate_ranges_budget_upper_bound_and_convert_both_bounds(self):
+        cost = {'min_price': 10, 'max_price': 20, 'currency': 'USD', 'scope': 'per_person', 'status': 'estimate', 'basis': 'Typical admission from model knowledge; unverified.'}
+        model = PlannedItem(title='Museum', cost=cost)
+        self.assertEqual(model.cost.price, 20)
+        trip = {'summary': {'currency': 'USD', 'travelers': 6}, 'daily_plan': [{'items': [{'card_type': 'activity', 'cost': cost}]}]}
+        self.assertEqual(budget_breakdown(trip)['estimated_total'], 120)
+        self.assertEqual(budget_breakdown(trip)['quoted_total'], 0)
+        with patch('trvelle.utils.currency.exchange_rate', AsyncMock(return_value=(80, '2026-10-05'))):
+            shown = asyncio.run(present_currency(trip, 'INR'))
+        shown_cost = shown['daily_plan'][0]['items'][0]['cost']
+        self.assertEqual((shown_cost['min_price'], shown_cost['max_price']), (800, 1600))
+        self.assertEqual(shown['budget_breakdown']['estimated_total'], 9600)
+        self.assertEqual(cost['max_price'], 20)
+
+    def test_invalid_or_mislabeled_ranges_are_rejected(self):
+        from pydantic import ValidationError
+        for extra in ({'min_price': 10}, {'min_price': 20, 'max_price': 10}, {'min_price': 10, 'max_price': 20, 'status': 'quoted'}, {'min_price': 10, 'max_price': float('nan')}):
+            with self.assertRaises(ValidationError):
+                PlannedItem(title='Museum', cost={'currency': 'INR', 'scope': 'per_person', **extra})
     def trip(self):
         return {'summary': {'currency': 'INR', 'travelers': 2, 'budget_amount': 10000},
                 'travel_options': {'flights': [{'selected': True, 'legs': [{'price': 2000, 'currency': 'INR'}, {'price': 4000, 'currency': 'INR'}]}],

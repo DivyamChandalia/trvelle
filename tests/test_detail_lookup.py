@@ -1,4 +1,5 @@
 import unittest
+import json
 from unittest.mock import AsyncMock, patch
 from langchain_core.messages import AIMessage
 from trvelle.tools.detail_lookup import DetailLookup, activity_query, merge_missing, missing_details
@@ -12,6 +13,31 @@ def option(number='LH 755', price=500):
 
 
 class DetailTests(unittest.IsolatedAsyncioTestCase):
+    async def test_missing_ticket_price_uses_marked_model_range_when_search_has_no_price(self):
+        payload = {'summary': '', 'cost': {'min_price': 800, 'max_price': 1600, 'currency': 'INR', 'scope': 'per_person', 'status': 'estimate', 'basis': 'Typical museum admission from model knowledge; unverified.', 'source_url': 'https://invented.example'}}
+        router = type('Router', (), {'invoke': AsyncMock(return_value=AIMessage(content=json.dumps(payload)))})()
+        lookup = DetailLookup(router)
+        lookup.serp = AsyncMock(return_value={'organic_results': []})
+        with patch.dict('os.environ', {'TAVILY_API_KEY': ''}):
+            item, report = await lookup.fetch('activity', {'title': 'Museum', 'location': 'Tokyo'}, currency='INR', fields=['Ticket price'])
+        self.assertEqual(item['cost']['price'], 1600)
+        self.assertEqual(item['cost']['status'], 'estimate')
+        self.assertNotIn('source_url', item['cost'])
+        self.assertNotIn('visitor_information', item)
+        self.assertEqual(report['missing'], [])
+        self.assertEqual(report['filled'], ['Ticket price'])
+        self.assertEqual(report['status'], 'estimated')
+
+    async def test_unsourced_model_quote_is_not_saved_as_a_verified_price(self):
+        payload = {'cost': {'price': 1000, 'currency': 'INR', 'scope': 'per_person', 'status': 'quoted', 'source_url': 'https://invented.example'}}
+        router = type('Router', (), {'invoke': AsyncMock(return_value=AIMessage(content=json.dumps(payload)))})()
+        lookup = DetailLookup(router)
+        lookup.serp = AsyncMock(return_value={'organic_results': []})
+        with patch.dict('os.environ', {'TAVILY_API_KEY': ''}):
+            item, report = await lookup.fetch('activity', {'title': 'Museum', 'location': 'Tokyo'}, currency='INR', fields=['Ticket price'])
+        self.assertNotIn('cost', item)
+        self.assertEqual(report['missing'], ['Ticket price'])
+
     async def test_scoped_baggage_lookup_does_not_research_unrelated_fields(self):
         original=option();original.pop('total_duration')
         lookup=DetailLookup();lookup.serp=AsyncMock(return_value={'best_flights':[]})

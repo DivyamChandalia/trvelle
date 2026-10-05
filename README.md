@@ -26,7 +26,7 @@
 | Durable planning | Events, checkpoints, completed operations, quotas and worker leases survive a dropped browser connection or worker replacement. |
 | Editing | Change flights, swap a hotel for the same stay, edit activities, adjust budget allowances and fetch a specific missing detail. |
 | Saved versions | Prompt retry/edit branches and itinerary revisions retain their own messages, selected offers and sources. |
-| Cost visibility | Recalculate selected quotes, preserve original currencies and separate known prices from unpriced expenses and estimates. |
+| Cost visibility | Check published activity prices first; use explicitly approximate ranges when only model knowledge is available. Preserve currencies and budget ranges at their upper bound, separately from verified quotes. |
 
 The backend publishes a **draft** when essential research is incomplete. It does not turn an absent quote into an invented hotel or fare, count a rejected hotel as selected, or report a summary-only continuation as a completed itinerary update.
 

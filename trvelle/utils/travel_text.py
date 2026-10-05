@@ -3,6 +3,20 @@ import re
 from datetime import date, timedelta
 
 
+def clean_destination(value):
+    """Keep the place/route, leaving calendar headings to the structured date."""
+    if not isinstance(value, str):
+        return value
+    heading = re.split(r'\s*\|\s*|\s+[—–]\s+', value)[0]
+    calendar = r'(?:(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\s*,?\s*)?(?:\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)(?:\s+\d{4})?)'
+    places = []
+    for part in re.split(r'\s*(?:→|->)\s*', heading):
+        part = re.sub(r'^' + calendar + r'(?:\s*[:·,]\s*|\s+|$)', '', part.strip(), flags=re.I).strip()
+        if part:
+            places.append(part)
+    return ' → '.join(places)
+
+
 def readable_text(value):
     if not isinstance(value, str) or value.startswith(('https://', 'http://')):
         return value
@@ -22,7 +36,7 @@ def readable_trip(trip):
         start = date.fromisoformat(str(trip.get('summary', {}).get('dates', {}).get('start')))
     except (ValueError, TypeError):
         start = None
-    return {**trip, 'daily_plan': [{**day, **({'date': (start + timedelta(days=index)).isoformat()} if start and not day.get('date') else {}), 'items': [
+    return {**trip, 'daily_plan': [{**day, **({'destination': clean_destination(day['destination'])} if day.get('destination') else {}), **({'date': (start + timedelta(days=index)).isoformat()} if start and not day.get('date') else {}), 'items': [
         {**item, **{key: notes(item[key]) for key in ('title', 'description', 'content', 'visitor_information', 'visitor_details') if key in item}}
         for item in day.get('items', [])]} for index, day in enumerate(trip.get('daily_plan', []))]}
 
@@ -32,7 +46,7 @@ def itinerary_chat_text(trip):
     origin = str(trip.get('summary', {}).get('origin') or '')
     cities = list(dict.fromkeys(city.strip() for day in days if day.get('destination')
         and not (day.get('items') and all(item.get('card_type') == 'flight' for item in day['items']))
-        for city in re.split(r'\s*(?:→|->)\s*', re.split(r'\s+[—–]\s+|\s*\|\s*', str(day['destination']))[0])
+        for city in re.split(r'\s*→\s*', clean_destination(str(day['destination'])))
         if not re.match(r'^\d{1,2}\s+\w+', city.strip())
         if city.strip() and not (origin and re.search(r'\b' + re.escape(city.strip()) + r'\b', origin, re.I))))
     travelers = trip.get('summary', {}).get('travelers')

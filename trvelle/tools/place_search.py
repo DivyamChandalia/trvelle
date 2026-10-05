@@ -146,6 +146,8 @@ async def find_place(name, location, *, destination='', photos=False, coordinate
     return normalize_place(place,score,(raw.get('_trvelle_search') or {}).get('fetched_at'))
 
 async def enrich_activity(item, *, destination='', photos=True):
+    from trvelle.utils.travel_text import clean_destination
+    destination = clean_destination(destination)
     item=deepcopy(item)
     if item.get('place_details') and item['place_details'].get('provider')=='brave' and (item.get('image_url') or not photos):
         return item,False

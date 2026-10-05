@@ -58,7 +58,7 @@ def budget_breakdown(trip):
             coverage = cost.get('coverage_key')
             if coverage and coverage in covered:
                 continue
-            value = number(cost.get('price'))
+            value = number(cost.get('max_price') if cost.get('status') == 'estimate' and cost.get('max_price') is not None else cost.get('price'))
             scope = cost.get('scope')
             if scope not in ('party', 'per_person'):
                 value = None

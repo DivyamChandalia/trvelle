@@ -99,9 +99,11 @@ async def present_currency(payload, target):
                 result[key]={**item,'lowest':format_money(converted,target) if converted is not None else 'Price unavailable','extracted_lowest':converted,'currency':target,'original_quote':original}
             else:
                 result[key]=await walk(item,source)
-        if isinstance(value.get('price'),(int,float)):
-            result['original_quote']={'price':value['price'],'currency':source}
-            result['price']=await convert(value['price'],source)
+        monetary = [key for key in ('price', 'min_price', 'max_price') if isinstance(value.get(key), (int, float))]
+        if monetary:
+            result['original_quote']={**{key: value[key] for key in monetary}, 'currency':source}
+            for key in monetary:
+                result[key]=await convert(value[key],source)
             result['currency']=target
         if any(isinstance(value.get(key), dict) for key in ('rate_per_night', 'total_rate')):
             result['currency'] = target
