@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import time
 import uuid
 from contextvars import ContextVar
@@ -95,13 +96,54 @@ class PersonalModels(ModelAccounts):
         )
         return env, directory
 
+    def claude_bridge_directory(self):
+        package = Path(__file__).parents[2] / "model-bridge/package.json"
+        version = json.loads(package.read_text())["dependencies"]["@anthropic-ai/claude-code"]
+        return self.root / (".claude-bridge-" + version)
+
     def claude_command(self):
-        cli = Path(__file__).parents[2] / "model-bridge/node_modules/.bin/claude"
-        if not cli.exists():
-            raise AccountError(
-                "Install the local Claude bridge with npm install in trvelle/model-bridge"
-            )
-        return [str(cli)]
+        for directory in (Path(__file__).parents[2] / "model-bridge", self.claude_bridge_directory()):
+            cli = directory / "node_modules/.bin/claude"
+            if cli.exists():
+                return [str(cli)]
+        raise AccountError("Claude Code needs setup. Choose Connect Claude to install the pinned bridge.")
+
+    async def ensure_claude_bridge(self):
+        try:
+            self.claude_command()
+            return
+        except AccountError:
+            pass
+        if not hasattr(self, "_claude_install_lock"):
+            self._claude_install_lock = asyncio.Lock()
+        async with self._claude_install_lock:
+            try:
+                self.claude_command()
+                return
+            except AccountError:
+                pass
+            npm = shutil.which("npm") or ("/opt/node/bin/npm" if Path("/opt/node/bin/npm").exists() else None)
+            if not npm:
+                raise AccountError("Claude Code setup requires Node.js and npm on the server.")
+            directory = self.claude_bridge_directory()
+            directory.mkdir(mode=0o700, exist_ok=True)
+            source = Path(__file__).parents[2] / "model-bridge"
+            for name in ("package.json", "package-lock.json"):
+                shutil.copyfile(source / name, directory / name)
+            env = dict(os.environ)
+            env["PATH"] = str(Path(npm).parent) + os.pathsep + env.get("PATH", "")
+            process = await asyncio.create_subprocess_exec(npm, "ci", "--no-audit", "--no-fund", cwd=directory,
+                env=env, stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL, start_new_session=True)
+            try:
+                await asyncio.wait_for(process.wait(), 120)
+                if process.returncode:
+                    raise AccountError("Claude Code setup failed. Retry connection or use a Claude API key.")
+            finally:
+                if process.returncode is None:
+                    import signal
+                    os.killpg(process.pid, signal.SIGTERM)
+                    await process.wait()
+            self.claude_command()
 
     async def claude_run(self, owner, args, input_data=None, timeout=15):
         env, directory = self.claude_env(owner)
@@ -121,7 +163,7 @@ class PersonalModels(ModelAccounts):
             )
             if process.returncode:
                 # Never emit CLI output, which may include credentials or conversation contents.
-                if "--output-format" not in args or not output.strip():
+                if ("--output-format" not in args and args != ["auth", "status"]) or not output.strip():
                     raise AccountError(
                         "Claude request failed. Check your connection, model access and subscription limits."
                     )
@@ -137,11 +179,13 @@ class PersonalModels(ModelAccounts):
         try:
             self.claude_command()
         except AccountError:
-            return {"status": "disconnected", "readiness": "unavailable", "can_plan": False, "can_connect": False,
-                    "message": "Install the local Claude bridge to connect Claude on this machine."}
+            return {"status": "disconnected", "readiness": "setup", "can_plan": False, "can_connect": True,
+                    "message": "Connect Claude to set up the native Claude Code bridge. Your connection survives website deployments."}
         pending = self.pending.get((str(owner), "claude"), {})
-        if pending.get("status") == "connecting":
-            return {"status": "connecting", "readiness": "connecting", "can_plan": False, "can_connect": True}
+        if pending.get("status") in ("connecting", "verifying"):
+            return {"status": pending["status"], "readiness": pending["status"], "can_plan": False, "can_connect": True,
+                    "sign_in_url": pending.get("url"), "code_required": True,
+                    "message": "Sign in on Claude’s page, then paste its one-time code below. Claude Code completes the sign-in."}
         try:
             data = json.loads(await self.claude_run(owner, ["auth", "status"]))
             _, directory = self.claude_env(owner)
@@ -155,39 +199,81 @@ class PersonalModels(ModelAccounts):
                 "readiness": "ready" if data.get("loggedIn") and data.get("authMethod") == "claude.ai" else "disconnected",
                 "can_plan": bool(data.get("loggedIn") and data.get("authMethod") == "claude.ai"),
                 "can_connect": True,
-                "message": "Local connection through Claude Code. Your website login is separate.",
+                "message": "Native connection through Claude Code. Your website login is separate.",
+                "error": pending.get("error") if not data.get("loggedIn") else None,
             }
         except (AccountError, ValueError, OSError, asyncio.TimeoutError):
             return {"status": "disconnected", "readiness": "error", "can_plan": False, "can_connect": True,
                     "error": pending.get("error") or "Claude access could not be checked. Try connecting again."}
 
     async def start_claude(self, owner):
-        self.claude_command()
+        await self.ensure_claude_bridge()
         slot = (str(owner), "claude")
-        if self.pending.get(slot, {}).get("status") == "connecting":
-            return {
-                "message": "Complete Claude sign-in in the browser already opened on this machine."
-            }
-        pending = {"status": "connecting"}
+        existing = self.pending.get(slot, {})
+        if existing.get("status") in ("connecting", "verifying"):
+            return {"url": existing.get("url"), "code_required": True}
+        pending = {"status": "connecting", "ready": asyncio.Event()}
         self.pending[slot] = pending
 
         async def login():
+            process = None
             try:
-                await self.claude_run(
-                    owner, ["auth", "login", "--claudeai"], timeout=600
-                )
+                env, directory = self.claude_env(owner)
+                # The unmodified CLI prints its own native sign-in URL when no
+                # browser can open on the server. Tokens are handled by the CLI.
+                env["BROWSER"] = "/bin/false"
+                process = await asyncio.create_subprocess_exec(*self.claude_command(), "auth", "login", "--claudeai",
+                    env=env, cwd=directory, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.STDOUT, start_new_session=True)
+                pending["process"] = process
+                async with asyncio.timeout(600):
+                    while line := await process.stdout.readline():
+                        from urllib.parse import urlsplit
+                        for candidate in re.findall(r"https://[^\s\x1b]+", line.decode(errors="replace")):
+                            parsed = urlsplit(candidate)
+                            if parsed.hostname in ("claude.com", "claude.ai") and parsed.path.endswith("/oauth/authorize"):
+                                pending["url"] = candidate
+                                pending["ready"].set()
+                    await process.wait()
+                    if process.returncode:
+                        raise AccountError("Claude sign-in failed")
                 pending.update(status="connected", error=None)
                 self.catalogs.clear()
             except (AccountError, OSError, asyncio.TimeoutError):
-                pending.update(
-                    status="disconnected",
-                    error="Claude sign-in failed or timed out. Please reconnect.",
-                )
+                pending.update(status="disconnected", error="Claude sign-in failed or timed out. Please reconnect.")
+            finally:
+                pending.pop("url", None)
+                pending["ready"].set()
+                if process and process.returncode is None:
+                    import signal
+                    os.killpg(process.pid, signal.SIGTERM)
+                    await process.wait()
 
         pending["task"] = asyncio.create_task(login())
-        return {
-            "message": "Complete Claude sign-in in the browser opened on this machine."
-        }
+        try:
+            await asyncio.wait_for(pending["ready"].wait(), 15)
+        except asyncio.TimeoutError:
+            await self.cancel_sign_in(owner, "claude")
+            raise AccountError("Claude sign-in could not start. Please retry.") from None
+        if not pending.get("url"):
+            raise AccountError(pending.get("error") or "Claude sign-in could not start.")
+        return {"url": pending["url"], "code_required": True,
+                "message": "Open Claude sign-in, then paste the one-time code below. No SSH tunnel is needed."}
+
+    async def complete_claude(self, owner, code):
+        pending = self.pending.get((str(owner), "claude"), {})
+        process = pending.get("process")
+        if pending.get("status") != "connecting" or not process or process.returncode is not None:
+            raise AccountError("Start Claude connection again before submitting a code.")
+        if not code or len(code) > 8192 or any(character in code for character in "\r\n\x00"):
+            raise AccountError("Enter the one-time code shown by Claude.")
+        try:
+            process.stdin.write((code.strip() + "\n").encode())
+            await process.stdin.drain()
+        except (BrokenPipeError, ConnectionResetError):
+            raise AccountError("Claude sign-in expired. Please reconnect.") from None
+        pending["status"] = "verifying"
+        return {"message": "Claude Code is verifying your sign-in."}
 
     async def disconnect_claude(self, owner):
         pending = self.pending.pop((str(owner), "claude"), {})

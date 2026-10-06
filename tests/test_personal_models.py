@@ -984,3 +984,66 @@ class AutomaticRoutingTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(service.load(owner)['roles'], {})
             router.cooldowns.db.close()
             await service.close()
+
+
+class ClaudeNativeLoginTests(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.temp=tempfile.TemporaryDirectory()
+        self.service=PersonalModels(self.temp.name+'/accounts')
+        self.owner=str(uuid.uuid4());self.other=str(uuid.uuid4())
+
+    async def asyncTearDown(self):
+        with patch('os.killpg'):
+            await self.service.close()
+        self.temp.cleanup()
+
+    async def test_native_url_code_verification_and_owner_isolation(self):
+        native_url='https://claude.com/cai/oauth/authorize?client_id=native-cli-test&state=native-state'
+        class Process:
+            returncode=None
+            pid=123456789
+            def __init__(self):
+                self.stdout=asyncio.StreamReader()
+                self.stdout.feed_data(('If the browser did not open, visit: '+native_url+'\n').encode())
+                self.written=[]
+                parent=self
+                class Input:
+                    def write(self,data):parent.written.append(data)
+                    async def drain(self):parent.stdout.feed_eof()
+                self.stdin=Input()
+            async def wait(self):self.returncode=0;return 0
+        process=Process()
+        with patch.object(self.service,'ensure_claude_bridge',new=AsyncMock()), patch.object(self.service,'claude_command',return_value=['native-claude']), patch('asyncio.create_subprocess_exec',new=AsyncMock(return_value=process)) as launch:
+            result=await self.service.start_claude(self.owner)
+            self.assertEqual(result['url'],native_url)
+            self.assertTrue(result['code_required'])
+            state=await self.service.claude_state(self.owner)
+            self.assertEqual(state['sign_in_url'],native_url)
+            self.assertEqual(state['status'],'connecting')
+            with self.assertRaises(AccountError):await self.service.complete_claude(self.other,'valid-native-test-code')
+            with self.assertRaises(AccountError):await self.service.complete_claude(self.owner,'code\ncommand')
+            await self.service.complete_claude(self.owner,'valid-native-test-code')
+            await self.service.pending[(self.owner,'claude')]['task']
+            self.assertEqual(process.written,[b'valid-native-test-code\n'])
+            self.assertEqual(self.service.pending[(self.owner,'claude')]['status'],'connected')
+            self.assertNotIn('url',self.service.pending[(self.owner,'claude')])
+            self.assertNotIn('code',self.service.load(self.owner))
+            args,kwargs=launch.call_args
+            self.assertEqual(args,('native-claude','auth','login','--claudeai'))
+            self.assertEqual(kwargs['env']['CLAUDE_CONFIG_DIR'],str(self.service.directory(self.owner)/'claude'))
+
+    async def test_native_disconnected_auth_status_is_not_an_access_error(self):
+        _,directory=self.service.claude_env(self.owner)
+        with patch.object(self.service,'claude_command',return_value=['native-claude']), patch.object(self.service,'claude_run',new=AsyncMock(return_value=json.dumps({'loggedIn':False,'authMethod':None,'configDirectory':str(directory)}))):
+            state=await self.service.claude_state(self.owner)
+            self.assertEqual(state['readiness'],'disconnected')
+            self.assertTrue(state['can_connect'])
+            self.assertFalse(state['can_plan'])
+
+    async def test_missing_bridge_can_be_set_up_from_connect(self):
+        with patch.object(self.service,'claude_command',side_effect=AccountError('Not installed')):
+            state=await self.service.claude_state(self.owner)
+            self.assertEqual(state['readiness'],'setup')
+            self.assertTrue(state['can_connect'])
+            self.assertFalse(state['can_plan'])
+        self.assertTrue(str(self.service.claude_bridge_directory()).startswith(str(self.service.root)))

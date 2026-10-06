@@ -264,7 +264,8 @@ class ModelRolesRequest(BaseModel):
 
 class AccountRequest(BaseModel):
     provider: str = Field(pattern=r"^(chatgpt|claude)$")
-    action: str = Field(pattern=r"^(connect|disconnect|cancel)$")
+    action: str = Field(pattern=r"^(connect|disconnect|cancel|complete)$")
+    code: str | None = Field(None, max_length=8192)
 
 @app.get('/model_settings', dependencies=[Depends(authorize)])
 async def model_settings(user_id: uuid.UUID = Header()):
@@ -308,6 +309,10 @@ async def model_account(body: AccountRequest, user_id: uuid.UUID = Header()):
     try:
         if body.action == 'connect':
             return await (service.start_chatgpt(user_id) if body.provider == 'chatgpt' else service.start_claude(user_id))
+        if body.action == 'complete':
+            if body.provider != 'claude':
+                raise AccountError('Code submission is only available for Claude Code sign-in')
+            return await service.complete_claude(user_id, body.code)
         if body.action == 'cancel':
             await service.cancel_sign_in(user_id, body.provider)
             return {'cancelled': True}
