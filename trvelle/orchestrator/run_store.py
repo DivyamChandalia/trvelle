@@ -66,7 +66,7 @@ class RunStore:
                 raise LookupError('Planning run not found')
             usage = {provider: int(db.query(func.coalesce(func.sum(SearchCharge.credits), 0)).filter_by(run_id=run.run_id, provider=provider).scalar()) for provider in ('serpapi', 'tavily', 'brave')}
             return {'run_id': str(run.run_id), 'chat_id': str(run.chat_id), 'status': run.status,
-                'phase': run.phase, 'revision': run.revision, 'last_event_id': run.last_event_id,
+                'phase': run.phase, 'mode':run.request.get('mode','plan'), 'revision': run.revision, 'last_event_id': run.last_event_id,
                 'elapsed_seconds': round(run.active_seconds), 'counters': run.counters,
                 'search_usage': usage, 'search_limits': run.request.get('search_limits', {}),
                 'search_providers':run.request.get('search_providers',{}),

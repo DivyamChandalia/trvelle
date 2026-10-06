@@ -59,14 +59,14 @@ def stream(owner, run_id, after=0, history=False):
 async def start(body: ChatRequest, user_id: uuid.UUID = Header(), chat_id: uuid.UUID | None = Query(None)):
     identifier = chat_id or uuid.uuid4()
     currency = body.currency or preferred_currency(body.message)
-    if chat_id and not body.currency:
+    if chat_id:
         from trvelle.database.models import ChatSession, ToolExecution
         with db_handler.db_session() as db:
             owned = db.query(ChatSession).filter_by(chat_id=identifier, user_id=user_id).first()
             if not owned:
                 raise HTTPException(404, 'Chat not found')
             previous = db.query(ToolExecution).filter_by(chat_id=identifier, tool_name='itinerary_tool').order_by(ToolExecution.created_at.desc()).first()
-            if previous:
+            if previous and not body.currency:
                 currency = preferred_currency(previous.raw_response.get('summary', {}).get('origin', ''), currency)
     # Keys and OAuth tokens stay in the encrypted account store; snapshot only choices.
     from trvelle.tools.search_gateway import brave_run_budget
@@ -77,6 +77,22 @@ async def start(body: ChatRequest, user_id: uuid.UUID = Header(), chat_id: uuid.
         'search_limits': {'serpapi':6, 'tavily':6, 'brave':brave_maximum},
         'search_reserves': {'brave_places':photo_reserve if providers['places']=='brave' else 0},
         'search_providers': providers}
+    from trvelle.utils.message_intent import message_mode
+    previous_plan=None
+    continuing_plan=False
+    if chat_id:
+        from trvelle.database.models import ToolExecution,Message,PlanningRun
+        with db_handler.db_session() as db:
+            previous_plan=db.query(ToolExecution).join(Message,Message.message_id==ToolExecution.message_id).filter(ToolExecution.chat_id==identifier,ToolExecution.tool_name=='itinerary_tool',Message.superseded.is_(False)).order_by(ToolExecution.created_at.desc()).first()
+            has_plan=bool(previous_plan and (previous_plan.raw_response or {}).get('daily_plan'))
+            prior_run=db.query(PlanningRun).filter_by(user_id=user_id,chat_id=identifier).order_by(PlanningRun.created_at.desc()).first()
+            continuing_plan=bool(prior_run and prior_run.request.get('mode','plan')=='plan' and not has_plan)
+    else:
+        has_plan=False
+    mode=message_mode(body.message,has_plan,continuing_plan)
+    request['mode']=mode
+    if mode=='chat':
+        request.update(search_limits={'serpapi':0,'tavily':0,'brave':0},search_reserves={})
     retrying_update=False
     if chat_id and body.replace_message_id:
         from trvelle.database.models import Message,PlanningRun
@@ -85,11 +101,14 @@ async def start(body: ChatRequest, user_id: uuid.UUID = Header(), chat_id: uuid.
             target=db.query(Message).filter_by(message_id=body.replace_message_id,chat_id=identifier,user_id=user_id,type='human').first()
             previous_run_id=version(target).get('run_id') if target else None
             prior=db.get(PlanningRun,uuid.UUID(previous_run_id)) if previous_run_id else None
-            retrying_update=bool(prior and prior.user_id==user_id and prior.request.get('mode')=='update')
-    if chat_id and (not body.replace_message_id or retrying_update):
+            retrying_update=bool(prior and prior.user_id==user_id and prior.request.get('mode') in ('update','chat'))
+            if prior and prior.user_id==user_id and prior.request.get('mode','plan')=='plan' and mode!='chat':
+                mode='plan'
+                request['mode']=mode
+    if chat_id and mode in ('update','chat') and (not body.replace_message_id or retrying_update or mode=='chat'):
         from trvelle.utils.itinerary_patch import update_scope
         scope = update_scope(body.message)
-        if scope:
+        if scope or mode=='chat':
             from trvelle.database.models import ToolExecution, Message, PlanningRun
             with db_handler.db_session() as db:
                 previous = db.query(ToolExecution).join(Message, Message.message_id == ToolExecution.message_id).filter(
@@ -107,9 +126,9 @@ async def start(body: ChatRequest, user_id: uuid.UUID = Header(), chat_id: uuid.
                     base_revision=current_view.get('revision',1)
                     if cached_base is None:
                         cached_base=context_snapshot(db_handler.get_itinerary(user_id,identifier,itinerary_id,revision=1))
-                    request.update(mode='update',update_scope=scope,base_itinerary_id=str(itinerary_id),base_revision=base_revision,
+                    request.update(mode=mode,update_scope=scope if mode=='update' else None,base_itinerary_id=str(itinerary_id),base_revision=base_revision,
                                    context_base=cached_base,context_diff=edit_diff(cached_base,context_snapshot(current_view)),
-                                   search_limits={'serpapi':6 if scope=='inventory' else 0,'tavily':2,'brave':min(brave_maximum,8)},search_reserves={'brave_places':2 if providers['places']=='brave' else 0})
+                                   search_limits={'serpapi':6 if scope=='inventory' and mode=='update' else 0,'tavily':2 if mode=='update' else 0,'brave':min(brave_maximum,8) if mode=='update' else 0},search_reserves={'brave_places':2 if providers['places']=='brave' and mode=='update' else 0})
     try:
         return store.create(user_id, identifier, request)
     except LookupError:

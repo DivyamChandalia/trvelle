@@ -85,6 +85,7 @@ def pending_call_message(prompt):
 
 
 async def perform_update(agent, config):
+    config['defer_plain_response']=True
     identifier = uuid.UUID(config['base_itinerary_id'])
     current = agent.db_handler.get_itinerary(config['user_id'],config['chat_id'],identifier)
     if not current or 'error' in current:
@@ -105,6 +106,8 @@ async def perform_update(agent, config):
     from trvelle.utils.edit_context import context_snapshot,edit_diff
     snapshot = config.get('context_base') or context_snapshot(current)
     changes = config.get('context_diff') if config.get('context_diff') is not None else edit_diff(snapshot,context_snapshot(current))
+    from .conversation import recent_conversation
+    memory=recent_conversation(config['user_id'],config['chat_id'])
     initial = [SystemMessage(content=('Update the EXISTING itinerary using itinerary_patch; do not recreate it. Change only the requested items or preferences, preserving unrelated flights, hotels, travel dates and activities. Flight and hotel choices must refer to actual supplied inventory. '
         'Use zero-based day_index and the supplied item_id. The saved base context is stable; apply the supplied edit diff to understand the CURRENT state. Manual edits and previous updates are authoritative. Do not undo them or recompute unchanged data. Preserve original money values and their currency; the currency parameter is for displaying/searching or pricing new items, not silently changing the units of an existing budget or quote. '
         'Infer food emphasis from the prompt: incidental discoveries close to the route, balanced food/activities, or a food-focused trip. There is no fixed number of meal recommendations. '
@@ -116,7 +119,7 @@ async def perform_update(agent, config):
         'Research with research_update using the researcher role. If inventory tools are available, use them only for the requested flight/stay change, reuse saved offers first and never invent UIDs. Choose returned verified flight_uid or a flight_option with uid/search_index/option_index, or hotel_choices with uid and stay_key; provide replace_stay_key when a new search changes a selected stay group. '
         'A general edit can change timing, transport, budget, preferences, names, descriptions or move/remove visits without restarting the trip. If an indirect request changes a destination, guest count or travel arrangements and genuinely needs inventory, call enable_inventory_edits with its reason. Reuse the saved inventory returned by that tool first. Summary/day changes are allowed only for trip-level edit scopes; scoped food/activity additions preserve slot times. Finish with itinerary_patch, not a long narrative.')),
         HumanMessage(content='Saved itinerary base context:\n'+json.dumps(snapshot,ensure_ascii=False,sort_keys=True,default=str)),
-        HumanMessage(content=json.dumps({'message':config['query'],'currency':config['currency'],'update_scope':config['update_scope'],'base_revision':config['base_revision'],'edit_diff':changes},ensure_ascii=False,sort_keys=True,default=str))]
+        HumanMessage(content=json.dumps({'message':config['query'],'currency':config['currency'],'update_scope':config['update_scope'],'base_revision':config['base_revision'],'edit_diff':changes,'recent_conversation':memory},ensure_ascii=False,sort_keys=True,default=str))]
     transcript = store.operation(config['run_id'], 'update-transcript', 'checkpoint')
     prompt = messages_from_dict(transcript['messages']) if transcript else initial
     tools = [research_update,itinerary_patch]
@@ -157,6 +160,7 @@ async def perform_update(agent, config):
             prompt.append(pending)
             store.operation(config['run_id'],'update-transcript','checkpoint',{'messages':messages_to_dict(prompt)})
         if not pending.tool_calls:
+            config['final_response']=pending
             return None, (pending.text[:2500] or 'No changes were applied.') + '\nYour saved itinerary is unchanged.'
         for call in pending.tool_calls:
             if any(isinstance(message,ToolMessage) and message.tool_call_id == call['id'] for message in prompt):

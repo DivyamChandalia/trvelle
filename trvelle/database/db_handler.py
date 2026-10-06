@@ -302,6 +302,24 @@ class DBHandler:
                     })
 
             by_id = {str(row.message_id): row for row in messages}
+            # Earlier update completions saved both the plain model reply and
+            # the same reply with an app footer. Keep one display entry without
+            # deleting stored messages or merging separate user turns.
+            deduplicated=[]
+            positions={}
+            footer='Your saved itinerary is unchanged.'
+            for item in filtered_messages:
+                row=by_id[item['message_id']]
+                turn=version(row).get('turn_id')
+                if item['type']=='ai' and turn:
+                    canonical=item['content'].strip().removesuffix(footer).strip()
+                    key=(turn,canonical)
+                    if key in positions:
+                        deduplicated[positions[key]]=None
+                        item={**item,'content':canonical}
+                    positions[key]=len(deduplicated)
+                deduplicated.append(item)
+            filtered_messages=[item for item in deduplicated if item is not None]
             last_responses = {}
             for item in filtered_messages:
                 row = by_id[item['message_id']]

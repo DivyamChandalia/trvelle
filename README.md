@@ -123,6 +123,8 @@ Follow the [website quick start](https://github.com/HyperToken9/trvelle-website#
 
 ## Planning and editing
 
+Questions and general conversation use a read-only assistant with the saved itinerary, current edit diff and recent chat context. They have no search or editing tools and use no search credits. Explicit trip requests start planning; requests to change an existing itinerary use targeted updates. Each answer is saved once, including after a resumed worker run.
+
 1. The API stores an owned run and immediately streams its status.
 2. The worker coordinates flight research and destination researchers. Completed operations and evidence are saved before moving on.
 3. Real travel offers are referenced by saved identifiers. Hotel offers distinguish property, dates and occupancy; a property name mentioned in notes does not select it.

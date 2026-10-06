@@ -236,7 +236,8 @@ class Orchestrator:
             response.id = str(uuid.uuid4())
         response.name = 'Supervisor_Agent' if role == 'supervisor' else 'Researcher_Agent_' + str(config.get('segment_number'))
         # Persist model output before the operation checkpoint is advanced.
-        self.db_handler.save_message_to_db(response, config)
+        if response.tool_calls or not config.get('defer_plain_response'):
+            self.db_handler.save_message_to_db(response, config)
         store.operation(config['run_id'], operation, 'model', response.model_dump(mode='json'))
         snapshot = store.snapshot(config['user_id'], config['run_id'])
         models = {**snapshot['models'], role: {'provider': response.additional_kwargs.get('routing_provider'), 'model': response.additional_kwargs.get('routing_model'), 'effort': response.additional_kwargs.get('routing_effort', '')}}
