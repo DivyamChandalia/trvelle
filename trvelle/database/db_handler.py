@@ -453,7 +453,9 @@ class DBHandler:
                         options = (part.get('best_flights') or []) + (part.get('other_flights') or [])
                         if options:
                             selected = min(part.get('selected_option_index', 0), len(options) - 1)
-                            legs.append({**options[selected], 'currency': options[selected].get('currency') or part.get('search_parameters', {}).get('currency', '')})
+                            from trvelle.utils.flight_routes import with_airport_cities
+                            leg = with_airport_cities(options[selected], part.get('airports'))
+                            legs.append({**leg, 'currency': leg.get('currency') or part.get('search_parameters', {}).get('currency', '')})
                     if legs:
                         flights.append({'uid': uid, 'legs': legs})
             cards = [item for day in result.get('daily_plan', []) for item in day.get('items', [])]
