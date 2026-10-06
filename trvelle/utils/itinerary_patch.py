@@ -6,7 +6,7 @@ import uuid
 from pydantic import BaseModel, Field
 from .party_prices import item_identity
 from .item_alternatives import minutes
-from trvelle.tools.itinerary_tool import PlannedItem
+from trvelle.tools.itinerary_tool import PlannedItem, DailyPlan
 
 
 def update_scope(message):
@@ -48,6 +48,11 @@ class HotelChoice(BaseModel):
     stay_key: str = Field(min_length=1, max_length=64)
     replace_stay_key: str | None = Field(None, min_length=1, max_length=64)
 
+class DayAction(BaseModel):
+    action: Literal['append_day','remove_day']
+    day_index: int | None = Field(None, ge=0)
+    day: DailyPlan | None = None
+
 
 class ItineraryPatch(BaseModel):
     operations: list[PatchOperation] = Field(default_factory=list, max_length=60)
@@ -57,6 +62,7 @@ class ItineraryPatch(BaseModel):
     trip_name: str | None = Field(None, max_length=200)
     trip_description: str | None = Field(None, max_length=4000)
     day_changes: list[dict[str, Any]] = Field(default_factory=list, max_length=60)
+    day_actions: list[DayAction] = Field(default_factory=list, max_length=30, description='Append or remove a destination day when the user changes trip duration; preserve unaffected days and refresh affected flight/stay quotes when needed.')
     flight_uid: str | None = None
     flight_option: FlightChoice | None = Field(None, description='Optional saved flight choice. Dependent return legs are refreshed within this update, then all changes commit together.')
     hotel_choices: list[HotelChoice] = Field(default_factory=list, max_length=30)
@@ -156,13 +162,28 @@ def apply_patch(trip, patch, scope):
                 raise ValueError('Choose a day in the saved itinerary.')
             from trvelle.tools.itinerary_tool import DailyPlan
             result['daily_plan'][index]=DailyPlan.model_validate({**result['daily_plan'][index],**{key:change[key] for key in ('date','destination') if key in change}}).model_dump(mode='json',exclude_none=True)
+        for change in patch.day_actions:
+            if change.action=='append_day':
+                if change.day is None or change.day.date is None:
+                    raise ValueError('An added day needs a date and structured daily plan.')
+                added=change.day.model_dump(mode='json',exclude_none=True)
+                if any(day.get('date')==added['date'] for day in result['daily_plan']):
+                    raise ValueError('That destination day is already in the itinerary.')
+                result['daily_plan'].append(added)
+            else:
+                if change.day_index is None or change.day_index >= len(result['daily_plan']):
+                    raise ValueError('Choose an existing day to remove.')
+                result['daily_plan'].pop(change.day_index)
+        if patch.day_actions:
+            result['daily_plan'].sort(key=lambda day:day.get('date') or '')
+            for index,day in enumerate(result['daily_plan']):day['day']=index+1
         if patch.budget_allocations is not None:
             from .budget import ALLOWANCE_KEYS, number
             if any(number(patch.budget_allocations.get(key)) is None for key in ALLOWANCE_KEYS):
                 raise ValueError('Provide nonnegative allowances for every budget category.')
             result['budget_allocations']={key:patch.budget_allocations[key] for key in ALLOWANCE_KEYS}
             result['budget_allocations']['currency']=patch.budget_allocations.get('currency') or result.get('summary',{}).get('currency')
-    elif patch.summary_changes or patch.day_changes or patch.trip_name or patch.trip_description or patch.budget_allocations:
+    elif patch.summary_changes or patch.day_changes or patch.day_actions or patch.trip_name or patch.trip_description or patch.budget_allocations:
         raise ValueError('Use a general edit request to change trip-level details.')
     if patch.flight_uid:
         if scope != 'inventory' or not any(f.get('uid')==patch.flight_uid for f in result.get('travel_options',{}).get('flights',[])):
@@ -186,6 +207,11 @@ def apply_patch(trip, patch, scope):
             result['hotel_selections'].pop(old_key,None)
         else:
             result=replace_hotel(result,hotels,choice['stay_key'],choice['uid'])
-    if not any((patch.operations,preferences,patch.summary_changes,patch.day_changes,patch.trip_name,patch.trip_description,patch.budget_allocations,patch.flight_uid,patch.flight_option,patch.hotel_choices)):
+    travel_uids={flight.get('uid') for flight in result.get('travel_options',{}).get('flights',[])}|{hotel.get('choose_uid') for hotel in result.get('travel_options',{}).get('hotels',[])}
+    for day in result.get('daily_plan',[]):
+        for item in day.get('items',[]):
+            if item.get('card_type') in ('flight','hotel') and item.get('uid') and item['uid'] not in travel_uids:
+                raise ValueError('Added travel cards must use verified flight or hotel UIDs.')
+    if not any((patch.operations,preferences,patch.summary_changes,patch.day_changes,patch.day_actions,patch.trip_name,patch.trip_description,patch.budget_allocations,patch.flight_uid,patch.flight_option,patch.hotel_choices)):
         raise ValueError('No itinerary changes were submitted.')
     return result

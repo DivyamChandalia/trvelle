@@ -421,9 +421,10 @@ class DBHandler:
                 if search.tool_name == 'hotel_search' and isinstance(raw, dict):
                     params = raw.get('search_parameters', {})
                     dates = result.get('summary', {}).get('dates', {})
-                    if dates.get('start') and params.get('check_in_date') and params['check_in_date'] < dates['start']:
+                    pending_quote = str(search.message_id) in set(extra_search_ids or [])
+                    if not pending_quote and dates.get('start') and params.get('check_in_date') and params['check_in_date'] < dates['start']:
                         continue
-                    if dates.get('end') and params.get('check_out_date') and params['check_out_date'] > dates['end']:
+                    if not pending_quote and dates.get('end') and params.get('check_out_date') and params['check_out_date'] > dates['end']:
                         continue
                     query = params.get('q', '')
                     import math

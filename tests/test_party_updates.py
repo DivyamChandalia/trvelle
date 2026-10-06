@@ -123,3 +123,12 @@ class PartyUpdateTests(unittest.TestCase):
         base=context_snapshot(trip);delta=edit_diff(base,context_snapshot(result))
         self.assertIn({'op':'replace','path':'/daily_plan/0/items/0/start_time','value':'09:30'},delta)
         self.assertFalse(any('cost' in change['path'] or 'image_url' in change['path'] for change in delta))
+
+    def test_trip_duration_edit_adds_only_requested_day_and_preserves_other_days(self):
+        trip=self.trip();trip['summary']['dates']={'start':'2027-04-25','end':'2027-04-25'}
+        patch=ItineraryPatch.model_validate({'summary_changes':{'dates':{'start':'2027-04-25','end':'2027-04-26'}},'day_actions':[{'action':'append_day','day':{'day':2,'date':'2027-04-26','destination':'Tokyo','items':[{'card_type':'free_time','title':'A relaxed morning'}]}}]})
+        result=apply_patch(trip,patch,'inventory')
+        self.assertEqual(len(result['daily_plan']),2)
+        self.assertEqual(result['daily_plan'][0]['items'][0]['cost'],trip['daily_plan'][0]['items'][0]['cost'])
+        self.assertEqual(result['summary']['dates']['end'],'2027-04-26')
+        with self.assertRaises(ValueError):apply_patch(trip,patch,'food')
