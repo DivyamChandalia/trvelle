@@ -119,7 +119,7 @@ def apply_patch(trip, patch, scope):
         item = {**deepcopy(target or {}),**submitted}
         identity_changed = target and any(key in submitted and submitted[key] != target.get(key) for key in ('title','location','place_name'))
         if identity_changed:
-            for key in ('cost','visitor_information','visitor_details','visitor_information_sources','source_url','place_details','photos','image_url','image','alternatives'):
+            for key in ('cost','visitor_information','visitor_details','visitor_information_sources','source_url','place_details','photos','image_url','image','alternatives','dining'):
                 if key not in submitted:item.pop(key,None)
             if 'description' not in submitted:
                 item.pop('description',None)

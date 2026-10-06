@@ -77,7 +77,16 @@ async def start(body: ChatRequest, user_id: uuid.UUID = Header(), chat_id: uuid.
         'search_limits': {'serpapi':6, 'tavily':6, 'brave':brave_maximum},
         'search_reserves': {'brave_places':photo_reserve if providers['places']=='brave' else 0},
         'search_providers': providers}
-    if chat_id and not body.replace_message_id:
+    retrying_update=False
+    if chat_id and body.replace_message_id:
+        from trvelle.database.models import Message,PlanningRun
+        from trvelle.database.chat_versions import version
+        with db_handler.db_session() as db:
+            target=db.query(Message).filter_by(message_id=body.replace_message_id,chat_id=identifier,user_id=user_id,type='human').first()
+            previous_run_id=version(target).get('run_id') if target else None
+            prior=db.get(PlanningRun,uuid.UUID(previous_run_id)) if previous_run_id else None
+            retrying_update=bool(prior and prior.user_id==user_id and prior.request.get('mode')=='update')
+    if chat_id and (not body.replace_message_id or retrying_update):
         from trvelle.utils.itinerary_patch import update_scope
         scope = update_scope(body.message)
         if scope:

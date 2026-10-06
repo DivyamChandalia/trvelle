@@ -54,7 +54,7 @@ def edit_activity(itinerary, day_index, item_index, fields, hotel_names=(), trav
         reports=result.get('detail_reports', {})
         for key in list(reports):
             if key.startswith((f'activity:{day_index}:{item_index}',f'activity-place:{day_index}:{item_index}')):reports.pop(key,None)
-        for key in ('visitor_information','visitor_details','visitor_information_sources','source_url','cost','place_details','place_name','photos','image_url','image','alternatives'):
+        for key in ('visitor_information','visitor_details','visitor_information_sources','source_url','cost','place_details','place_name','photos','image_url','image','alternatives','dining'):
             item.pop(key,None)
     item.update({key:value for key,value in fields.items() if key in ('title','description','start_time','end_time','location')})
     if item.get('start_time') and item.get('end_time') and item['end_time'] <= item['start_time']:

@@ -40,6 +40,16 @@ class TargetedUpdatesTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(request['context_base']['daily_plan'][0]['items'][0]['start_time'],'09:00')
         self.assertIn({'op':'replace','path':'/daily_plan/0/items/0/start_time','value':'09:30'},request['context_diff'])
         self.assertEqual(request['search_limits']['serpapi'],0)
+        store.finish(uuid.UUID(result['run_id']),'complete')
+        from trvelle.database.chat_versions import KEY
+        message_id=uuid.uuid4()
+        with DBHandler.db_session() as db:
+            db.add(Message(message_id=message_id,user_id=self.owner,chat_id=self.chat,type='human',content='Move the museum visit later',additional_kwargs={KEY:{'run_id':result['run_id'],'root_id':str(message_id),'parent_id':None}}));db.commit()
+        retry=await start(ChatRequest(message='Move the museum visit to 10:00',replace_message_id=message_id),self.owner,self.chat)
+        with DBHandler.db_session() as db:
+            retried=db.get(PlanningRun,uuid.UUID(retry['run_id'])).request
+        self.assertEqual(retried['mode'],'update')
+        self.assertEqual(retried['search_limits']['serpapi'],0)
 
     async def test_food_update_uses_researcher_and_patch_tools_without_inventory_search_and_is_idempotent(self):
         request={'message':'Recommend local food places','currency':'INR','search_limits':{'serpapi':0,'tavily':2,'brave':8},'mode':'update','update_scope':'food','base_itinerary_id':str(self.identifier),'base_revision':1}
