@@ -103,6 +103,9 @@ class PartyUpdateTests(unittest.TestCase):
         self.assertEqual(update_scope('Make the museum visit later'),'general')
         self.assertEqual(update_scope('Set the trip budget to 300000 INR'),'general')
         self.assertEqual(update_scope('Change the return date'),'inventory')
+        self.assertEqual(update_scope('Move dinner to 8pm'),'general')
+        self.assertEqual(update_scope('Reduce the food budget'),'general')
+        self.assertEqual(update_scope('Make this activity later'),'general')
 
     def test_interrupted_multi_tool_turn_keeps_pending_call(self):
         from trvelle.orchestrator.itinerary_updates import pending_call_message

@@ -23,6 +23,8 @@ def update_scope(message):
         return 'inventory'
     if re.search(r'\b(?:flight|flights|hotel|hotels|stay|stays)\b', text) and not re.search(r'\b(?:food|breakfast|restaurant|restaurants|eat|meals?)\b', text):
         return 'inventory'
+    if re.search(r'\b(?:budget|allowance|rename|title|cost|price|transport|reschedule|earlier|later)\b|\b(?:move|shift|change|set|start|end)\b.{0,40}(?:\btime\b|\d{1,2}:\d{2}|\d{1,2}\s*(?:am|pm)\b)',text):
+        return 'general'
     if re.search(r'\b(?:food|foodie|restaurants?|caf[eé]s?|dining|eat|eating|breakfast|lunch|dinner|meals?|vegetarian|vegan)\b', text):
         return 'general' if re.search(r'\b(?:activities|activity|attractions?|sightseeing)\b',text) else 'food'
     if re.search(r'\b(?:activities|activity|attractions?|sightseeing)\b', text):
