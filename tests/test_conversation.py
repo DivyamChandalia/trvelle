@@ -70,6 +70,34 @@ class ConversationTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(replies),1)
             self.assertEqual(replies[0].content,'The museum visit starts at 09:30.')
 
+    async def test_agent_edit_has_one_persistent_version_link_and_legacy_updates_restore_it(self):
+        from copy import deepcopy
+        request={'message':'Move the museum later','currency':'INR','mode':'update','update_scope':'general','base_itinerary_id':str(self.itinerary),'base_revision':1,'search_limits':{'serpapi':0,'tavily':0,'brave':0}}
+        run=store.create(self.owner,self.chat,request)
+        config={**request,'query':request['message'],'run_id':uuid.UUID(run['run_id']),'user_id':self.owner,'chat_id':self.chat,'resume':False}
+        edited=deepcopy(self.plan);edited['daily_plan'][0]['items'][0]['start_time']='10:00'
+        edited['applied_update_runs']={run['run_id']:2}
+        DBHandler().save_itinerary_edit(self.owner,self.chat,self.itinerary,edited,expected_revision=1)
+        agent=SimpleNamespace(db_handler=DBHandler(),load_chat_history=Mock())
+        agent.get_message=lambda text,c: agent.db_handler.save_message_to_db(HumanMessage(content=text,id=str(uuid.uuid4())),c)
+        with patch('trvelle.orchestrator.worker.get_accounts',return_value=SimpleNamespace(load=lambda _:{})), patch('trvelle.orchestrator.itinerary_updates.perform_update',new=AsyncMock(return_value=(str(self.itinerary),'Moved the museum. Saved as version 2.'))):
+            await perform(agent,config)
+            config['resume']=True
+            await perform(agent,config)
+        history=DBHandler().get_filtered_chat_history(self.owner,self.chat)
+        reply=next(row for row in history if row['type']=='ai')
+        self.assertEqual(reply['metadata']['itineraryId'],str(self.itinerary))
+        self.assertEqual(reply['metadata']['itineraryRevision'],2)
+        self.assertTrue(reply['metadata']['itineraryUpdated'])
+        with DBHandler.db_session() as db:
+            rows=db.query(Message).filter_by(chat_id=self.chat,type='ai').all()
+            self.assertEqual(len(rows),1)
+            rows[0].additional_kwargs={key:value for key,value in rows[0].additional_kwargs.items() if key!='itinerary_ref'}
+            db.commit()
+        legacy=next(row for row in DBHandler().get_filtered_chat_history(self.owner,self.chat) if row['type']=='ai')
+        self.assertEqual(legacy['metadata']['itineraryRevision'],2)
+        self.assertEqual(legacy['metadata']['itineraryId'],str(self.itinerary))
+
     async def test_old_duplicate_reply_is_hidden_without_merging_user_turns(self):
         handler=DBHandler()
         def add_turn():

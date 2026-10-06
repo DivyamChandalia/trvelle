@@ -292,6 +292,7 @@ class DBHandler:
                         "type": message.type,
                         "content": message.content,
                         "created_at": message.created_at.isoformat(),
+                        **({'metadata':dict(message.additional_kwargs['itinerary_ref'])} if (message.additional_kwargs or {}).get('itinerary_ref') else {}),
                     })
                 elif message.type == "tool" and message.message_name == "itinerary_tool" and db.get(ToolExecution, message.message_id):
                     from trvelle.utils.travel_text import itinerary_chat_text
@@ -325,9 +326,20 @@ class DBHandler:
                 row = by_id[item['message_id']]
                 if row.type != 'human':
                     last_responses[version(row).get('turn_id')] = item['message_id']
+            from .models import PlanningRun
+            runs={str(run.run_id):run for run in db.query(PlanningRun).filter_by(user_id=user_id,chat_id=chat_id).all()}
             for item in filtered_messages:
                 row = by_id[item['message_id']]
                 turn_id = str(row.message_id) if row.type == 'human' else version(row).get('turn_id')
+                # Restore links for already-completed agent edits as well as new replies.
+                human=humans.get(turn_id)
+                run=runs.get(version(human).get('run_id')) if human else None
+                if row.type=='ai' and last_responses.get(turn_id)==item['message_id'] and run and run.request.get('mode')=='update':
+                    saved_id=(run.checkpoint or {}).get('itinerary_id')
+                    target=db.get(ToolExecution,uuid.UUID(saved_id)) if saved_id else None
+                    revision=(target.raw_response or {}).get('applied_update_runs',{}).get(str(run.run_id)) if target and target.chat_id==chat_id else None
+                    if revision:
+                        item['metadata']={**item.get('metadata',{}),'itineraryId':saved_id,'itineraryRevision':revision,'itineraryUpdated':True}
                 if row.type == 'human' or last_responses.get(turn_id) == item['message_id']:
                     navigation = navigation_for(humans, turn_id)
                     if navigation:

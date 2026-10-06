@@ -171,14 +171,18 @@ async def perform(agent, config):
                 from langchain_core.messages import AIMessage
                 response = config.get('final_response')
                 if response is None:
-                    response = AIMessage(content=message,id=str(uuid.uuid4()),name='Supervisor_Agent')
+                    response = AIMessage(content=message,id=str(uuid.uuid5(uuid.NAMESPACE_URL,str(run_id)+':final-response')),name='Supervisor_Agent')
                 else:
                     response=response.model_copy(update={'content':message,'name':'Supervisor_Agent','id':response.id or str(uuid.uuid4())})
+                if identifier:
+                    reference={'itineraryId':identifier,'itineraryRevision':config['base_revision']+1,'itineraryUpdated':True}
+                    response=response.model_copy(update={'additional_kwargs':{**response.additional_kwargs,'itinerary_ref':reference}})
                 agent.db_handler.save_message_to_db(response,config)
                 store.event(run_id,'message_id',response.id)
                 store.event(run_id,'message',message)
                 if identifier:
                     store.event(run_id,'itinerary_id',identifier)
+                    store.event(run_id,'itinerary_revision',str(config['base_revision']+1))
                 store.finish(run_id,'complete')
                 return
             async for chunk in agent.orchestrate_stream(config['query'], config, resume=True):
