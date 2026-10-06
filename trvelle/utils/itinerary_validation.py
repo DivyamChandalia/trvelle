@@ -45,7 +45,9 @@ def validate_trip(trip):
     for hotel in trip.get('travel_options', {}).get('hotels', []):
         if not hotel.get('selected'):
             continue
-        total = amount(hotel.get('total_rate', {}))
+        from .party_prices import hotel_price
+        projected_cost = hotel_price(hotel, trip)['total_cost'] or {}
+        total = projected_cost.get('price')
         if total is not None:
             totals.append({'kind': 'hotel', 'amount': total, 'currency': hotel.get('currency') or currency, 'scope': 'stay'})
         if not hotel.get('room_type') and not hotel.get('room_description'):

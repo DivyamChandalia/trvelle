@@ -50,16 +50,15 @@ def edit_activity(itinerary, day_index, item_index, fields, hotel_names=(), trav
     text=' '.join(str(item.get(key,'')) for key in ('title','description')).casefold()
     if item.get('item_type')=='tag' or item.get('card_type') in ('flight','hotel') or item.get('uid') in travel_uids or (not item.get('card_type') and any(name.casefold() in text for name in hotel_names if name)):
         raise ValueError('Use the flight or hotel selection controls to change this item.')
-    result.get('detail_reports', {}).pop(f'activity:{day_index}:{item_index}', None)
-    result.get('detail_reports', {}).pop(f'activity-place:{day_index}:{item_index}', None)
-    for key in ('visitor_information', 'visitor_details', 'visitor_information_sources', 'source_url', 'cost'):
-        item.pop(key, None)
     if any(key in fields and fields[key] != item.get(key) for key in ('title','location')):
-        for key in ('place_details','photos','image_url','image'):
+        reports=result.get('detail_reports', {})
+        for key in list(reports):
+            if key.startswith((f'activity:{day_index}:{item_index}',f'activity-place:{day_index}:{item_index}')):reports.pop(key,None)
+        for key in ('visitor_information','visitor_details','visitor_information_sources','source_url','cost','place_details','place_name','photos','image_url','image','alternatives'):
             item.pop(key,None)
     item.update({key:value for key,value in fields.items() if key in ('title','description','start_time','end_time','location')})
     if item.get('start_time') and item.get('end_time') and item['end_time'] <= item['start_time']:
         raise ValueError('End time must be after start time.')
     item['item_type']='card'
-    item['card_type']='activity'
+    item['card_type']='meal' if item.get('card_type') == 'meal' else 'activity'
     return result

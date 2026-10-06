@@ -76,6 +76,29 @@ class ItemCost(BaseModel):
         return self
 
 
+class DiningDetails(BaseModel):
+    model_config = {'extra':'allow'}
+    venue_name: Optional[str] = None
+    cuisine: Optional[str] = None
+    dishes_to_try: List[str] = Field(default_factory=list)
+    dietary_notes: Optional[str] = None
+    meal_type: Optional[str] = None
+    at_hotel: Optional[bool] = None
+    breakfast_included: Optional[bool] = None
+    inclusion_source: Optional[str] = None
+    reservation_notes: Optional[str] = None
+
+    @field_validator('dishes_to_try',mode='before')
+    @classmethod
+    def dish_list(cls,value):
+        return [value] if isinstance(value,str) else value or []
+
+    @field_validator('dietary_notes','reservation_notes','cuisine',mode='before')
+    @classmethod
+    def note_string(cls,value):
+        return ' · '.join(str(part) for part in value) if isinstance(value,list) else value
+
+
 class PlannedItem(BaseModel):
     model_config = {'extra': 'allow'}
     item_type: Literal['card', 'tag'] = 'card'
@@ -83,6 +106,11 @@ class PlannedItem(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     uid: Optional[str] = None
+    item_id: Optional[str] = None
+    participants: Optional[int] = Field(None, ge=1, le=100)
+    alternatives: List[Dict[str, Any]] = Field(default_factory=list, max_length=6, description='Researched alternative activities or meal venues that fit this existing time slot and route. Include alternative_id, title, location, duration_minutes, visit notes, cost and any actual provider media. Never include flights or hotels here.')
+    duration_minutes: Optional[int] = Field(None, ge=1, le=1440)
+    dining: Optional[DiningDetails] = Field(None, description='For meal items. Breakfast inclusion requires evidence from the selected rate, not property amenities. Use named venues as meal cards; generic breaks may stay simple notes.')
     location: Optional[str] = None
     place_name: Optional[str] = Field(None, description='Exact attraction name for place/photo matching, especially when the card title combines attractions or describes a walk. Omit for generic rest or orientation items.')
     image_url: Optional[str] = Field(None, description='Optional actual matched-place photo URL from provider results. Never invent a photo URL.')
@@ -168,6 +196,7 @@ class TripDates(BaseModel):
 
 class TripSummary(BaseModel):
     dates: TripDates
+    travel_dates: Optional[TripDates] = Field(None, description='Optional complete home-to-home flight dates; daily_plan dates cover destination arrival through destination departure, not an extra outbound departure day.')
     origin: Optional[str] = None
     budget: Optional[str] = None
     budget_amount: Optional[float] = Field(None, ge=0)
@@ -180,6 +209,9 @@ class TripRequirements(BaseModel):
     bed: Optional[Literal['double', 'twin', 'any']] = None
     minimum_rating: Optional[float] = Field(None, ge=1, le=5)
     checked_baggage_kg: Optional[float] = Field(None, ge=0)
+    rooms: Optional[int] = Field(None, ge=1, le=30)
+    food_focus: Literal['incidental', 'balanced', 'primary'] = 'incidental'
+    dietary_preferences: List[str] = Field(default_factory=list)
 
 class Itinerary(BaseModel):
     model_config = {'extra': 'allow'}

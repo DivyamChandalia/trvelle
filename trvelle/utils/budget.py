@@ -2,6 +2,7 @@
 import math
 
 from .itinerary_validation import amount
+from .party_prices import hotel_price, flight_price, item_price, item_identity
 
 ALLOWANCE_KEYS = ('activities', 'meals', 'transport', 'buffer')
 LABELS = {'flights': 'Flights', 'stays': 'Stays', 'activities': 'Activities',
@@ -20,7 +21,7 @@ def budget_breakdown(trip):
     if budget is None:
         budget = number(trip.get('validation', {}).get('budget_amount'))
     rows = {key: {'key': key, 'label': label, 'quoted': 0, 'estimated': 0,
-                  'priced_count': 0, 'unpriced_count': 0} for key, label in LABELS.items()}
+                  'priced_count': 0, 'unpriced_count': 0, 'children': []} for key, label in LABELS.items()}
 
     def add(key, price, source, status='quoted'):
         row = rows[key]
@@ -37,6 +38,7 @@ def budget_breakdown(trip):
             # The final resolved fare covers the party's entire round trip.
             leg = (flight.get('legs') or [{}])[-1]
             add('flights', leg.get('price'), leg.get('currency') or currency)
+            rows['flights']['children'].append({'item_id':flight.get('uid'), 'label':'Full flight journey', 'price_summary':flight_price(flight, travelers, currency), 'counted':True})
     seen_stays = set()
     for hotel in options.get('hotels', []):
         if not hotel.get('selected'):
@@ -46,24 +48,26 @@ def budget_breakdown(trip):
             continue
         seen_stays.add(identity)
         quote = hotel.get('total_rate') or {}
-        add('stays', amount(quote), quote.get('currency') or hotel.get('currency') or currency)
+        price = hotel_price(hotel, trip)
+        total = price['total_cost'] or {}
+        add('stays', total.get('price'), total.get('currency') or currency, total.get('status', 'estimate'))
+        rows['stays']['children'].append({'item_id':hotel.get('choose_uid'), 'label':hotel.get('name', 'Stay'), 'date':hotel.get('check_in_date'), 'price_summary':price, 'counted':True})
     covered = set()
-    for day in trip.get('daily_plan', []):
-        for item in day.get('items', []):
+    for day_index, day in enumerate(trip.get('daily_plan', [])):
+        for item_index, item in enumerate(day.get('items', [])):
             kind = item.get('card_type') or item.get('item_type') or 'activity'
             key = {'activity': 'activities', 'meal': 'meals', 'transfer': 'transport'}.get(kind)
             if not key:
                 continue
             cost = item.get('cost') or {}
             coverage = cost.get('coverage_key')
+            price = item_price(item, travelers, currency)
+            rows[key]['children'].append({'item_id':item_identity(trip, day_index, item_index), 'label':item.get('title') or item.get('description') or kind,
+                'date':day.get('date'), 'price_summary':price, 'counted':not (coverage and coverage in covered), 'coverage_key':coverage})
             if coverage and coverage in covered:
                 continue
-            value = number(cost.get('max_price') if cost.get('status') == 'estimate' and cost.get('max_price') is not None else cost.get('price'))
-            scope = cost.get('scope')
-            if scope not in ('party', 'per_person'):
-                value = None
-            elif value is not None and scope == 'per_person':
-                value *= travelers
+            total = price['total_cost'] or {}
+            value = number(total.get('price'))
             add(key, value, cost.get('currency') or currency, cost.get('status', 'estimate'))
             if coverage and value is not None and (cost.get('currency') or currency) == currency:
                 covered.add(coverage)

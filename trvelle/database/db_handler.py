@@ -243,6 +243,7 @@ class DBHandler:
                                 chat_id=config.get("chat_id"),
                                 message_id=msg_to_db.message_id,
                                 tool_name=message.name,
+                                unique_identifier=config.get('base_itinerary_id') if config.get('mode')=='update' else None,
                                 raw_response=redact_secrets(raw),
                                 created_at=datetime.datetime.now(datetime.timezone.utc)
                             )
@@ -360,7 +361,7 @@ class DBHandler:
         finally:
             db.close()
 
-    def get_itinerary(self, user_id: UUID, chat_id: UUID, itinerary_id: UUID, revision=None) -> Dict[str, Any]:
+    def get_itinerary(self, user_id: UUID, chat_id: UUID, itinerary_id: UUID, revision=None, extra_search_ids=None) -> Dict[str, Any]:
         """Retrieve a specific itinerary by ID."""
         db = self.db_session()
 
@@ -405,7 +406,7 @@ class DBHandler:
                     ToolExecution.unique_identifier == str(itinerary_id))
             ).order_by(ToolExecution.created_at.desc()).all()
             if 'source_search_ids' in result:
-                identifiers = set(result['source_search_ids'])
+                identifiers = set(result['source_search_ids']) | set(extra_search_ids or [])
                 searches = [search for search in searches if str(search.message_id) in identifiers]
             saved_message = db.get(Message, itinerary_id)
             turn_id = version(saved_message).get('turn_id') if saved_message else None
@@ -437,7 +438,7 @@ class DBHandler:
                             continue
                         seen.add(('property', stay_key, identity))
                         hotel = {**hotel, **result.get('hotel_details', {}).get(hotel['choose_uid'], {})}
-                        hotels.append({**hotel, 'location': hotel.get('address') or hotel.get('location') or '', 'destination': destination, 'stay_key': stay_key, 'currency': params.get('currency', 'USD'),
+                        hotels.append({**hotel, 'search_adults':params.get('adults'), 'search_children':params.get('children'), 'requested_rooms':raw.get('stay_context', {}).get('rooms_requested'), 'location': hotel.get('address') or hotel.get('location') or '', 'destination': destination, 'stay_key': stay_key, 'currency': params.get('currency', 'USD'),
                             'mentioned_in_plan': bool(hotel.get('name')) and hotel['name'].casefold() in description,
                             'check_in_date': params.get('check_in_date'), 'check_out_date': params.get('check_out_date')})
                 elif search.tool_name == 'flight_search' and isinstance(raw, list):
@@ -494,7 +495,9 @@ class DBHandler:
             from trvelle.utils.budget import budget_breakdown
             result['budget_breakdown'] = budget_breakdown(result)
             from trvelle.utils.travel_text import readable_trip
-            return readable_trip(result)
+            from trvelle.utils.breakfast import apply_breakfast_rules
+            from trvelle.utils.destination_days import destination_calendar
+            return apply_breakfast_rules(destination_calendar(readable_trip(result)))
 
         finally:
             db.close()
@@ -512,14 +515,23 @@ class DBHandler:
             db.commit()
         return self.get_itinerary(user_id, chat_id, itinerary_id)
 
-    def save_itinerary_edit(self, user_id, chat_id, itinerary_id, raw):
+    def save_itinerary_edit(self, user_id, chat_id, itinerary_id, raw, expected_revision=None):
         with self.db_session() as db:
             chat = db.query(ChatSession).filter(ChatSession.chat_id == chat_id, ChatSession.user_id == user_id).first()
-            itinerary = db.query(ToolExecution).filter(ToolExecution.message_id == itinerary_id, ToolExecution.chat_id == chat_id, ToolExecution.tool_name == 'itinerary_tool').first()
+            itinerary = db.query(ToolExecution).filter(ToolExecution.message_id == itinerary_id, ToolExecution.chat_id == chat_id, ToolExecution.tool_name == 'itinerary_tool').with_for_update().first()
             if not chat or not itinerary:
                 raise ValueError('Itinerary not found')
+            if expected_revision is not None and (itinerary.raw_response or {}).get('revision', 1) != expected_revision:
+                raise ValueError('This itinerary changed during research. Your findings are saved; apply them to the latest version.')
             # Enriched options and display conversions are derived when reading.
             raw = {key:value for key,value in raw.items() if key not in ('travel_options','pricing','budget_breakdown')}
+            def source_only(value):
+                if isinstance(value,dict):
+                    return {key:source_only(entry) for key,entry in value.items() if key not in ('price_summary','fits')}
+                if isinstance(value,list):
+                    return [source_only(entry) for entry in value]
+                return value
+            raw = source_only(raw)
             self._revision(db, itinerary, redact_secrets(raw), 'itinerary edit')
             db.commit()
         return self.get_itinerary(user_id, chat_id, itinerary_id)

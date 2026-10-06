@@ -80,7 +80,7 @@ async def present_currency(payload, target):
         for key,item in value.items():
             if key in ('original_quote','pricing'):
                 result[key]=item
-            elif key == 'budget_breakdown':
+            elif key in ('budget_breakdown', 'price_summary'):
                 continue  # Recompute from the converted offers below.
             elif key == 'budget_allocations' and isinstance(item, dict):
                 from .budget import ALLOWANCE_KEYS
@@ -124,6 +124,8 @@ async def present_currency(payload, target):
                 report['budget_amount'] = await convert(payload['validation']['budget_amount'], source)
             result['validation'] = report
         if 'daily_plan' in result:
+            from .party_prices import project_prices
+            project_prices(result)
             from .budget import budget_breakdown
             result['budget_breakdown'] = budget_breakdown(result)
         if identity and quotes:

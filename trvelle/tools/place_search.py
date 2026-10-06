@@ -117,6 +117,7 @@ def normalize_place(place, score, fetched_at=None):
         'opening_hours':place.get('opening_hours'), 'phone':contact.get('telephone') or contact.get('phone'),
         'website':safe_url(place.get('url')), 'source_url':safe_url(place.get('provider_url') or place.get('url')),
         'categories':place.get('categories'), 'timezone':place.get('timezone'), 'photos':photos_of(place),
+        'price_range':place.get('price_range'), 'cuisine':place.get('cuisine'),
         'match_score':score,'fetched_at':fetched_at or datetime.now(timezone.utc).isoformat()
     }.items() if v is not None and v != '' and v != [] and v != {}}
 
@@ -165,7 +166,8 @@ async def enrich_itinerary(itinerary):
     matches={}
     for day in result.get('daily_plan',[]):
         for index,item in enumerate(day.get('items',[])):
-            if item.get('card_type')!='activity' or item.get('item_type')=='tag': continue
+            if item.get('card_type') not in ('activity', 'meal') or item.get('item_type')=='tag': continue
+            if item.get('card_type') == 'meal' and not (item.get('place_name') or (item.get('dining') or {}).get('venue_name')): continue
             if not item.get('title') or not (item.get('location') or day.get('destination')): continue
             # Generic stroll/rest descriptions have no single place to photograph.
             name=item.get('place_name') or re.split(r'\s+(?:and|&)\s+|\s*/\s*',item['title'],maxsplit=1,flags=re.I)[0]

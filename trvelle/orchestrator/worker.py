@@ -158,6 +158,20 @@ async def perform(agent, config):
                 else:
                     config['turn_message_id'] = str(exists.message_id)
                 store.started(run_id)
+            if config.get('mode') == 'update':
+                from .itinerary_updates import perform_update
+                identifier, message = await perform_update(agent,config)
+                if identifier:
+                    store.checkpoint(run_id, 'publish', itinerary_id=identifier)
+                from langchain_core.messages import AIMessage
+                response = AIMessage(content=message, id=str(uuid.uuid4()), name='Supervisor_Agent')
+                agent.db_handler.save_message_to_db(response,config)
+                store.event(run_id,'message_id',response.id)
+                store.event(run_id,'message',message)
+                if identifier:
+                    store.event(run_id,'itinerary_id',identifier)
+                store.finish(run_id,'complete')
+                return
             async for chunk in agent.orchestrate_stream(config['query'], config, resume=True):
                 for key, kind in (('message_id', 'message_id'), ('message', 'message'), ('progress', 'progress'), ('itinerary', 'itinerary_id')):
                     if key in chunk:
@@ -202,6 +216,9 @@ async def execute(agent, config, worker_id):
                     store.requeue(config['run_id'])
                     return
                 if control in ('finish', 'deadline'):
+                    if config.get('mode') == 'update':
+                        store.finish(config['run_id'],'paused','Your existing itinerary is unchanged. Saved update research can be resumed.')
+                        return
                     published = await publish_partial(agent, config, 'Draft made from saved search results. Planning stopped before all details were verified.')
                     store.finish(config['run_id'], 'partial' if published else 'paused', None if published else 'No verified travel options are saved yet. Resume planning to continue.')
                 else:
@@ -219,12 +236,15 @@ async def execute(agent, config, worker_id):
                 db.commit()
         raise
     except RunConflict as error:
+        if config.get('mode') == 'update':
+            store.finish(config['run_id'],'paused','Update research reached its limit. Your existing itinerary is unchanged and research is saved.')
+            return
         published = await publish_partial(agent, config, str(error))
         store.finish(config['run_id'], 'partial' if published else 'paused', None if published else str(error))
     except Exception as error:
         from .model_router import ModelsUnavailableError
         # Avoid raw provider errors/URLs/tokens in public events and logs.
-        message = str(error) if isinstance(error, ModelsUnavailableError) else 'Planning paused because a step could not finish. Your completed research is saved; reconnect or resume to continue.'
+        message = str(error) if isinstance(error, ModelsUnavailableError) or (config.get('mode')=='update' and isinstance(error,ValueError)) else 'Planning paused because a step could not finish. Your completed research is saved; reconnect or resume to continue.'
         logger.error('Planning run %s paused: %s', config['run_id'], type(error).__name__)
         store.finish(config['run_id'], 'failed', message)
 

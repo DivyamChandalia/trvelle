@@ -21,6 +21,7 @@ class HotelSearchInput(BaseModel):
     check_out_date: str = Field(..., description="Check-out date in YYYY-MM-DD format")
     currency: Optional[str] = Field("USD", description="Currency of returned prices (default: USD)", min_length=3, max_length=3)
     adults: Optional[int] = Field(2, description="Number of adults (default: 2)", ge=1, le=30)
+    rooms: Optional[int] = Field(None, description='Requested room count, retained as a planning requirement rather than confirmed provider inventory.', ge=1, le=30)
     children: Optional[int] = Field(0, description="Number of children (default: 0)", ge=0, le=10)
     children_ages: Optional[str] = Field(None, description="Ages of children (1-17), comma-separated for multiple children (e.g., '5,8,10')")
     sort_by: Optional[int] = Field(
@@ -190,6 +191,7 @@ class HotelSearch:
         else:
             search_params_dict = {k: v for k, v in search_params.items() if v is not None}
         destination = search_params_dict.pop('_destination', None)
+        rooms = search_params_dict.pop('rooms', None)
         # A researcher can cover several cities. Its scope must never replace
         # an explicit city/property query (e.g. Rome becomes Rome and Florence).
         query = ' '.join(str(search_params_dict.get('q') or '').split())
@@ -209,7 +211,7 @@ class HotelSearch:
         # Fetch results
         cache_file = f"cache/hotel_search_results.json"
         raw_results = self._fetch_results(search_params_dict, cache_file)
-        raw_results['stay_context'] = {'destination': stay_destination}
+        raw_results['stay_context'] = {'destination': stay_destination, **({'rooms_requested':rooms} if rooms else {})}
         
         # Extract hotels from results
         hotels = raw_results.get("properties", [])

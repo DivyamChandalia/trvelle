@@ -105,7 +105,8 @@ class RunStore:
             config = {'user_id': run.user_id, 'chat_id': run.chat_id, 'run_id': run.run_id, 'currency': run.request['currency'],
                 'query': run.request['message'], 'choices': run.request.get('choices'), 'resume': bool(run.checkpoint.get('started')),
                 'replace_message_id': run.request.get('replace_message_id'), 'search_limits': run.request['search_limits'], 'search_providers':run.request.get('search_providers',{}),
-                'existing_itinerary_id': run.checkpoint.get('itinerary_id')}
+                'existing_itinerary_id': run.checkpoint.get('itinerary_id'),
+                **{key:run.request.get(key) for key in ('mode','update_scope','base_itinerary_id','base_revision','context_base','context_diff')}}
             db.commit()
             return config
 

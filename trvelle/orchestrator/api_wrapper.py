@@ -379,7 +379,7 @@ async def save_owned_edit(body, user_id, chat_id, transform):
             raise HTTPException(409, 'This plan changed. Reopen it before saving your edit.')
         try:
             raw = transform(itinerary)
-            updated = db_handler.save_itinerary_edit(user_id, chat_id, body.itinerary_id, raw)
+            updated = db_handler.save_itinerary_edit(user_id, chat_id, body.itinerary_id, raw, expected_revision=body.revision)
         except ValueError as error:
             raise HTTPException(422, str(error)) from error
         from trvelle.utils.currency import preferred_currency, present_currency
@@ -400,6 +400,33 @@ async def update_activity(body: ActivityEdit, user_id: uuid.UUID = Header(), cha
         uids=[h['choose_uid'] for h in options.get('hotels',[])]+[f['uid'] for f in options.get('flights',[])]
         return edit_activity(itinerary,body.day_index,body.item_index,body.model_dump(include={'title','description','location','start_time','end_time'}),hotel_names,uids)
     return await save_owned_edit(body,user_id,chat_id,transform)
+
+class ItemAlternativeSelection(BaseModel):
+    itinerary_id: uuid.UUID
+    item_id: str = Field(min_length=1, max_length=100)
+    alternative_id: str = Field(min_length=1, max_length=100)
+    revision: int = Field(ge=1)
+    currency: str | None = Field(None, pattern=r'^[A-Z]{3}$')
+
+@app.post('/select_item_alternative', dependencies=[Depends(authorize)])
+async def select_item_alternative(body: ItemAlternativeSelection, user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query()):
+    from trvelle.utils.item_alternatives import replace_item_alternative
+    return await save_owned_edit(body, user_id, chat_id, lambda itinerary: replace_item_alternative(itinerary, body.item_id, body.alternative_id))
+
+class RoomPlan(BaseModel):
+    itinerary_id: uuid.UUID
+    stay_key: str = Field(min_length=1, max_length=64)
+    rooms: int = Field(ge=1, le=30)
+    revision: int = Field(ge=1)
+    currency: str | None = Field(None, pattern=r'^[A-Z]{3}$')
+
+@app.post('/hotel_room_plan', dependencies=[Depends(authorize)])
+async def hotel_room_plan(body: RoomPlan, user_id: uuid.UUID = Header(), chat_id: uuid.UUID = Query()):
+    def transform(itinerary):
+        if not any(h.get('stay_key') == body.stay_key for h in itinerary.get('travel_options', {}).get('hotels', [])):
+            raise ValueError('Stay not found in this itinerary.')
+        return {**itinerary, 'room_allocations': {**itinerary.get('room_allocations', {}), body.stay_key:body.rooms}}
+    return await save_owned_edit(body, user_id, chat_id, transform)
 
 class BudgetAllocation(BaseModel):
     itinerary_id: uuid.UUID

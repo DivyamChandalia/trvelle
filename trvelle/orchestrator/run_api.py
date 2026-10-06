@@ -77,6 +77,30 @@ async def start(body: ChatRequest, user_id: uuid.UUID = Header(), chat_id: uuid.
         'search_limits': {'serpapi':6, 'tavily':6, 'brave':brave_maximum},
         'search_reserves': {'brave_places':photo_reserve if providers['places']=='brave' else 0},
         'search_providers': providers}
+    if chat_id and not body.replace_message_id:
+        from trvelle.utils.itinerary_patch import update_scope
+        scope = update_scope(body.message)
+        if scope:
+            from trvelle.database.models import ToolExecution, Message, PlanningRun
+            with db_handler.db_session() as db:
+                previous = db.query(ToolExecution).join(Message, Message.message_id == ToolExecution.message_id).filter(
+                    ToolExecution.chat_id == identifier, ToolExecution.tool_name == 'itinerary_tool', Message.superseded.is_(False)).order_by(ToolExecution.created_at.desc()).first()
+                if previous and not (previous.raw_response or {}).get('daily_plan'):
+                    previous=None
+                if previous:
+                    itinerary_id=previous.message_id
+                    prior_run=db.query(PlanningRun).filter_by(user_id=user_id,chat_id=identifier).order_by(PlanningRun.created_at.desc()).all()
+                    cached_base=next(((run.request or {}).get('context_base') for run in prior_run if (run.request or {}).get('base_itinerary_id')==str(itinerary_id) and (run.request or {}).get('context_base')),None)
+                    base_revision=(previous.raw_response or {}).get('revision',1)
+                if previous:
+                    from trvelle.utils.edit_context import context_snapshot,edit_diff
+                    current_view=db_handler.get_itinerary(user_id,identifier,itinerary_id)
+                    base_revision=current_view.get('revision',1)
+                    if cached_base is None:
+                        cached_base=context_snapshot(db_handler.get_itinerary(user_id,identifier,itinerary_id,revision=1))
+                    request.update(mode='update',update_scope=scope,base_itinerary_id=str(itinerary_id),base_revision=base_revision,
+                                   context_base=cached_base,context_diff=edit_diff(cached_base,context_snapshot(current_view)),
+                                   search_limits={'serpapi':6 if scope=='inventory' else 0,'tavily':2,'brave':min(brave_maximum,8)},search_reserves={'brave_places':2 if providers['places']=='brave' else 0})
     try:
         return store.create(user_id, identifier, request)
     except LookupError:
