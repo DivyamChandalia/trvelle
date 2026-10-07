@@ -62,7 +62,7 @@ class AffiliateLinks:
             self.sessions, self.engine = DBHandler.db_session, DBHandler.engine
         scope = hashlib.sha256(f'{token}:{project}:{marker}'.encode()).hexdigest()
         rate_scope = hashlib.sha256(f'travelpayouts:{marker}'.encode()).hexdigest()
-        key = hashlib.sha256(f'{scope}:{kind}:{url}'.encode()).hexdigest()
+        key = hashlib.sha256(f'v2:{scope}:{kind}:{url}'.encode()).hexdigest()
         lock_id = int.from_bytes(bytes.fromhex(rate_scope)[:8], 'big', signed=True)
         try:
             # Coalesce across workers and enforce one shared partner rate budget.
@@ -106,8 +106,8 @@ class AffiliateLinks:
                 if data.get('code') == 'success' and isinstance(result, dict):
                     offer = next((v for v in result.get('links', []) if isinstance(v,dict) and v.get('url') == url), {})
                     candidate = safe_booking_url(offer.get('partner_url'))
-                    # Short links must be returned by the provider on its tracking domains.
-                    if offer.get('code') == 'success' and candidate and (urlsplit(candidate).hostname.endswith('.tp.st') or urlsplit(candidate).hostname in ('tp.media','tp.st')):
+                    # Accept legacy and current short-link domains returned by the authenticated API.
+                    if offer.get('code') == 'success' and candidate and (urlsplit(candidate).hostname.endswith(('.tp.st','.tpx.lu')) or urlsplit(candidate).hostname in ('tp.media','tp.st','tpx.lu')):
                         partner_url, success, reason = candidate, True, 'converted'
                     else: reason = 'brand_unavailable' if offer.get('message') == 'trs is not subscribed for brand' else 'unsupported_link'
                 else: reason, cooldown = 'config_rejected', now + timedelta(minutes=5)

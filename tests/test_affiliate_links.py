@@ -11,11 +11,11 @@ class AffiliateTests(unittest.TestCase):
  def setUp(self):
   self.token=uuid.uuid4().hex;self.marker=str(uuid.uuid4().int % 1000000000 + 1)
   self.env=patch.dict(os.environ,{'TRAVELPAYOUTS_API_TOKEN':self.token,'TRAVELPAYOUTS_PROJECT_ID':'12345','TRAVELPAYOUTS_MARKER':self.marker,'TRAVELPAYOUTS_REQUESTS_PER_MINUTE':'80'})
-  self.env.start();self.calls=[];self.http_status=200;self.mode='success'
+  self.env.start();self.calls=[];self.http_status=200;self.mode='success';self.tracking_host='booking.tp.st'
   def send(request):
    self.calls.append(request);body=json.loads(request.content);url=body['links'][0]['url']
    if self.mode=='timeout':raise httpx.ReadTimeout('fixture timeout',request=request)
-   item={'url':url,'code':'success','partner_url':'https://booking.tp.st/test-affiliate-fixture'}
+   item={'url':url,'code':'success','partner_url':f'https://{self.tracking_host}/test-affiliate-fixture'}
    if self.mode=='unapproved':item={'url':url,'code':'failed','message':'trs is not subscribed for brand','partner_url':''}
    if self.mode=='unsafe':item['partner_url']='javascript:alert(1)'
    return httpx.Response(self.http_status,json={'code':'success','result':{'links':[item]}},headers={'Retry-After':'120'})
@@ -36,6 +36,12 @@ class AffiliateTests(unittest.TestCase):
   with DBHandler.db_session() as db:
    caches=db.query(SearchCache).filter_by(provider='travelpayouts').all()
    self.assertFalse(any(self.token in json.dumps(c.query) or self.token in json.dumps(c.result) for c in caches))
+ def test_current_tracking_domain_is_accepted_and_cached(self):
+  self.tracking_host='aviasales.tpx.lu'
+  result=self.links.convert('https://www.aviasales.com/','flight')
+  self.assertEqual(result,'https://aviasales.tpx.lu/test-affiliate-fixture')
+  self.assertEqual(self.links.convert('https://www.aviasales.com/','flight'),result)
+  self.assertEqual(len(self.calls),1)
  def test_unapproved_brand_is_negative_cached_and_returns_original(self):
   self.mode='unapproved'
   for _ in range(2):self.assertEqual(self.links.convert(self.url),self.url)
