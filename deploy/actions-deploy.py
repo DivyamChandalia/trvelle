@@ -50,6 +50,15 @@ def switch(release):
     link.symlink_to(release)
     os.replace(link, BASE / 'current')
 
+def prune_releases(base, keep_count=4):
+    current=(base/'current').resolve()
+    releases=sorted([path for path in (base/'releases').iterdir() if path.is_dir() and not path.is_symlink() and (path/'deployment.json').exists()],key=lambda path:(path/'deployment.json').stat().st_mtime,reverse=True)
+    retained=set(releases[:keep_count])|{current}
+    for release in releases:
+        if release not in retained and not (release/'trvelle/.runtime/model-accounts').exists():
+            shutil.rmtree(release)
+
+
 def main():
     component, sha = command()
     STATE.mkdir(mode=0o700, exist_ok=True)
@@ -115,6 +124,7 @@ def main():
             versions = json.loads(manifest.read_text()) if manifest.exists() else {}
             versions[component] = sha
             (release / 'deployment.json').write_text(json.dumps(versions))
+            prune_releases(BASE)
             print('Deployed', component, sha, 'at https://144.24.127.147', flush=True)
         except Exception:
             if (BASE / 'current').resolve() == release:

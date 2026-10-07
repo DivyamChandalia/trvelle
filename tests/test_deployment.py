@@ -35,3 +35,17 @@ class DeploymentTests(unittest.TestCase):
                 output.addfile(member, io.BytesIO(b'pass'))
             deployment.unpack(root / 'source.tar', root / 'out')
             self.assertEqual((root / 'out/app.py').read_text(), 'pass')
+
+    def test_cleanup_preserves_active_rollback_and_persistent_credential_directories(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base=Path(directory);(base/'releases').mkdir()
+            versions=[]
+            for index in range(7):
+                release=base/'releases'/str(index);release.mkdir();(release/'deployment.json').write_text('{}')
+                os.utime(release/'deployment.json',(100+index,100+index));versions.append(release)
+            (base/'current').symlink_to(versions[0])
+            (versions[1]/'trvelle/.runtime/model-accounts').mkdir(parents=True)
+            failed=base/'releases'/'incomplete';failed.mkdir()
+            deployment.prune_releases(base,keep_count=2)
+            for release in (versions[0],versions[1],versions[5],versions[6],failed):self.assertTrue(release.exists())
+            for release in versions[2:5]:self.assertFalse(release.exists())
