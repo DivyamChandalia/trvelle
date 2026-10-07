@@ -230,3 +230,15 @@ See the [companion website](https://github.com/HyperToken9/trvelle-website) for 
 Credential storage, server isolation, migration and limitations are documented in [Credential security](docs/credential-security.md).
 
 Expanded flight details include provider-returned booking options and a Google Flights fallback. Loading booking sites uses one cached, quota-controlled SerpAPI lookup for the selected complete journey. Booking results preserve the itinerary fare; external POST booking requests use an authenticated, isolated handoff page.
+
+## Affiliate booking links
+
+Optional Travelpayouts conversion runs on the backend when a traveler opens an itinerary booking offer. Set `TRAVELPAYOUTS_API_TOKEN`, `TRAVELPAYOUTS_PROJECT_ID` (`trs`) and `TRAVELPAYOUTS_MARKER` in the backend environment. Production stores these with the other encrypted systemd backend credentials; never pass the token to the browser or publish it in source.
+
+Authenticated `/hotel_booking` and `/flight_booking` resolve offers from the user’s owned itinerary and current revision. The caller cannot supply an arbitrary destination. Original SerpAPI quotes and links remain saved; only the outbound redirect is converted. Recognized direct brand domains can use the official partner-links API. There is no guarantee of affiliate access: each brand must be available for the specified Travelpayouts project.
+
+Successful links are cached for 24 hours; rejected links for 15 minutes. PostgreSQL advisory locks coalesce concurrent calls across processes. A shared per-partner ceiling defaults to 80 requests/minute, below the provider’s 100/minute limit. Retry-After and credential failures put conversion on cooldown. Conversion failures, unsupported brands and unavailable configuration preserve the original booking URL. Request counts and conversion outcomes are stored in the existing search cache/charge/account tables with provider `travelpayouts`; API tokens and personal identifiers are not included in cache payloads or SubIDs.
+
+Flight booking forms with POST payloads and Google hand-off URLs are passed through unchanged because the link API does not reproduce their booking payloads. The website uses SerpAPI’s booking provider offers and does not show a Google Flights booking fallback. Never claim an original provider link is an affiliate link unless the partner API has successfully converted it.
+
+Reference: https://support.travelpayouts.com/hc/en-us/articles/25289759198226-API-for-Travelpayouts-partner-links

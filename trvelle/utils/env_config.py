@@ -33,7 +33,7 @@ def load_environment(env_file: Optional[Path] = env_file_path) -> Dict[str, str]
     if credential_dir:
         credential_file=Path(credential_dir)/'backend-secrets'
         if credential_file.exists():
-            allowed={'DB_URI','SUPABASE_DATABASE_URL','BACKEND_API_TOKEN','GOOGLE_API_KEY','OPENAI_API_KEY','ANTHROPIC_API_KEY','OPENROUTER_API_KEY','SERPAPI_API_KEY','TAVILY_API_KEY','BRAVE_API_KEY'}
+            allowed={'DB_URI','SUPABASE_DATABASE_URL','BACKEND_API_TOKEN','GOOGLE_API_KEY','OPENAI_API_KEY','ANTHROPIC_API_KEY','OPENROUTER_API_KEY','SERPAPI_API_KEY','TAVILY_API_KEY','BRAVE_API_KEY','TRAVELPAYOUTS_API_TOKEN','TRAVELPAYOUTS_PROJECT_ID','TRAVELPAYOUTS_MARKER'}
             secret_values=json.loads(credential_file.read_text())
             if not isinstance(secret_values,dict) or not set(secret_values)<=allowed:
                 raise ValueError('Backend credential bundle has an invalid schema')

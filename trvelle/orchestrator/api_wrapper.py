@@ -629,7 +629,29 @@ async def flight_booking(user_id:uuid.UUID=Header(),chat_id:uuid.UUID=Query(),it
     offers=booking_offers(raw)
     offer=next((entry for entry in offers if entry['source_index']==offer_index),None)
     if offer is None:raise HTTPException(404,'Reopen flight details to load the booking option')
-    return {'provider':offer.get('book_with','Booking provider'),'booking_request':offer['booking_request']}
+    from trvelle.tools.affiliate_links import affiliate_links
+    booking = dict(offer['booking_request'])
+    booking['url'] = await affiliate_links.resolve(booking['url'], 'flight', post_data=booking.get('post_data',''))
+    return {'provider':offer.get('book_with','Booking provider'),'booking_request':booking}
+
+
+@app.get('/hotel_booking', dependencies=[Depends(authorize)])
+async def hotel_booking(user_id:uuid.UUID=Header(), chat_id:uuid.UUID=Query(), itinerary_id:uuid.UUID=Query(), uid:str=Query(), offer_index:int=Query(ge=-1), revision:int=Query(ge=1)):
+    from trvelle.tools.affiliate_links import affiliate_links, hotel_booking_offers
+    from trvelle.tools.flight_booking import safe_booking_url
+    itinerary = db_handler.get_itinerary(user_id, chat_id, itinerary_id)
+    if not itinerary or 'error' in itinerary: raise HTTPException(404, 'Itinerary not found')
+    if itinerary.get('revision',1) != revision: raise HTTPException(409, 'This itinerary changed. Reopen hotel details before booking.')
+    hotel = next((h for h in itinerary.get('travel_options',{}).get('hotels',[]) if h.get('choose_uid') == uid), None)
+    if not hotel: raise HTTPException(404, 'Hotel not found in this itinerary')
+    if offer_index == -1:
+        url = safe_booking_url(hotel.get('link'))
+    else:
+        offers = hotel_booking_offers(hotel)
+        offer = next((entry for entry in offers if entry['source_index'] == offer_index), None)
+        url = offer['url'] if offer else None
+    if not url: raise HTTPException(404, 'Reopen hotel details to load this booking option')
+    return {'url':await affiliate_links.resolve(url, 'hotel')}
 
 
 if __name__ == "__main__":

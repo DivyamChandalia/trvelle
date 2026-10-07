@@ -35,6 +35,29 @@ class IntegrationTests(unittest.TestCase):
             db.commit()
         self.client.close()
 
+    def test_hotel_booking_is_owned_revision_checked_and_preserves_offer_identity(self):
+        with db_handler.db_session() as db:
+            search = db.query(ToolExecution).filter_by(chat_id=self.chat_a, tool_name='hotel_search').one()
+            search.raw_response = {'properties':[{'name':'Selected hotel','choose_uid':self.hotel_uid,
+                'link':'https://property.example/stay','prices':[
+                    {'link':'javascript:invalid'}, {'link':'https://www.booking.com/hotel/it/test.html?checkin=2027-03-14'},
+                    {'link':'https://www.booking.com/hotel/it/test.html?checkin=2027-03-14'}]}]}
+            db.commit()
+        params={'chat_id':str(self.chat_a),'itinerary_id':str(self.itinerary_id),'uid':self.hotel_uid,'offer_index':1,'revision':1}
+        with patch('trvelle.tools.affiliate_links.affiliate_links.resolve',new_callable=AsyncMock,return_value='https://booking.tp.st/fixture') as convert:
+            self.assertEqual(self.client.get('/hotel_booking',params=params,headers={**self.headers,'user-id':str(self.user_b)}).status_code,404)
+            self.assertEqual(self.client.get('/hotel_booking',params={**params,'revision':2},headers=self.headers).status_code,409)
+            self.assertEqual(self.client.get('/hotel_booking',params={**params,'uid':'foreign-hotel'},headers=self.headers).status_code,404)
+            self.assertEqual(self.client.get('/hotel_booking',params={**params,'offer_index':0},headers=self.headers).status_code,404)
+            convert.assert_not_awaited()
+            response=self.client.get('/hotel_booking',params=params,headers=self.headers)
+            self.assertEqual(response.status_code,200,response.text)
+            self.assertEqual(response.json()['url'],'https://booking.tp.st/fixture')
+            convert.assert_awaited_once_with('https://www.booking.com/hotel/it/test.html?checkin=2027-03-14','hotel')
+            response=self.client.get('/hotel_booking',params={**params,'offer_index':-1},headers=self.headers)
+            self.assertEqual(response.status_code,200)
+            self.assertEqual(db_handler.get_itinerary(self.user_a,self.chat_a,self.itinerary_id)['revision'],1)
+
     def test_budget_allocation_persists_versions_and_rejects_wrong_owner_or_stale_edits(self):
         body = {'itinerary_id': str(self.itinerary_id), 'revision': 1, 'currency': 'INR',
                 'activities': 1500, 'meals': 2500, 'transport': 500, 'buffer': 300}

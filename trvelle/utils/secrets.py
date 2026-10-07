@@ -3,7 +3,7 @@ import re
 import logging
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
-SECRET_FIELDS = {'api_key', 'apikey', 'authorization', 'access_token', 'secret', 'password', 'serpapi_api_key', 'google_api_key', 'tavily_api_key', 'openrouter_api_key', 'brave_api_key', 'x-subscription-token', 'x_subscription_token'}
+SECRET_FIELDS = {'api_key', 'apikey', 'authorization', 'access_token', 'secret', 'password', 'serpapi_api_key', 'google_api_key', 'tavily_api_key', 'openrouter_api_key', 'brave_api_key', 'x-subscription-token', 'x_subscription_token', 'travelpayouts_api_token', 'x-access-token'}
 
 class CredentialLogFilter(logging.Filter):
     def filter(self, record):

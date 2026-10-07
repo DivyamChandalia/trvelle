@@ -70,7 +70,7 @@ try:
                'TRVELLE_SEARCH_MODE': 'replay', 'TRVELLE_REPLAY_DIR': str(ROOT / 'tests/fixtures/search'),
                'E2E_BASE_URL': 'http://127.0.0.1:13000', 'E2E_DB_URI': url.set(database=name, drivername='postgresql').render_as_string(hide_password=False),
                'E2E_MAILBOX': str(mailbox), 'E2E_BACKEND_ROOT': str(ROOT)}
-        for key in ('GOOGLE_API_KEY', 'OPENROUTER_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'BRAVE_API_KEY', 'SERPAPI_API_KEY', 'TAVILY_API_KEY'):
+        for key in ('GOOGLE_API_KEY', 'OPENROUTER_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'BRAVE_API_KEY', 'SERPAPI_API_KEY', 'TAVILY_API_KEY', 'TRAVELPAYOUTS_API_TOKEN'):
             env[key] = ''
         # The locally installed Node is optional; any supported Node on PATH works.
         node = ROOT.parent / '.local-tools/node-v22.23.3-linux-x64/bin'

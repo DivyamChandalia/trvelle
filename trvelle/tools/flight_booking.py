@@ -57,14 +57,14 @@ async def fetch_flight_booking(raw,currency,lookup):
     report={'status':'unavailable','missing':['Booking options'],'filled':[],'summary':'','sources':[],'fetched_at':datetime.now(timezone.utc).isoformat()}
     token=item.get('booking_token')
     if not token:
-        report['provider_notice']='This saved option has no booking token. Open Google Flights to check booking sites, or search a fresh flight option.'
+        report['provider_notice']='This saved option has no booking token. Refresh the flight search to get current booking offers.'
         return raw,report
     allowed=('departure_id','arrival_id','outbound_date','return_date','type','multi_city_json','adults','children','infants_in_seat','infants_on_lap','travel_class','hl','gl')
     params={key:value for key,value in part.get('search_parameters',{}).items() if key in allowed}
     params.update(engine='google_flights',currency=currency,booking_token=token)
     try:response=await lookup.serp(params)
     except (RuntimeError,httpx.HTTPError):
-        report['provider_notice']='Booking providers could not be loaded. Please retry or open Google Flights.'
+        report['provider_notice']='Booking providers could not be loaded. Please retry loading booking sites.'
         return raw,report
     incoming=response.get('selected_flights') or []
     if incoming and tuple(flight_identity(leg) for leg in incoming)!=tuple(flight_identity(option) for _,option in selected):
@@ -79,5 +79,5 @@ async def fetch_flight_booking(raw,currency,lookup):
     link=safe_booking_url(response.get('search_metadata',{}).get('google_flights_url'))
     if link:item['booking_google_flights_url']=link
     if booking_offers(raw):report.update(status='complete',missing=[],filled=['Booking options'])
-    else:report['provider_notice']='No direct online booking links were returned for this fare. Check booking sites on Google Flights.'
+    else:report['provider_notice']='No online booking links were returned for this fare. Refresh the selected flight to check current offers.'
     return raw,report
