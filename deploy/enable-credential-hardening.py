@@ -67,7 +67,7 @@ def main():
             'ReadWritePaths=/var/lib/trvelle /opt/trvelle/current/trvelle/logs /opt/trvelle/current/trvelle/.runtime',
             'LoadCredentialEncrypted=backend-secrets:/etc/credstore.encrypted/trvelle-backend-secrets',
             'Environment=TRVELLE_REQUIRE_CREDENTIALS=1 PYTHONDONTWRITEBYTECODE=1']
-        if service!='trvelle-tools':specific += ['LoadCredentialEncrypted=model-accounts.key:/etc/credstore.encrypted/trvelle-model-accounts-key',
+        if service!='trvelle-tools':specific += ['ProcSubset=all','LoadCredentialEncrypted=model-accounts.key:/etc/credstore.encrypted/trvelle-model-accounts-key',
             'Environment=TRVELLE_REQUIRE_VAULT_KEY=1 TRVELLE_CLAUDE_SANDBOX=1 TRVELLE_REQUIRE_TMPFS=1 TRVELLE_CLAUDE_RUNTIME_DIR=/run/'+service+'/claude']
         dropin(service,specific)
     dropin('trvelle-website',[*common,'User=trvelle-web','Group=trvelle-web','RuntimeDirectory=trvelle-website','RuntimeDirectoryMode=0700',
