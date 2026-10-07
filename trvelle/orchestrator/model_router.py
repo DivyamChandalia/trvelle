@@ -303,7 +303,9 @@ class ModelRouter:
             selected = await personal.invoke_selected(self, owner, role, messages, tools)
             if selected is not None:
                 return selected
-            automatic = await personal.invoke_auto(self, owner, role, messages, tools)
+            # Explicit user selections above win. Otherwise honor configured defaults
+            # before considering connected-account recommendations.
+            automatic = None if self.role_models.get(role) else await personal.invoke_auto(self, owner, role, messages, tools)
             if automatic is not None:
                 return automatic
             keys = dict(self.keys)

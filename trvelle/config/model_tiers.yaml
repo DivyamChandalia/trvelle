@@ -1,7 +1,11 @@
-# Ordered preferences, not a universal intelligence benchmark. OpenRouter is free-only.
-# Researchers start one tier below the orchestrator's selected tier.
+# Shared automatic OpenRouter routing is free-only; personal keys can select paid models.
+# Both automatic roles use the free router; tiers apply when fixed defaults are removed.
 # Explicit role assignments override automatic tier fallback until removed.
-role_models: {}
+role_models:
+  supervisor:
+    - openrouter:openrouter/free
+  researcher:
+    - openrouter:openrouter/free
 tiers:
   - name: planning
     models:
