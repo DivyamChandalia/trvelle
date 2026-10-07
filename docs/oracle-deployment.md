@@ -1,6 +1,6 @@
 # Oracle VM deployment
 
-The current deployment serves both packages at **https://144.24.127.147** on
+The current deployment serves both packages at **https://trvelle.com** on
 Ubuntu 24.04 ARM64. Caddy terminates HTTPS and proxies the production Next.js
 server; the website authenticates requests before proxying to the Python API.
 
@@ -34,9 +34,17 @@ List and any attached Network Security Group must permit inbound TCP 80 and
 443 from `0.0.0.0/0`, with **all source ports**. The host's matching firewall
 rules are persisted with `netfilter-persistent`.
 
-HTTP redirects to HTTPS, except `/.well-known/acme-challenge/`. Caddy's
-`default_sni` is the public IP so clients that omit SNI still receive the right
-certificate.
+`trvelle.com` is the canonical origin. DNS uses `A @ → 144.24.127.147` and
+`CNAME www → trvelle.com`. Caddy automatically issues and renews trusted
+certificates for both domain names. HTTP, HTTPS `www` and the legacy IP redirect
+to `https://trvelle.com`, preserving paths and queries. The IP's HTTP
+`/.well-known/acme-challenge/` route remains reachable for its certificate renewal.
+Caddy's `default_sni` remains the public IP for legacy clients without SNI.
+
+The versioned reverse-proxy configuration is [deploy/Caddyfile](../deploy/Caddyfile).
+To apply a change, copy it to the VM, validate it with
+`sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile`, then run
+`sudo systemctl reload caddy`. Keep the IP certificate files in place.
 
 ## HTTPS renewal
 
@@ -58,7 +66,7 @@ sudo /opt/trvelle-certbot/bin/certbot renew --dry-run
 ## Operations
 
 ```sh
-curl https://144.24.127.147/api/backend/health
+curl https://trvelle.com/api/backend/health
 ssh ubuntu@144.24.127.147
 sudo systemctl status trvelle-website trvelle-api trvelle-tools trvelle-worker
 sudo journalctl -u trvelle-api -u trvelle-worker --since '10 minutes ago'
@@ -84,11 +92,12 @@ GPT-6.1 Sol and GPT-6 Luna record owner-scoped access evidence and add them to
 that account's model picker. Refreshing the picker does not spend inference
 quota. Reauthorization to the same account preserves that evidence.
 
-For an update, create a new release directory and transfer both current source
+Application updates run through the repositories' GitHub Actions workflows.
+The receiver creates a new release directory and transfers both current source
 trees, excluding `.env*`, `.git`, `.runtime`, `.venv`, `node_modules`, `.next*`,
 logs and test reports. Install locked dependencies and build Next.js on ARM64
 before changing `current`. Build with the website's production environment;
-keep `BETTER_AUTH_URL=https://144.24.127.147` consistent with the public origin.
+keep `BETTER_AUTH_URL=https://trvelle.com` consistent with the public origin.
 Back up PostgreSQL before applying migrations. Apply only the initial auth
 migration for a fresh database; later additive migrations can be applied to
 existing databases. Feed SQL through standard input when the `postgres` user

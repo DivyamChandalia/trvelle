@@ -1,0 +1,34 @@
+{
+	default_sni 144.24.127.147
+}
+
+# Keep the legacy IP certificate's HTTP renewal challenge reachable.
+http://144.24.127.147 {
+	handle /.well-known/acme-challenge/* {
+		root * /var/www/trvelle-acme
+		file_server
+	}
+	handle {
+		redir https://trvelle.com{uri} permanent
+	}
+}
+
+https://144.24.127.147 {
+	tls /etc/caddy/certs/trvelle-fullchain.pem /etc/caddy/certs/trvelle-privkey.pem
+	redir https://trvelle.com{uri} permanent
+}
+
+www.trvelle.com {
+	redir https://trvelle.com{uri} permanent
+}
+
+trvelle.com {
+	encode zstd gzip
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+	reverse_proxy 127.0.0.1:3000 {
+		flush_interval -1
+	}
+}
