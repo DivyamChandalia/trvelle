@@ -1,0 +1,7 @@
+abi <abi/4.0>,
+include <tunables/global>
+# Permit namespace creation for bubblewrap without disabling Ubuntu's global
+# unprivileged-user-namespace restriction. Filesystem policy is set by bwrap.
+profile trvelle-bwrap /usr/bin/bwrap flags=(unconfined) {
+  userns,
+}

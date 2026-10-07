@@ -7,7 +7,8 @@ import uuid
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager, AsyncExitStack
 from fastapi import FastAPI, Depends, Header, HTTPException, Query
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.exceptions import RequestValidationError
 from .streaming import with_keepalive
 from .chat_runs import ChatRuns
 from pydantic import BaseModel, Field
@@ -33,6 +34,23 @@ async def lifespan(app):
         await personal_models.accounts.close()
 
 app = FastAPI(title="Trvelle", version="0.1.0", lifespan=lifespan)
+
+@app.exception_handler(RequestValidationError)
+async def private_validation_error(request,error):
+    # FastAPI's default validation payload echoes input, including API keys/codes.
+    return JSONResponse(status_code=422,content={'detail':[{'loc':list(item['loc']),'msg':item['msg'],'type':item['type']} for item in error.errors()]})
+
+
+def stop_connection_runs(owner,provider):
+    from .run_store import store,RunConflict
+    from trvelle.database.models import PlanningRun
+    with db_handler.db_session() as db:
+        runs=db.query(PlanningRun).filter_by(user_id=owner).filter(PlanningRun.status.in_(['queued','running'])).all()
+        identifiers=[run.run_id for run in runs if any(choice and choice.get('provider')==provider for choice in [*(run.request.get('choices') or {}).values(),*(run.checkpoint.get('models') or {}).values()])]
+    for identifier in identifiers:
+        try:store.control(owner,identifier,'stop')
+        except (LookupError,RunConflict):pass
+
 
 async def authorize(x_backend_token: str = Header(default="")):
     secret = os.getenv("BACKEND_API_TOKEN", "")
@@ -287,6 +305,7 @@ async def model_key(body: ModelKeyRequest, user_id: uuid.UUID = Header()):
     from .model_accounts import AccountError
     try:
         get_accounts().set_key(user_id, body.provider, body.key)
+        if not body.key:stop_connection_runs(user_id,body.provider)
     except AccountError as error:
         raise HTTPException(422, str(error)) from None
     return {'saved': True}
@@ -316,6 +335,7 @@ async def model_account(body: AccountRequest, user_id: uuid.UUID = Header()):
         if body.action == 'cancel':
             await service.cancel_sign_in(user_id, body.provider)
             return {'cancelled': True}
+        stop_connection_runs(user_id,body.provider)
         await (service.disconnect_chatgpt(user_id) if body.provider == 'chatgpt' else service.disconnect_claude(user_id))
     except AccountError as error:
         raise HTTPException(422, str(error)) from None

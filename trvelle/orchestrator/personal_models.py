@@ -15,6 +15,7 @@ import httpx
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from .model_accounts import ModelAccounts, AccountError
+from .credential_security import ClaudeVault, minimal_cli_env, sandbox_command, audit
 
 active_owner = ContextVar("model_account_owner", default=None)
 active_choices = ContextVar("model_account_choices", default=None)
@@ -46,28 +47,16 @@ def get_accounts():
 
 class PersonalModels(ModelAccounts):
     def remember_chatgpt_model(self, owner, model):
-        """Keep successful inference evidence with the OAuth account that used it."""
-        if model not in CHATGPT_RELEASE_MODELS:
-            return
-        data = self.load(owner)
-        account = data["oauth"].get("chatgpt", {})
-        if not account.get("access_token") or "chatgpt.tokens.use.direct" not in account.get(
-            "scopes", []
-        ):
-            return
-        verified = account.setdefault("verified_models", {})
-        if model not in verified:
-            verified[model] = {"verified_at": time.time()}
-            self.save(owner, data)
-            self.catalogs.clear()
+        if model not in CHATGPT_RELEASE_MODELS:return
+        def mutate(data):
+            account=data['oauth'].get('chatgpt',{})
+            if account.get('access_token') and 'chatgpt.tokens.use.direct' in account.get('scopes',[]):
+                account.setdefault('verified_models',{}).setdefault(model,{'verified_at':time.time()})
+        self.update(owner,mutate);self.catalogs.clear()
 
-    def forget_chatgpt_model(self, owner, model):
-        data = self.load(owner)
-        verified = data["oauth"].get("chatgpt", {}).get("verified_models", {})
-        if model in verified:
-            del verified[model]
-            self.save(owner, data)
-            self.catalogs.clear()
+    def forget_chatgpt_model(self,owner,model):
+        self.update(owner,lambda data:data['oauth'].get('chatgpt',{}).get('verified_models',{}).pop(model,None))
+        self.catalogs.clear()
 
     def credential(self, owner, provider):
         data = self.load(owner)
@@ -77,24 +66,17 @@ class PersonalModels(ModelAccounts):
             "google": "GOOGLE_API_KEY",
             "openrouter": "OPENROUTER_API_KEY",
         }
-        snapshot = active_choices.get() if str(owner) == active_owner.get() else None
-        return (snapshot or data)["keys"].get(provider) or os.getenv(
+        audit(owner,"credential_requested",provider)
+        return data["keys"].get(provider) or os.getenv(
             env.get(provider, ""), ""
         )
 
-    def claude_env(self, owner):
-        env = dict(os.environ)
-        for key in list(env):
-            if key.startswith(("ANTHROPIC_", "CLAUDE_", "CLAUDECODE")):
-                env.pop(key)
-        directory = self.directory(owner) / "claude"
-        directory.mkdir(mode=0o700, exist_ok=True)
-        env.update(
-            CLAUDE_CONFIG_DIR=str(directory),
-            CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1",
-            CLAUDE_CODE_DISABLE_AUTO_MEMORY="1",
-        )
-        return env, directory
+    def claude_env(self, owner, directory=None):
+        env=minimal_cli_env()
+        directory=Path(directory) if directory is not None else self.directory(owner)/'claude'
+        env.update(HOME=str(directory),CLAUDE_CONFIG_DIR=str(directory),XDG_CONFIG_HOME=str(directory/'.config'),XDG_CACHE_HOME=str(directory/'.cache'),
+                   CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC='1',CLAUDE_CODE_DISABLE_AUTO_MEMORY='1')
+        return env,directory
 
     def claude_bridge_directory(self):
         package = Path(__file__).parents[2] / "model-bridge/package.json"
@@ -130,9 +112,11 @@ class PersonalModels(ModelAccounts):
             source = Path(__file__).parents[2] / "model-bridge"
             for name in ("package.json", "package-lock.json"):
                 shutil.copyfile(source / name, directory / name)
-            env = dict(os.environ)
+            env = minimal_cli_env()
+            env["HOME"] = str(directory)
             env["PATH"] = str(Path(npm).parent) + os.pathsep + env.get("PATH", "")
-            process = await asyncio.create_subprocess_exec(npm, "ci", "--no-audit", "--no-fund", cwd=directory,
+            command,env,_=sandbox_command([npm,"ci","--no-audit","--no-fund"],directory,env)
+            process = await asyncio.create_subprocess_exec(*command,cwd=directory,
                 env=env, stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL, start_new_session=True)
             try:
                 await asyncio.wait_for(process.wait(), 120)
@@ -146,34 +130,28 @@ class PersonalModels(ModelAccounts):
             self.claude_command()
 
     async def claude_run(self, owner, args, input_data=None, timeout=15):
-        env, directory = self.claude_env(owner)
-        process = await asyncio.create_subprocess_exec(
-            *self.claude_command(),
-            *args,
-            env=env,
-            cwd=directory,
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            start_new_session=True,
-        )
-        try:
-            output, error = await asyncio.wait_for(
-                process.communicate(input_data), timeout
-            )
-            if process.returncode:
-                # Never emit CLI output, which may include credentials or conversation contents.
-                if ("--output-format" not in args and args != ["auth", "status"]) or not output.strip():
-                    raise AccountError(
-                        "Claude request failed. Check your connection, model access and subscription limits."
-                    )
-            return output.decode()
-        finally:
-            if process.returncode is None:
-                import signal
-
-                os.killpg(process.pid, signal.SIGTERM)
-                await process.wait()
+        async with ClaudeVault(self).session(owner) as scope:
+            env,directory=self.claude_env(owner,scope['directory'])
+            command,env,visible=sandbox_command([*self.claude_command(),*args],directory,env)
+            process=await asyncio.create_subprocess_exec(*command,env=env,cwd=directory,stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,start_new_session=True)
+            try:
+                output,error=await asyncio.wait_for(process.communicate(input_data),timeout)
+                if process.returncode and (("--output-format" not in args and args != ["auth","status"]) or not output.strip()):
+                    raise AccountError('Claude request failed. Check your connection, model access and subscription limits.')
+                if args==['auth','status']:
+                    data=json.loads(output)
+                    if Path(data.get('configDirectory','')).resolve()!=visible.resolve():
+                        raise AccountError('Claude credential isolation could not be verified.')
+                    scope['status']={key:data.get(key) for key in ('loggedIn','authMethod','email')}
+                    data['configDirectory']=str(self.directory(owner)/'claude')
+                    return json.dumps(data)
+                return output.decode()
+            finally:
+                if process.returncode is None:
+                    import signal
+                    os.killpg(process.pid,signal.SIGTERM)
+                    await process.wait()
 
     async def claude_state(self, owner):
         try:
@@ -187,7 +165,9 @@ class PersonalModels(ModelAccounts):
                     "sign_in_url": pending.get("url"), "code_required": True,
                     "message": "Sign in on Claude’s page, then paste its one-time code below. Claude Code completes the sign-in."}
         try:
-            data = json.loads(await self.claude_run(owner, ["auth", "status"]))
+            cached=ClaudeVault(self).load(owner)
+            native_status=cached.get('status') if '.credentials.json' in cached.get('files',{}) else None
+            data={**native_status,'configDirectory':str(self.directory(owner)/'claude')} if native_status else json.loads(await self.claude_run(owner, ["auth", "status"]))
             _, directory = self.claude_env(owner)
             if Path(data.get("configDirectory", "")).resolve() != directory.resolve():
                 raise AccountError("Claude credential isolation could not be verified")
@@ -216,13 +196,22 @@ class PersonalModels(ModelAccounts):
         self.pending[slot] = pending
 
         async def login():
+            try:
+                async with ClaudeVault(self).session(owner) as scope:
+                    await native_login(scope)
+            except (AccountError,OSError):
+                pending.update(status='disconnected',error='Claude secure profile could not open. Please retry.')
+                pending['ready'].set()
+
+        async def native_login(scope):
             process = None
             try:
-                env, directory = self.claude_env(owner)
+                env, directory = self.claude_env(owner,scope["directory"])
                 # The unmodified CLI prints its own native sign-in URL when no
                 # browser can open on the server. Tokens are handled by the CLI.
                 env["BROWSER"] = "/bin/false"
-                process = await asyncio.create_subprocess_exec(*self.claude_command(), "auth", "login", "--claudeai",
+                command,env,_=sandbox_command([*self.claude_command(),"auth","login","--claudeai"],directory,env)
+                process = await asyncio.create_subprocess_exec(*command,
                     env=env, cwd=directory, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.STDOUT, start_new_session=True)
                 pending["process"] = process
@@ -237,6 +226,8 @@ class PersonalModels(ModelAccounts):
                     await process.wait()
                     if process.returncode:
                         raise AccountError("Claude sign-in failed")
+                scope["status"]=None
+                audit(owner,"connected","claude")
                 pending.update(status="connected", error=None)
                 self.catalogs.clear()
             except (AccountError, OSError, asyncio.TimeoutError):
@@ -280,8 +271,11 @@ class PersonalModels(ModelAccounts):
         if pending.get("task"):
             pending["task"].cancel()
             await asyncio.gather(pending["task"], return_exceptions=True)
-        await self.claude_run(owner, ["auth", "logout"])
-        self.catalogs.clear()
+        try:
+            await self.claude_run(owner, ["auth", "logout"])
+        finally:
+            await ClaudeVault(self).purge(owner)
+            self.catalogs.clear()
 
     async def settings(self, owner):
         result = self.state(owner)
@@ -646,14 +640,13 @@ class PersonalModels(ModelAccounts):
                 )
             selection["free"] = model.get("free", False)
             selection["expiration_date"] = model.get("expiration_date")
-        data = self.load(owner)
-        data["roles"] = {role: choice for role, choice in roles.items() if choice}
-        self.save(owner, data)
+        self.update(owner,lambda data:data.update(roles={role:choice for role,choice in roles.items() if choice}))
 
     async def invoke_selected(self, router, owner, role, messages, tools):
         from .model_router import ProviderError, ModelsUnavailableError
 
-        data = active_choices.get() or self.load(owner)
+        data=self.load(owner)
+        if active_choices.get() is not None:data={**data,"roles":active_choices.get().get("roles",{})}
         selection = data["roles"].get(role)
         if not selection:
             return None
@@ -703,9 +696,7 @@ class PersonalModels(ModelAccounts):
                 )
                 if not response.content and not response.tool_calls:
                     raise ValueError("Empty model response")
-                stored = self.load(owner)
-                if stored.get("last_errors", {}).pop(role, None):
-                    self.save(owner, stored)
+                self.update(owner,lambda data:data.get('last_errors',{}).pop(role,None))
                 response.additional_kwargs.update(
                     routing_provider=provider,
                     routing_model=model,
@@ -814,13 +805,14 @@ class PersonalModels(ModelAccounts):
                     "message": message,
                     "retry_at": retry,
                 }
-                self.save(owner, stored)
+                self.update(owner,lambda data:data.setdefault("last_errors",{}).update({role:stored["last_errors"][role]}))
                 raise ModelsUnavailableError(message) from None
 
     async def invoke_auto(self, router, owner, role, messages, tools):
         """Curated live catalog, connected subscriptions first; no automatic paid API choice."""
         from .model_router import ModelsUnavailableError
-        data = active_choices.get() or self.load(owner)
+        data=self.load(owner)
+        if active_choices.get() is not None:data={**data,"roles":active_choices.get().get("roles",{})}
         catalog = await self.catalog(owner)
         recommendations = catalog['recommendations']
         priority = ('chatgpt', 'claude', 'openrouter')
@@ -834,7 +826,7 @@ class PersonalModels(ModelAccounts):
             if model is None or (provider == 'openrouter' and not model.get('free')):
                 continue
             selected = {**selected, 'free': model.get('free', False), 'expiration_date': model.get('expiration_date')}
-            token = active_choices.set({**data, 'roles': {**data['roles'], role: selected}})
+            token = active_choices.set({'roles': {**data['roles'], role: selected}})
             try:
                 response = await self.invoke_selected(router, owner, role, messages, tools)
                 if response:

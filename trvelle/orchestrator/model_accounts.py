@@ -26,8 +26,7 @@ RESOURCE = "https://api.openai.com/v1"
 SCOPES = "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct"
 
 
-class AccountError(ValueError):
-    pass
+from .credential_security import AccountError, account_lock, atomic_private_write, seal, unseal, audit
 
 
 class ModelAccounts:
@@ -37,7 +36,19 @@ class ModelAccounts:
         ).resolve()
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
         os.chmod(self.root, 0o700)
-        key = self.root / "master.key"
+        configured=os.getenv("MODEL_ACCOUNTS_KEY_FILE")
+        if not configured and os.getenv("CREDENTIALS_DIRECTORY"):
+            candidate=Path(os.environ["CREDENTIALS_DIRECTORY"])/"model-accounts.key"
+            if candidate.exists():configured=str(candidate)
+        if not configured and os.getenv("TRVELLE_REQUIRE_VAULT_KEY")=="1":
+            raise AccountError("The required credential encryption key is unavailable.")
+        key=Path(configured) if configured else self.root / "master.key"
+        if configured:
+            if not key.is_file() or key.is_symlink() or key.stat().st_mode & 0o077:
+                raise AccountError("The configured credential encryption key is unavailable or unsafe.")
+            self.cipher=Fernet(key.read_bytes())
+            self.pending={};self.locks={};self.catalogs={};self.migration_locks={}
+            return
         try:
             fd = os.open(key, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         except FileExistsError:
@@ -65,60 +76,79 @@ class ModelAccounts:
         source, target = self.load(source_owner), self.load(target_owner)
         for field in ("keys", "oauth", "roles"):
             target[field] = {**source.get(field, {}), **{key: value for key, value in target.get(field, {}).items() if value}}
-        source_dir, target_dir = self.directory(source_owner) / "claude", self.directory(target_owner) / "claude"
-        if source_dir.is_dir() and not (target_dir / ".credentials.json").exists():
-            for file in source_dir.rglob("*"):
-                if file.is_symlink():
-                    continue
-                destination = target_dir / file.relative_to(source_dir)
-                if file.is_dir():
-                    destination.mkdir(parents=True, exist_ok=True, mode=0o700)
-                    os.chmod(destination, 0o700)
-                elif file.is_file() and not destination.exists():
-                    destination.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-                    shutil.copyfile(file, destination)
-                    os.chmod(destination, 0o600)
-        self.save(target_owner, target)
+        from .credential_security import ClaudeVault
+        vault=ClaudeVault(self)
+        vault.migrate(source_owner);vault.migrate(target_owner)
+        source_profile,target_profile=vault.load(source_owner),vault.load(target_owner)
+        if '.credentials.json' in source_profile['files'] and '.credentials.json' not in target_profile['files']:
+            vault.save(target_owner,source_profile)
+        audit(target_owner,'credentials_linked')
+        def merge(latest):
+            for field in ('keys','oauth','roles'):
+                latest[field]={**source.get(field,{}),**{key:value for key,value in latest.get(field,{}).items() if value}}
+        self.update(target_owner,merge)
         self.catalogs.clear()
 
     def finish_credential_move(self, source_owner):
         import shutil
         self.save(source_owner, {"keys": {}, "roles": {}, "oauth": {}})
         shutil.rmtree(self.directory(source_owner) / "claude", ignore_errors=True)
+        (self.directory(source_owner)/"claude.enc").unlink(missing_ok=True)
+        audit(source_owner,"credentials_moved")
         self.catalogs.clear()
 
     def directory(self, owner):
         path = self.root / str(uuid.UUID(str(owner)))
+        if path.is_symlink():raise AccountError("Credential storage path is not safe.")
         path.mkdir(mode=0o700, exist_ok=True)
         os.chmod(path, 0o700)
         return path
 
     def load(self, owner):
-        path = self.directory(owner) / "accounts.enc"
-        if not path.exists():
-            return {"keys": {}, "roles": {}, "oauth": {}}
-        return json.loads(self.cipher.decrypt(path.read_bytes()))
+        directory=self.directory(owner)
+        with account_lock(directory):
+            path=directory/'accounts.enc'
+            if path.is_symlink():raise AccountError('Credential storage path is not safe.')
+            if not path.exists():return {'keys':{},'roles':{},'oauth':{}}
+            data,legacy=unseal(self.cipher,str(uuid.UUID(str(owner))),'accounts',path.read_bytes(),legacy=True)
+            if legacy:
+                atomic_private_write(path,seal(self.cipher,str(uuid.UUID(str(owner))),'accounts',data))
+                audit(owner,'legacy_storage_bound')
+            return data
 
     def save(self, owner, data):
-        path = self.directory(owner) / "accounts.enc"
-        temporary = path.with_name("write-" + secrets.token_hex(8))
-        fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        with os.fdopen(fd, "wb") as output:
-            output.write(self.cipher.encrypt(json.dumps(data).encode()))
-        os.replace(temporary, path)
+        directory=self.directory(owner)
+        with account_lock(directory):
+            atomic_private_write(directory/'accounts.enc',seal(self.cipher,str(uuid.UUID(str(owner))),'accounts',data))
+
+    def update(self, owner, mutate):
+        directory=self.directory(owner)
+        with account_lock(directory):
+            path=directory/'accounts.enc'
+            data=unseal(self.cipher,str(uuid.UUID(str(owner))),'accounts',path.read_bytes(),legacy=True)[0] if path.exists() else {'keys':{},'roles':{},'oauth':{}}
+            mutate(data)
+            atomic_private_write(path,seal(self.cipher,str(uuid.UUID(str(owner))),'accounts',data))
+            return data
+
+    def save_chatgpt(self,owner,saved,expected):
+        def mutate(data):
+            current=data['oauth'].get('chatgpt',{})
+            if any(current.get(key)!=value for key,value in expected.items()):
+                raise AccountError('ChatGPT connection changed during refresh. Retry the request.')
+            data['oauth']['chatgpt']=saved
+        self.update(owner,mutate)
 
     def set_key(self, owner, provider, key):
         if provider not in PROVIDERS[:4]:
             raise AccountError("Unknown API provider")
         if key and (len(key) < 10 or len(key) > 2048 or any(c.isspace() for c in key)):
             raise AccountError("Enter a valid API key without spaces")
-        data = self.load(owner)
-        if key:
-            data["keys"][provider] = key
-        else:
-            data["keys"].pop(provider, None)
-        self.save(owner, data)
+        def mutate(data):
+            if key:data['keys'][provider]=key
+            else:data['keys'].pop(provider,None)
+        self.update(owner,mutate)
         self.catalogs.clear()
+        audit(owner,"key_saved" if key else "key_removed",provider)
 
     def state(self, owner):
         data = self.load(owner)
@@ -158,6 +188,7 @@ class ModelAccounts:
                     "readiness": readiness,
                     "can_plan": readiness == "ready",
                     "can_connect": True,
+                    "revocation_pending": bool(data.get('pending_revocations',{}).get('chatgpt')),
                     "message": messages[readiness],
                     "email": chatgpt.get("email"),
                     "error": pending.get("error"),
@@ -273,9 +304,7 @@ class ModelAccounts:
                 ):
                     raise AccountError("Registration could not be verified")
                 # Retain issued registration even if the one-time code exchange fails.
-                data = self.load(owner)
-                data["oauth"].setdefault("chatgpt", {})["client_id"] = client_id
-                self.save(owner, data)
+                self.update(owner,lambda data:data['oauth'].setdefault('chatgpt',{}).update(client_id=client_id))
                 async with httpx.AsyncClient(timeout=20) as client:
                     result = await client.post(
                         "https://auth.openai.com/api/accounts/oauth/token",
@@ -315,8 +344,10 @@ class ModelAccounts:
                     # Keep account-specific successful model checks on reauthorization.
                     verified_models=previous.get("verified_models", {}),
                 )
-                self.save(owner, data)
+                committed=data['oauth']['chatgpt']
+                self.update(owner,lambda latest:latest['oauth'].update(chatgpt=committed))
                 pending.update(status="connected", error=None)
+                audit(owner,"connected","chatgpt")
                 self.catalogs.clear()
                 writer.write(
                     b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nChatGPT connected. Return to Trvelle."
@@ -392,9 +423,11 @@ class ModelAccounts:
         )
 
     async def chatgpt_token(self, owner):
+        audit(owner,"token_requested","chatgpt")
         async with self.locks.setdefault(str(owner), asyncio.Lock()):
             data = self.load(owner)
             saved = data["oauth"].get("chatgpt", {})
+            expected={key:saved.get(key) for key in ('client_id','subject','refresh_token','access_token')}
             if "chatgpt.tokens.use.direct" not in saved.get(
                 "scopes", []
             ) or not saved.get("access_token"):
@@ -440,21 +473,21 @@ class ModelAccounts:
                             payload = {}
                         if response.status_code in (401, 403) or payload.get("error") in ("invalid_grant", "invalid_token"):
                             saved["invalid_refresh"] = True
-                            self.save(owner, data)
+                            self.save_chatgpt(owner,saved,expected)
                             raise AccountError("ChatGPT session expired. Please reconnect.")
                         if response.status_code == 429:
                             from .model_router import ProviderError, reset_time
                             deadline, _ = reset_time(ProviderError(429, payload, dict(response.headers)), time.time())
                             if deadline:
                                 saved["earliest_refresh_at"] = deadline
-                                self.save(owner, data)
+                                self.save_chatgpt(owner,saved,expected)
                             raise AccountError("ChatGPT refresh is awaiting its provider reset")
                         raise AccountError("ChatGPT access could not be renewed. Please try again shortly.")
                     tokens = response.json()
                 saved["pending_refresh_received_at"] = time.time()
                 saved["pending_refresh"] = tokens
                 data["oauth"]["chatgpt"] = saved
-                self.save(owner, data)
+                self.save_chatgpt(owner,saved,expected)
             if tokens.get("id_token"):
                 claims = await self.verify_identity(
                     tokens["id_token"],
@@ -467,43 +500,33 @@ class ModelAccounts:
             saved.update(fields)
             saved.pop("pending_refresh", None)
             saved.pop("pending_refresh_received_at", None)
-            self.save(owner, data)
+            self.save_chatgpt(owner,saved,expected)
             return saved["access_token"]
 
-    async def disconnect_chatgpt(self, owner):
-        await self.cancel_sign_in(owner, "chatgpt")
-        data = self.load(owner)
-        saved = data["oauth"].get("chatgpt", {})
-        renewable = saved.get("pending_refresh", {}).get("refresh_token") or saved.get(
-            "refresh_token"
-        )
+    async def disconnect_chatgpt(self,owner):
+        await self.cancel_sign_in(owner,'chatgpt')
+        data=self.load(owner)
+        saved=data['oauth'].get('chatgpt') or data.get('pending_revocations',{}).get('chatgpt',{})
+        def disable(latest):
+            latest['oauth'].pop('chatgpt',None)
+            if saved:latest.setdefault('pending_revocations',{})['chatgpt']=saved
+        self.update(owner,disable)
+        self.catalogs.clear();audit(owner,'connection_disabled','chatgpt')
+        renewable=saved.get('pending_refresh',{}).get('refresh_token') or saved.get('refresh_token')
         if renewable:
-            async with httpx.AsyncClient(timeout=15) as client:
-                discovery = await client.get(
-                    "https://auth.openai.com/.well-known/openid-configuration"
-                )
-                discovery.raise_for_status()
-                endpoint = discovery.json().get("revocation_endpoint", "")
-                if not endpoint.startswith("https://auth.openai.com/"):
-                    raise AccountError(
-                        "Provider revocation endpoint could not be verified"
-                    )
-                response = await client.post(
-                    endpoint,
-                    data={
-                        "client_id": saved["client_id"],
-                        "token": renewable,
-                        "token_type_hint": "refresh_token",
-                    },
-                )
-                if response.is_error:
-                    raise AccountError(
-                        "Provider revocation failed. Retry disconnecting or revoke access in ChatGPT settings."
-                    )
-        data = self.load(owner)
-        data["oauth"].pop("chatgpt", None)
-        self.save(owner, data)
-        self.catalogs.clear()
+            try:
+                async with httpx.AsyncClient(timeout=15) as client:
+                    discovery=await client.get('https://auth.openai.com/.well-known/openid-configuration')
+                    discovery.raise_for_status()
+                    endpoint=discovery.json().get('revocation_endpoint','')
+                    if not endpoint.startswith('https://auth.openai.com/'):
+                        raise AccountError('Provider revocation endpoint could not be verified')
+                    response=await client.post(endpoint,data={'client_id':saved['client_id'],'token':renewable,'token_type_hint':'refresh_token'})
+                    response.raise_for_status()
+            except (httpx.HTTPError,AccountError):
+                raise AccountError('Local ChatGPT access is disabled. Retry revocation or revoke access in ChatGPT settings.') from None
+        self.update(owner,lambda latest:latest.get('pending_revocations',{}).pop('chatgpt',None))
+        audit(owner,'connection_removed','chatgpt')
 
     async def cancel_sign_in(self, owner, provider):
         """Close the pending local flow without revoking an existing connection."""

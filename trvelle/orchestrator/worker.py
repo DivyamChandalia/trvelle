@@ -129,7 +129,7 @@ async def publish_partial(agent, config, reason):
 async def perform(agent, config):
     run_id = config['run_id']
     owner_token = active_owner.set(str(config['user_id']))
-    account = get_accounts().load(config['user_id'])
+    account = {'roles':get_accounts().load(config['user_id']).get('roles',{})}
     if config.get('choices') is not None:
         account = {**account, 'roles': config['choices']}
     choice_token = active_choices.set(account)

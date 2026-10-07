@@ -222,7 +222,9 @@ compose.yaml         Optional local PostgreSQL service
 - Trvelle researches and edits plans; it does not purchase flights, reserve rooms or issue attraction tickets.
 - Future-date schedules, room types, taxes, baggage and booking terms remain unconfirmed unless the returned evidence supports them. Field lookup notes can remain unverified rather than overwriting a quote.
 - Photos depend on a confident place match and available provider media. The website expands the text when no usable photo exists.
-- Subscription sign-in uses native connection workflows. Claude connects through the unmodified Claude Code CLI: open its sign-in link, then submit its one-time code in Connections. The first connection installs the pinned bridge into private persistent model-account storage using Node.js/npm; later deployments reuse it. CLI credentials stay in each user’s separate private config directory. No SSH tunnel is needed for Claude. API-key authentication remains available independently.
+- Subscription sign-in uses native connection workflows. Claude connects through the unmodified Claude Code CLI: open its sign-in link, then submit its one-time code in Connections. The first connection installs the pinned bridge into private persistent model-account storage using Node.js/npm; later deployments reuse it. CLI credentials are encrypted per user and opened only in a private temporary profile for native operations. Production requires a memory-only filesystem sandbox. No SSH tunnel is needed for Claude. API-key authentication remains available independently.
 - Hosting requires all backend processes, persistent PostgreSQL and the encrypted `.runtime/model-accounts` directory/master key. The existing cloud manifests are legacy templates, not a complete deployment of this worker-based stack.
 
 See the [companion website](https://github.com/HyperToken9/trvelle-website) for the user interface and authentication setup.
+
+Credential storage, server isolation, migration and limitations are documented in [Credential security](docs/credential-security.md).

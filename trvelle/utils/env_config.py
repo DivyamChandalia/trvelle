@@ -1,6 +1,7 @@
 """Environment configuration for the application."""
 
 import os
+import json
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -26,6 +27,19 @@ def load_environment(env_file: Optional[Path] = env_file_path) -> Dict[str, str]
         ValueError: If required environment variables are missing.
     """
     env_vars = {}
+    credential_dir=os.getenv('CREDENTIALS_DIRECTORY')
+    if os.getenv('TRVELLE_REQUIRE_CREDENTIALS')=='1' and (not credential_dir or not (Path(credential_dir)/'backend-secrets').is_file()):
+        raise ValueError('Required backend credentials are unavailable')
+    if credential_dir:
+        credential_file=Path(credential_dir)/'backend-secrets'
+        if credential_file.exists():
+            allowed={'DB_URI','SUPABASE_DATABASE_URL','BACKEND_API_TOKEN','GOOGLE_API_KEY','OPENAI_API_KEY','ANTHROPIC_API_KEY','OPENROUTER_API_KEY','SERPAPI_API_KEY','TAVILY_API_KEY','BRAVE_API_KEY'}
+            secret_values=json.loads(credential_file.read_text())
+            if not isinstance(secret_values,dict) or not set(secret_values)<=allowed:
+                raise ValueError('Backend credential bundle has an invalid schema')
+            for key,value in secret_values.items():
+                if not isinstance(value,str):raise ValueError('Backend credential bundle has an invalid value')
+                os.environ[key]=value
     if env_file and env_file.exists():
         logger.info(f"Loading environment variables from {env_file}")
         with open(env_file) as f:

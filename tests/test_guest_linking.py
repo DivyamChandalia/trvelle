@@ -161,10 +161,12 @@ class GuestMigrationTests(unittest.TestCase):
         (source / '.credentials.json').write_text('isolated-test-credentials')
         (source / 'symlink').symlink_to(Path(self.temp.name) / 'master.key')
         self.assertEqual(self.client.post('/guest_migrate', headers=self.headers, json={'guest_id': str(owner)}).status_code, 200)
-        destination = self.accounts.directory(self.target) / 'claude'
-        self.assertEqual((destination / '.credentials.json').read_text(), 'isolated-test-credentials')
-        self.assertEqual((destination / '.credentials.json').stat().st_mode & 0o777, 0o600)
-        self.assertFalse((destination / 'symlink').exists())
+        from trvelle.orchestrator.credential_security import ClaudeVault
+        import base64
+        vault=ClaudeVault(self.accounts)
+        self.assertEqual(base64.b64decode(vault.load(self.target)['files']['.credentials.json']).decode(), 'isolated-test-credentials')
+        self.assertEqual(vault.path(self.target).stat().st_mode & 0o777, 0o600)
+        self.assertFalse((self.accounts.directory(self.target)/'claude').exists())
         self.assertFalse(source.exists())
         self.assertEqual(self.accounts.load(self.target)['keys']['google'], 'credential-only-test')
 

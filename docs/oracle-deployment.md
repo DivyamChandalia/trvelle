@@ -146,3 +146,7 @@ deployment results. The deployment step fails with setup instructions until
 the secrets are configured. No GitHub runner is installed on the VM. Future
 changes to the root-owned deployment receiver must be installed deliberately
 over the administrator SSH connection.
+
+## Credential hardening
+
+See [Credential security](credential-security.md) for the encrypted systemd credential bundles, website/build service accounts, owner-bound model vault, native CLI sandbox and migration procedure. Production secrets are loaded into private runtime files rather than stored in environment files.

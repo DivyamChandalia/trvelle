@@ -1030,7 +1030,8 @@ class ClaudeNativeLoginTests(unittest.IsolatedAsyncioTestCase):
             self.assertNotIn('code',self.service.load(self.owner))
             args,kwargs=launch.call_args
             self.assertEqual(args,('native-claude','auth','login','--claudeai'))
-            self.assertEqual(kwargs['env']['CLAUDE_CONFIG_DIR'],str(self.service.directory(self.owner)/'claude'))
+            self.assertTrue(Path(kwargs['env']['CLAUDE_CONFIG_DIR']).name.startswith('claude-'))
+            self.assertFalse(Path(kwargs['env']['CLAUDE_CONFIG_DIR']).exists())
 
     async def test_native_disconnected_auth_status_is_not_an_access_error(self):
         _,directory=self.service.claude_env(self.owner)
