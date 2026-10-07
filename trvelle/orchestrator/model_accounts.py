@@ -44,7 +44,10 @@ class ModelAccounts:
             raise AccountError("The required credential encryption key is unavailable.")
         key=Path(configured) if configured else self.root / "master.key"
         if configured:
-            if not key.is_file() or key.is_symlink() or key.stat().st_mode & 0o077:
+            credential_dir=os.getenv('CREDENTIALS_DIRECTORY')
+            managed=bool(credential_dir and key.parent.resolve()==Path(credential_dir).resolve() and key.is_file() and key.stat().st_uid==0 and not (key.parent.stat().st_mode & 0o007))
+            unsafe_mode=(key.stat().st_mode & (0o037 if managed else 0o077)) if key.is_file() else True
+            if not key.is_file() or key.is_symlink() or unsafe_mode:
                 raise AccountError("The configured credential encryption key is unavailable or unsafe.")
             self.cipher=Fernet(key.read_bytes())
             self.pending={};self.locks={};self.catalogs={};self.migration_locks={}
