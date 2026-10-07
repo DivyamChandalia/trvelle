@@ -228,3 +228,5 @@ compose.yaml         Optional local PostgreSQL service
 See the [companion website](https://github.com/HyperToken9/trvelle-website) for the user interface and authentication setup.
 
 Credential storage, server isolation, migration and limitations are documented in [Credential security](docs/credential-security.md).
+
+Expanded flight details include provider-returned booking options and a Google Flights fallback. Loading booking sites uses one cached, quota-controlled SerpAPI lookup for the selected complete journey. Booking results preserve the itinerary fare; external POST booking requests use an authenticated, isolated handoff page.

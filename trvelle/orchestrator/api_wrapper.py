@@ -487,8 +487,8 @@ async def fetch_details(body: DetailRequest, user_id: uuid.UUID = Header(), chat
     from copy import deepcopy
     from trvelle.tools.detail_lookup import DetailLookup, DETAIL_FIELDS
     from trvelle.utils.currency import preferred_currency, present_currency
-    if body.purpose == 'booking' and body.kind != 'hotel':
-        raise HTTPException(422, 'Booking options are only available for hotels')
+    if body.purpose == 'booking' and body.kind not in ('hotel','flight'):
+        raise HTTPException(422, 'Choose a hotel or flight for booking options')
     if body.purpose == 'place' and body.kind != 'activity':
         raise HTTPException(422, 'Place matching is only available for activities')
     if body.fields and (body.purpose != 'details' or not set(body.fields).issubset(DETAIL_FIELDS[body.kind])):
@@ -530,7 +530,7 @@ async def fetch_details(body: DetailRequest, user_id: uuid.UUID = Header(), chat
             raise HTTPException(404, 'Travel item not found in this itinerary')
         key = f'{body.kind}:{body.uid}' if hotel or flight else f'{body.kind}:{body.day_index}:{body.item_index}'
         if body.purpose == 'booking':
-            key = f'hotel-booking:{body.uid}'
+            key = f'{body.kind}-booking:{body.uid}'
         if body.purpose == 'place':
             key = f'activity-place:{body.day_index}:{body.item_index}'
         if body.fields:
@@ -554,19 +554,25 @@ async def fetch_details(body: DetailRequest, user_id: uuid.UUID = Header(), chat
             raw = deepcopy(itinerary.get('flight_selections', {}).get(body.uid) or db_handler.get_tool_response(user_id, chat_id, body.uid))
             if not isinstance(raw, list):
                 raise HTTPException(422, 'The saved flight search is unavailable')
-            reports = []
-            for part in raw:
-                choices = part.get('best_flights', []) + part.get('other_flights', [])
-                if not choices:
-                    continue
-                index = part.get('selected_option_index', 0)
-                if not isinstance(index, int) or not 0 <= index < len(choices):
-                    raise HTTPException(422, 'The selected flight is unavailable')
-                enriched, report = await lookup.fetch('flight', choices[index], part, currency, context, **lookup_kwargs)
-                bucket = 'best_flights' if index < len(part.get('best_flights', [])) else 'other_flights'
-                offset = index if bucket == 'best_flights' else index - len(part.get('best_flights', []))
-                part[bucket][offset] = enriched
-                reports.append(report)
+            if body.purpose=='booking':
+                from trvelle.tools.flight_booking import fetch_flight_booking
+                try:raw,booking_report=await fetch_flight_booking(raw,currency,lookup)
+                except ValueError as error:raise HTTPException(422,str(error)) from None
+                reports=[booking_report]
+            else:
+                reports = []
+                for part in raw:
+                    choices = part.get('best_flights', []) + part.get('other_flights', [])
+                    if not choices:
+                        continue
+                    index = part.get('selected_option_index', 0)
+                    if not isinstance(index, int) or not 0 <= index < len(choices):
+                        raise HTTPException(422, 'The selected flight is unavailable')
+                    enriched, report = await lookup.fetch('flight', choices[index], part, currency, context, **lookup_kwargs)
+                    bucket = 'best_flights' if index < len(part.get('best_flights', [])) else 'other_flights'
+                    offset = index if bucket == 'best_flights' else index - len(part.get('best_flights', []))
+                    part[bucket][offset] = enriched
+                    reports.append(report)
             edited.setdefault('flight_selections', {})[body.uid] = raw
             detail_data = raw
             report = {'summary':'\n\n'.join(r['summary'] for r in reports if r.get('summary')),
@@ -609,6 +615,22 @@ async def fetch_details(body: DetailRequest, user_id: uuid.UUID = Header(), chat
         return {'itinerary':await present_currency(updated, currency),
                 'detail_data':await present_currency(detail_data, currency) if detail_data else None,
                 'report':report}
+
+@app.get('/flight_booking',dependencies=[Depends(authorize)])
+async def flight_booking(user_id:uuid.UUID=Header(),chat_id:uuid.UUID=Query(),itinerary_id:uuid.UUID=Query(),uid:str=Query(),offer_index:int=Query(ge=0),revision:int=Query(ge=1)):
+    from trvelle.tools.flight_booking import booking_offers
+    itinerary=db_handler.get_itinerary(user_id,chat_id,itinerary_id)
+    if not itinerary or 'error' in itinerary:raise HTTPException(404,'Itinerary not found')
+    if itinerary.get('revision',1)!=revision:raise HTTPException(409,'This itinerary changed. Reopen flight details before booking.')
+    raw=itinerary.get('flight_selections',{}).get(uid)
+    if raw is None:raw=db_handler.get_tool_response(user_id,chat_id,uid)
+    if not isinstance(raw,list):raise HTTPException(404,'Flight not found')
+    if not any(flight.get('uid')==uid for flight in itinerary.get('travel_options',{}).get('flights',[])):raise HTTPException(404,'Flight not found in this itinerary')
+    offers=booking_offers(raw)
+    offer=next((entry for entry in offers if entry['source_index']==offer_index),None)
+    if offer is None:raise HTTPException(404,'Reopen flight details to load the booking option')
+    return {'provider':offer.get('book_with','Booking provider'),'booking_request':offer['booking_request']}
+
 
 if __name__ == "__main__":
     import uvicorn

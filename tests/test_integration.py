@@ -97,7 +97,9 @@ class IntegrationTests(unittest.TestCase):
             self.assertEqual(self.client.post('/fetch_details', params={'chat_id':str(self.chat_a)}, headers=self.headers,
                 json=body).status_code,409)
             self.assertEqual(self.client.post('/fetch_details', params={'chat_id':str(self.chat_a)}, headers=self.headers,
-                json={**body,'kind':'flight','revision':2}).status_code,422)
+                json={**body,'kind':'flight','revision':2}).status_code,404)
+            self.assertEqual(self.client.post('/fetch_details',params={'chat_id':str(self.chat_a)},headers=self.headers,
+                json={**body,'kind':'activity','revision':2}).status_code,422)
 
     def test_optional_brave_place_lookup_persists_structured_details_and_photos_without_model_calls(self):
         candidate = {'id':'temporary', 'title':'Uffizi Gallery', 'url':'https://www.uffizi.it/',
