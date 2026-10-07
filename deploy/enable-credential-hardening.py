@@ -4,8 +4,6 @@ Run with the backend virtualenv after deploying the credential loader/bootstrap.
 """
 import json,os,secrets,subprocess,pwd
 from pathlib import Path
-import psycopg2
-from psycopg2 import sql
 from urllib.parse import urlsplit,urlunsplit,quote
 
 STORE=Path('/etc/credstore.encrypted')
@@ -23,14 +21,14 @@ def website_database(backend,website):
     # A dedicated role can access auth tables, not itinerary/provider tables or
     # PostgreSQL administration. Ownership/migrations stay with the admin role.
     password=secrets.token_urlsafe(40)
-    with psycopg2.connect(backend['DB_URI'].replace('postgresql+psycopg2://','postgresql://',1)) as db:
-        with db.cursor() as cursor:
-            cursor.execute("SELECT 1 FROM pg_roles WHERE rolname='trvelle_web'")
-            if cursor.fetchone():cursor.execute(sql.SQL('ALTER ROLE trvelle_web LOGIN PASSWORD {} NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION').format(sql.Literal(password)))
-            else:cursor.execute(sql.SQL('CREATE ROLE trvelle_web LOGIN PASSWORD {} NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION').format(sql.Literal(password)))
-            cursor.execute('GRANT USAGE ON SCHEMA public TO trvelle_web')
-            for table in ('user','account','session','verification','trvelle_guest_links'):
-                cursor.execute(sql.SQL('GRANT SELECT, INSERT, UPDATE, DELETE ON {} TO trvelle_web').format(sql.Identifier(table)))
+    # The application DB user deliberately cannot create roles. Use the local
+    # PostgreSQL administrator via peer auth; secrets go on stdin, not argv.
+    database=urlsplit(backend['DB_URI']).path.lstrip('/')
+    commands=[f"DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='trvelle_web') THEN ALTER ROLE trvelle_web LOGIN PASSWORD '{password}' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION; ELSE CREATE ROLE trvelle_web LOGIN PASSWORD '{password}' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION; END IF; END $$;",
+              'GRANT USAGE ON SCHEMA public TO trvelle_web;']
+    for table in ('user','account','session','verification','trvelle_guest_links'):
+        commands.append(f'GRANT SELECT, INSERT, UPDATE, DELETE ON "{table}" TO trvelle_web;')
+    run(['runuser','-u','postgres','--','psql','-v','ON_ERROR_STOP=1','-d',database],input=('\n'.join(commands)+'\n').encode(),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     previous=urlsplit(website['DATABASE_URL'])
     host=previous.hostname
     if ':' in host:host='['+host+']'
