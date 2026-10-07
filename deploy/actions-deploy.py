@@ -78,6 +78,7 @@ def main():
             release.chmod(0o711)
             as_app('uv sync --locked', release / 'trvelle')
             as_app('npm ci --no-audit --no-fund; export BETTER_AUTH_URL=https://trvelle.com BETTER_AUTH_SECRET=build-only-placeholder-secret-32-characters DATABASE_URL=postgresql://USER:YOUR_DATABASE_PASSWORD@127.0.0.1/build; npm run build', release / 'trvelle-website')
+            for runtime in ('logs','.runtime'):(release/'trvelle'/runtime).mkdir(exist_ok=True)
             run(['chown','-R','trvelle:trvelle',str(release/'trvelle')])
             run(['chown','-R','trvelle-build:trvelle-web',str(release/'trvelle-website')])
             run(['chmod','-R','g+rX',str(release/'trvelle-website')])
