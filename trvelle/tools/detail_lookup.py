@@ -150,9 +150,21 @@ def requested_missing(kind, item, fields):
 
 
 class DetailLookup:
-    def __init__(self, router=None):
+    def __init__(self, router=None, owner=None):
         self.router = router
+        self.owner = owner
         self.policy_cache = {}
+
+    async def summarize(self, messages):
+        # HTTP detail lookups must use the authenticated owner's researcher,
+        # just like planning runs, without inheriting another request's identity.
+        from trvelle.orchestrator.personal_models import active_owner
+        token = active_owner.set(str(self.owner)) if self.owner is not None else None
+        try:
+            return await self.router.invoke('researcher', [], messages)
+        finally:
+            if token is not None:
+                active_owner.reset(token)
 
     async def serp(self, params):
         from .search_gateway import gateway
@@ -221,7 +233,7 @@ class DetailLookup:
                                    'For a sourced published price, cost has price, the original source currency (the app converts it), scope per_person, status quoted, and source_url copied exactly from a supplied source. Future prices are not guaranteed. '
                                    'If no reliable price is found, use your model knowledge to approximate typical admission or a meal as min_price and max_price in the requested currency, scope per_person, status estimate, basis explaining your assumptions and that this is an unverified model-knowledge estimate. For meals use supplied dishes/cuisine and qualitative price_range if available; price_range is not a numeric quote. Never fabricate a source_url for model knowledge. '
                                    'Only use zero for a known free visit. If a reasonable range cannot be inferred, set cost null. Use coverage_key for a shared combined ticket. Do not invent opening hours, booking rules or other facts. Do not change the activity or itinerary.')
-                response = await self.router.invoke('researcher', [], [
+                response = await self.summarize([
                     SystemMessage(content=instruction),
                     HumanMessage(content=json.dumps({'item':context, 'sources':evidence}, ensure_ascii=False)[:18000])])
                 content = response.content

@@ -13,6 +13,25 @@ def option(number='LH 755', price=500):
 
 
 class DetailTests(unittest.IsolatedAsyncioTestCase):
+    async def test_detail_summary_uses_owner_researcher_and_restores_request_context(self):
+        import uuid
+        from trvelle.orchestrator.personal_models import active_owner
+        owner=uuid.uuid4();caller=uuid.uuid4()
+        async def answer(role,tools,messages):
+            self.assertEqual(active_owner.get(),str(owner))
+            self.assertEqual(role,'researcher')
+            return AIMessage(content='Scoped summary')
+        router=type('Router',(),{'invoke':AsyncMock(side_effect=answer)})()
+        lookup=DetailLookup(router,owner=owner)
+        token=active_owner.set(str(caller))
+        try:
+            self.assertEqual((await lookup.summarize([])).content,'Scoped summary')
+            self.assertEqual(active_owner.get(),str(caller))
+            router.invoke.side_effect=RuntimeError('Fixture failure')
+            with self.assertRaises(RuntimeError):await lookup.summarize([])
+            self.assertEqual(active_owner.get(),str(caller))
+        finally:active_owner.reset(token)
+
     async def test_baggage_rejects_destination_packages_and_other_airlines(self):
         lookup=DetailLookup();lookup.serp=AsyncMock(return_value={'organic_results':[
             {'title':'Japan Tokyo Osaka Kyoto tour','link':'https://tour.example/japan','snippet':'Posjeta Kabukiza teataru. 2 bags included.'},

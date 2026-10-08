@@ -544,7 +544,7 @@ async def fetch_details(body: DetailRequest, user_id: uuid.UUID = Header(), chat
             router = get_orchestrator().model_router if body.purpose == 'details' else None
         except HTTPException:
             router = None
-        lookup = DetailLookup(router)
+        lookup = DetailLookup(router, owner=user_id)
         edited = deepcopy(itinerary)
         detail_data = None
         context = ' '.join(str(value) for value in (
