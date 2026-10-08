@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock,patch
 from langchain_core.messages import AIMessage
 from trvelle.orchestrator.model_accounts import AccountError
-from trvelle.orchestrator.personal_models import PersonalModels,active_owner
+from trvelle.orchestrator.personal_models import PersonalModels,active_owner,active_choices
 from trvelle.orchestrator.model_router import ModelRouter
 
 
@@ -29,12 +29,15 @@ class FreeDefaultTests(unittest.IsolatedAsyncioTestCase):
         self.router.request=AsyncMock(side_effect=[AIMessage(content='plan'),AIMessage(content='research')])
         self.service.invoke_auto=AsyncMock(side_effect=AssertionError('Default must not select a connected paid model'))
         token=active_owner.set(self.owner)
+        choices=active_choices.set({'roles':{}})
         try:
             with patch('trvelle.orchestrator.personal_models.get_accounts',return_value=self.service):
                 for role in ('supervisor','researcher'):
                     result=await self.router.invoke(role,[],[])
                     self.assertEqual(result.additional_kwargs['routing_model'],'openrouter/free')
-        finally:active_owner.reset(token)
+        finally:
+            active_choices.reset(choices)
+            active_owner.reset(token)
         self.assertEqual([(call.args[0],call.args[1]) for call in self.router.request.call_args_list],[('openrouter','openrouter/free')]*2)
         self.service.invoke_auto.assert_not_called()
 
@@ -75,3 +78,20 @@ class FreeDefaultTests(unittest.IsolatedAsyncioTestCase):
         self.service.catalog=AsyncMock(return_value={'models':[{'provider':'openrouter','id':'fixture/free-model','efforts':[],'available':True,'free':True}]})
         await self.service.save_roles(self.owner,{'supervisor':{'provider':'openrouter','model':'fixture/free-model','effort':''}})
         self.assertEqual(self.service.load(self.owner)['roles']['supervisor']['model'],'fixture/free-model')
+
+    async def test_automatic_fallback_reads_rotated_keys_and_ignores_snapshot_credentials(self):
+        seen=[]
+        async def request(router,provider,model,messages,tools):
+            seen.append(router.keys['openrouter'])
+            return AIMessage(content='Automatic answer')
+        owner_token=active_owner.set(self.owner)
+        choice_token=active_choices.set({'roles':{},'keys':{'openrouter':'stale-snapshot-key'}})
+        try:
+            with patch('trvelle.orchestrator.personal_models.get_accounts',return_value=self.service),patch.object(ModelRouter,'request',new=request):
+                self.service.set_key(self.owner,'openrouter','fresh-personal-router-key')
+                await self.router.invoke('supervisor',[],[])
+                self.service.set_key(self.owner,'openrouter','')
+                await self.router.invoke('supervisor',[],[])
+        finally:
+            active_choices.reset(choice_token);active_owner.reset(owner_token)
+        self.assertEqual(seen,['fresh-personal-router-key','shared-test-key'])

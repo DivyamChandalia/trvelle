@@ -309,7 +309,9 @@ class ModelRouter:
             if automatic is not None:
                 return automatic
             keys = dict(self.keys)
-            keys.update({p:k for p,k in (active_choices.get() or personal.load(owner))['keys'].items() if p in keys})
+            # Durable runs pin roles only. Credentials must always be read freshly
+            # from the owner's vault, including after rotation or key removal.
+            keys.update({p:k for p,k in personal.load(owner).get('keys',{}).items() if p in keys})
             if keys != self.keys:
                 fingerprint = hashlib.sha256(json.dumps(keys, sort_keys=True).encode()).hexdigest()
                 if fingerprint not in self.personal_routers:
