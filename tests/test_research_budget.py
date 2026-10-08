@@ -1,4 +1,5 @@
 import unittest
+import json
 from unittest.mock import Mock, AsyncMock
 from langchain_core.messages import AIMessage, ToolMessage
 from trvelle.orchestrator.research_budget import counts, compact, should_finalize
@@ -47,5 +48,6 @@ class ResearchBudgetTests(unittest.IsolatedAsyncioTestCase):
         # no database fixture is needed for this pure budget check.
         result, raw = await Orchestrator.handle_tools.__wrapped__(agent,[{'name':'hotel_search','args':{},'id':'blocked'}],'researcher',{'user_id':'owner','chat_id':'chat','segment_number':1})
         hotel.ainvoke.assert_not_awaited()
-        self.assertIn('budget reached',result[0].content)
+        self.assertEqual(result[0].status,'success')
+        self.assertEqual(json.loads(result[0].content)['status'],'budget_exhausted')
         self.assertEqual(raw,[None])

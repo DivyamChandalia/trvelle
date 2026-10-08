@@ -161,7 +161,7 @@ class DetailLookup:
         from trvelle.orchestrator.personal_models import active_owner
         token = active_owner.set(str(self.owner)) if self.owner is not None else None
         try:
-            return await self.router.invoke('researcher', [], messages)
+            return await asyncio.wait_for(self.router.invoke('researcher', [], messages),timeout=120)
         finally:
             if token is not None:
                 active_owner.reset(token)

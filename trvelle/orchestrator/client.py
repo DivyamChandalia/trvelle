@@ -231,6 +231,13 @@ class Orchestrator:
         from .run_store import store
         operation = store.reserve_model(config['run_id'], role, config.get('segment_number'))
         store.operation(config['run_id'], operation, 'model')
+        from .search_budget_notice import blocked_search_tools,budget_notice,exhausted_providers
+        budget=store.snapshot(config['user_id'],config['run_id'])
+        blocked=blocked_search_tools(budget)
+        if any(getattr(tool,'name',None) in blocked for tool in tools):
+            tools=[tool for tool in tools if getattr(tool,'name',None) not in blocked]
+            prompt=list(prompt.to_messages() if hasattr(prompt,'to_messages') else prompt)
+            prompt.append(SystemMessage(content=budget_notice(exhausted_providers(budget))))
         response = await self.model_router.invoke(role, tools, prompt, config.get('supervisor_tier', 0))
         if response.id is None:
             response.id = str(uuid.uuid4())
@@ -265,7 +272,8 @@ class Orchestrator:
             budget_name = 'tavily_search' if tool_name in ('web_search', 'brave_place_search') else tool_name
             if agent_type == "researcher" and budget_name in research_used:
                 if research_used[budget_name] >= LIMITS[budget_name]:
-                    messages.append(tool_validator.create_error_response(tool_call_id, tool_name, "Research search budget reached. Reuse the saved results and submit trip_segment now. Mark missing details as unverified."))
+                    from .search_budget_notice import budget_notice
+                    messages.append(ToolMessage(content=budget_notice(['researcher '+budget_name]),tool_call_id=tool_call_id,name=tool_name))
                     raw_messages.append(None)
                     continue
                 research_used[budget_name] += 1
@@ -290,6 +298,18 @@ class Orchestrator:
                 raw_messages.append(None)
                 continue
             
+            # Report exhausted budgets as a normal tool result, without calling the provider.
+            if config and config.get('run_id'):
+                from .search_budget_notice import SEARCH_TOOLS,blocked_search_tools,budget_notice,exhausted_providers
+                if tool_name in SEARCH_TOOLS:
+                    from .run_store import store
+                    budget=store.snapshot(config['user_id'],config['run_id'])
+                    if tool_name in blocked_search_tools(budget):
+                        notice=budget_notice(exhausted_providers(budget))
+                        store.operation(config['run_id'],tool_call_id,'tool',{'result':notice})
+                        messages.append(ToolMessage(content=notice,tool_call_id=tool_call_id,name=tool_name))
+                        raw_messages.append(None)
+                        continue
             # Step 3: Execute tool with validated arguments
             try:
                 from .run_store import store
@@ -367,6 +387,16 @@ class Orchestrator:
                 logger.info(f"Successfully executed tool {tool_name} for {agent_type}")
                 
             except Exception as e:
+                from .search_budget_notice import budget_exception,budget_notice
+                exhausted=budget_exception(e)
+                if exhausted is not None:
+                    notice=budget_notice([tool_name])
+                    if config and config.get('run_id'):
+                        store.operation(config['run_id'],tool_call_id,'tool',{'result':notice})
+                    messages.append(ToolMessage(content=notice,tool_call_id=tool_call_id,name=tool_name))
+                    raw_messages.append(None)
+                    logger.info('Search budget reached for %s; continuing with saved results',tool_name)
+                    continue
                 # This should be rare since we validated inputs
                 import traceback
                 logger.error(f"Error executing tool {tool_name} for {agent_type}: {e}\n{traceback.format_exc()}")

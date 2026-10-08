@@ -126,6 +126,10 @@ class Cooldowns:
         row = self.db.execute("SELECT until FROM cooldowns WHERE scope=?", (scope,)).fetchone()
         return row[0] if row else 0
 
+    def reason(self, scope):
+        row=self.db.execute("SELECT reason FROM cooldowns WHERE scope=?",(scope,)).fetchone()
+        return row[0] if row else ''
+
     def block(self, scope, until, reason):
         self.db.execute("INSERT INTO cooldowns VALUES (?,?,?) ON CONFLICT(scope) DO UPDATE SET until=max(until,excluded.until), reason=excluded.reason", (scope, until, reason))
         self.db.commit()
@@ -250,23 +254,17 @@ class ModelRouter:
                 payload["tools"] = [convert_to_openai_tool(t) for t in tools]
                 payload["tool_choice"] = "auto"
                 payload["provider"] = {"require_parameters": True}
-            async with httpx.AsyncClient(timeout=45) as client:
-                response = await client.post("https://openrouter.ai/api/v1/chat/completions", headers={"Authorization": f"Bearer {self.keys[provider]}"}, json=payload)
-            body = response.json()
-            if response.is_error or body.get("error"):
-                raise ProviderError(response.status_code if response.is_error else body["error"].get("code", 503), body, response.headers)
-            if self.free_remaining is not None:
-                self.free_remaining = max(0, self.free_remaining - 1)
-                if self.free_remaining == 0:
-                    self.cooldowns.block(self.scope(provider, "free"), next_midnight(time.time(), "UTC"), "daily quota")
-            message = body["choices"][0]["message"]
-            calls = []
-            for call in message.get("tool_calls", []):
-                args = json.loads(call["function"]["arguments"])
-                if not isinstance(args, dict):
-                    raise ValueError("Invalid model tool arguments")
-                calls.append({"id": call["id"], "name": call["function"]["name"], "args": args})
-            return AIMessage(content=message.get("content") or "", tool_calls=calls, id=body.get("id"), additional_kwargs={"reasoning_details": message.get("reasoning_details", [])})
+            payload['stream'] = True
+            from .openrouter_stream import read_openrouter_stream
+            async with httpx.AsyncClient(timeout=httpx.Timeout(45,connect=15)) as client:
+                async with client.stream('POST',"https://openrouter.ai/api/v1/chat/completions",headers={"Authorization":f"Bearer {self.keys[provider]}"},json=payload) as response:
+                    if response.is_error:
+                        await response.aread()
+                        raise ProviderError(response.status_code,response.json(),response.headers)
+                    if self.free_remaining is not None:
+                        self.free_remaining=max(0,self.free_remaining-1)
+                        if self.free_remaining==0:self.cooldowns.block(self.scope(provider,'free'),next_midnight(time.time(),'UTC'),'daily quota')
+                    return await read_openrouter_stream(response)
 
     def record_error(self, provider, model, error):
         now = time.time()
@@ -280,7 +278,8 @@ class ModelRouter:
         if not transient:
             raise error
         scope = self.scope(provider, model)
-        reason = "temporarily unavailable"
+        timeout = isinstance(error,(TimeoutError,httpx.TimeoutException))
+        reason = "response timeout" if timeout else "temporarily unavailable"
         daily = "RequestsPerDay" in detail or "per day" in detail.lower() or "daily" in detail.lower()
         if status in (401, 403, 402):
             scope = self.scope(provider)
@@ -291,7 +290,7 @@ class ModelRouter:
             if "provider_code" not in metadata and "provider_name" not in metadata:
                 scope = self.scope(provider, "free")
         if until is None:
-            until = next_midnight(now, "America/Los_Angeles" if provider == "google" else "UTC") if daily else now + (86400 if status in (401, 403, 402, 404) else 60)
+            until = next_midnight(now, "America/Los_Angeles" if provider == "google" else "UTC") if daily else now + (86400 if status in (401, 403, 402, 404) else 15 if timeout else 60)
         self.cooldowns.block(scope, until, reason)
 
     async def invoke(self, role, tools, prompt, supervisor_tier=0):
@@ -337,7 +336,10 @@ class ModelRouter:
                 if self.blocked_until(provider, model) > time.time():
                     continue
                 try:
-                    response = await asyncio.wait_for(self.request(provider, model, messages, tools), timeout=65)
+                    # OpenRouter sends SSE keep-alives; bound inactivity in HTTPX, not
+                    # healthy generation at 65 seconds. The durable worker enforces
+                    # the run's overall budget and cancels this stream on Stop.
+                    response = await self.request(provider,model,messages,tools) if provider=='openrouter' else await asyncio.wait_for(self.request(provider, model, messages, tools), timeout=65)
                     if not response.content and not response.tool_calls:
                         raise RuntimeError("The model returned an empty response")
                     response.additional_kwargs.update(routing_provider=provider, routing_model=model, routing_tier=tier, routing_degraded=role == "researcher" and tier <= supervisor_tier)
@@ -347,6 +349,9 @@ class ModelRouter:
         resets = [self.blocked_until(p, m) for p, m, _ in candidates]
         upcoming = min((r for r in resets if r > time.time()), default=None)
         hint = f" Earliest retry: {datetime.fromtimestamp(upcoming, timezone.utc).isoformat()}." if upcoming else " Check provider configuration."
+        timeout_scopes = [scope for p,m,_ in candidates for scope in (self.scope(p),self.scope(p,m)) if self.cooldowns.until(scope)>time.time() and self.cooldowns.until(scope)>=self.blocked_until(p,m) and self.cooldowns.reason(scope)=='response timeout']
+        if timeout_scopes:
+            raise ModelsUnavailableError("The AI response stalled. Your saved research is safe. Resume after the temporary app cooldown." + hint + " This cooldown is not a provider quota reset.")
         raise ModelsUnavailableError("No eligible AI model is available." + hint)
 
     def status(self):

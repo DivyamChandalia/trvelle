@@ -25,6 +25,22 @@ class RouterTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ModelsUnavailableError):
             await self.router.invoke('researcher',[],[],supervisor_tier=1)
         self.router.request.assert_not_called()
+    async def test_streaming_openrouter_has_no_fixed_65_second_cutoff(self):
+        self.router.role_models={'supervisor':['openrouter:openrouter/free']}
+        self.router.request=AsyncMock(return_value=AIMessage(content='Streamed answer'))
+        with patch('trvelle.orchestrator.model_router.asyncio.wait_for',side_effect=AssertionError('Do not truncate an active OpenRouter stream')):
+            result=await self.router.invoke('supervisor',[],[])
+        self.assertEqual(result.content,'Streamed answer')
+
+    async def test_idle_timeout_is_an_app_cooldown_not_a_provider_quota_reset(self):
+        self.router.role_models={'supervisor':['openrouter:openrouter/free']}
+        self.router.request=AsyncMock(side_effect=__import__('httpx').ReadTimeout('Fixture stalled'))
+        with self.assertRaises(ModelsUnavailableError) as caught:
+            await self.router.invoke('supervisor',[],[])
+        self.assertIn('not a provider quota reset',str(caught.exception))
+        delay=self.router.blocked_until('openrouter','openrouter/free')-time.time()
+        self.assertGreater(delay,0);self.assertLessEqual(delay,15)
+
     def test_reset_hints(self):
         self.assertEqual(reset_time(ProviderError(429, {}, {'Retry-After':'80','X-RateLimit-Reset':'1120'}), 1000)[0],1120)
         self.assertEqual(reset_time(ProviderError(429, {}, {'Retry-After':'Thu, 01 Jan 1970 00:20:00 GMT'}),1000)[0],1200)
