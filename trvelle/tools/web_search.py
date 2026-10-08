@@ -22,7 +22,7 @@ def search_providers():
             'places':choices.get('places') or os.getenv('TRVELLE_PLACE_SEARCH_PROVIDER') or 'brave'}
 
 
-async def research_search(query, max_results=3, include_domains=None, provider=None, fallback=True):
+async def research_search(query, max_results=3, include_domains=None, provider=None, fallback=True, language=None):
     """Normalize web evidence for any researcher; explicit tests can disable fallback."""
     provider = provider or search_providers()['web']
     if provider not in ('brave', 'tavily'):
@@ -33,18 +33,18 @@ async def research_search(query, max_results=3, include_domains=None, provider=N
     domains = [d.strip().casefold().removeprefix('www.') for d in (include_domains or []) if d.strip()][:10]
     q = query + (' (' + ' OR '.join('site:' + d for d in domains) + ')' if domains else '')
     try:
-        raw = await gateway.arequest('brave', {'endpoint':'web', 'q':q, 'count':max(1,min(max_results,5)), 'extra_snippets':True})
+        raw = await gateway.arequest('brave', {'endpoint':'web', 'q':q, 'count':max(1,min(max_results,5)), 'extra_snippets':True, **({'search_lang':language} if language else {})})
         results = [{'title':r.get('title',''), 'url':r.get('url',''),
                     'content':' '.join([r.get('description') or '', *(r.get('extra_snippets') or [])]).strip(),
                     **({'thumbnail':r['thumbnail']} if r.get('thumbnail') else {})} for r in (raw.get('web') or {}).get('results', [])]
         if not results and fallback and os.getenv('TAVILY_API_KEY'):
-            data = await research_search(query, max_results, include_domains, 'tavily', False)
+            data = await research_search(query, max_results, include_domains, 'tavily', False, language)
             return {**data, 'fallback_from':'brave', 'provider_notice':'Brave returned no web evidence; Tavily was used.'}
         return {'provider':'brave', 'results':results, 'locations':raw.get('locations'), '_trvelle_search':raw.get('_trvelle_search')}
     except (SearchBudgetError, httpx.HTTPError):
         if not fallback or not os.getenv('TAVILY_API_KEY'):
             raise
-        data = await research_search(query, max_results, include_domains, 'tavily', False)
+        data = await research_search(query, max_results, include_domains, 'tavily', False, language)
         return {**data, 'fallback_from':'brave', 'provider_notice':'Brave was unavailable; Tavily was used.'}
 
 

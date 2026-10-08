@@ -575,7 +575,8 @@ async def fetch_details(body: DetailRequest, user_id: uuid.UUID = Header(), chat
                     reports.append(report)
             edited.setdefault('flight_selections', {})[body.uid] = raw
             detail_data = raw
-            report = {'summary':'\n\n'.join(r['summary'] for r in reports if r.get('summary')),
+            report = {'summary':'\n\n'.join(dict.fromkeys(r['summary'] for r in reports if r.get('summary'))),
+                      **({'baggage_policy_version':1} if any(r.get('baggage_policy_version')==1 for r in reports) else {}),
                       'sources':list({s['url']:s for r in reports for s in r.get('sources', [])}.values()),
                       'missing':list(dict.fromkeys(x for r in reports for x in r.get('missing', []))),
                       'filled':list(dict.fromkeys(x for r in reports for x in r.get('filled', []))),

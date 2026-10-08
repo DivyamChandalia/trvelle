@@ -13,6 +13,48 @@ def option(number='LH 755', price=500):
 
 
 class DetailTests(unittest.IsolatedAsyncioTestCase):
+    async def test_baggage_rejects_destination_packages_and_other_airlines(self):
+        lookup=DetailLookup();lookup.serp=AsyncMock(return_value={'organic_results':[
+            {'title':'Japan Tokyo Osaka Kyoto tour','link':'https://tour.example/japan','snippet':'Posjeta Kabukiza teataru. 2 bags included.'},
+            {'title':'Japan Airlines baggage','link':'https://cabinz.example/jal','snippet':'Two 23 kg bags.'},
+            {'title':'Vietjet baggage','link':'https://vietjetair.com/en/baggage','snippet':'Checked baggage depends on fare.'},
+            {'title':'JAL checked baggage','link':'https://www.jal.co.jp/jp/en/inter/baggage/checked/','snippet':'Checked baggage allowance depends on cabin class.'}]})
+        with patch.dict('os.environ',{'TAVILY_API_KEY':''}):
+            report=await lookup.research('Japan Airlines baggage',{'kind':'flight','official_domains':['jal.co.jp']})
+        self.assertEqual(report['summary'],'')
+        self.assertEqual(report['status'],'sources_only')
+        self.assertEqual([s['url'] for s in report['sources']],['https://www.jal.co.jp/jp/en/inter/baggage/checked/'])
+
+    async def test_baggage_policy_is_summarized_in_english_without_verifying_fare(self):
+        source='https://www.jal.co.jp/jp/en/inter/baggage/checked/'
+        router=type('Router',(),{'invoke':AsyncMock(return_value=AIMessage(content=json.dumps({'summary':'General checked baggage allowance depends on cabin class. Confirm the selected fare and operating carrier.','source_urls':[source]})))})()
+        lookup=DetailLookup(router)
+        response={'results':[{'title':'JAL baggage','url':source,'content':'Checked baggage allowance for economy and business cabins.'},
+                             {'title':'Japan holiday','url':'https://tour.example/japan','content':'Posjeta Kabukiza teataru.'}]}
+        original=option('JL 30');original['flights'][0].update(airline='Japan Airlines',travel_class='Economy')
+        with patch('trvelle.tools.web_search.research_search',new=AsyncMock(return_value=response)) as search:
+            result,report=await lookup.fetch('flight',original,{'search_parameters':{'outbound_date':'2027-04-20'}},fields=['Baggage allowance'],web_provider='brave',context='Japan Tokyo Kyoto 2027')
+        self.assertEqual(result['price'],original['price'])
+        self.assertIn('Baggage allowance',report['missing'])
+        self.assertFalse(result['baggage_policies'][0]['fare_verified'])
+        self.assertIn('General checked baggage',result['baggage_policies'][0]['summary'])
+        self.assertEqual(report['baggage_policy_version'],1)
+        self.assertEqual(search.call_args.kwargs['include_domains'],['jal.co.jp'])
+        self.assertEqual(search.call_args.kwargs['language'],'en')
+        self.assertNotIn('Kyoto',search.call_args.args[0])
+        self.assertNotIn('Kabukiza',router.invoke.call_args.args[2][1].content)
+        self.assertIn('English',router.invoke.call_args.args[2][0].content)
+
+    async def test_failed_baggage_summarizer_never_displays_raw_html_or_foreign_snippets(self):
+        router=type('Router',(),{'invoke':AsyncMock(side_effect=RuntimeError('Model unavailable'))})()
+        lookup=DetailLookup(router);lookup.serp=AsyncMock(return_value={'organic_results':[
+            {'title':'JAL baggage','link':'https://www.jal.co.jp/jp/en/inter/baggage/checked/','snippet':'Checked baggage: <strong>23 kg</strong> &amp; special conditions.'}]})
+        with patch.dict('os.environ',{'TAVILY_API_KEY':''}):
+            report=await lookup.research('JAL baggage',{'kind':'flight','official_domains':['jal.co.jp']})
+        self.assertEqual(report['summary'],'')
+        self.assertEqual(report['status'],'sources_only')
+        self.assertEqual(len(report['sources']),1)
+
     async def test_missing_ticket_price_uses_marked_model_range_when_search_has_no_price(self):
         payload = {'summary': '', 'cost': {'min_price': 800, 'max_price': 1600, 'currency': 'INR', 'scope': 'per_person', 'status': 'estimate', 'basis': 'Typical museum admission from model knowledge; unverified.', 'source_url': 'https://invented.example'}}
         router = type('Router', (), {'invoke': AsyncMock(return_value=AIMessage(content=json.dumps(payload)))})()
