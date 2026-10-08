@@ -279,7 +279,9 @@ class PersonalModels(ModelAccounts):
 
     async def settings(self, owner):
         result = self.state(owner)
-        result["last_errors"] = self.load(owner).get("last_errors", {})
+        private = self.load(owner)
+        result['roles'] = {role:choice for role,choice in result['roles'].items() if choice and (choice.get('provider') not in ('openai','anthropic','google','openrouter') or private['keys'].get(choice['provider']))}
+        result["last_errors"] = private.get("last_errors", {})
         result["accounts"]["claude"] = await self.claude_state(owner)
         result["shared_keys"] = {
             p: bool(self.credential(owner, p)) and not result["keys"][p]
@@ -337,11 +339,7 @@ class PersonalModels(ModelAccounts):
                         "pricing": pricing,
                         "free": free_tool_model(item),
                         "expiration_date": expiry,
-                        "available": bool(self.load(owner)["keys"].get("openrouter"))
-                        or (
-                            bool(self.credential(owner, "openrouter"))
-                            and free_tool_model(item)
-                        ),
+                        "available": bool(self.load(owner)["keys"].get("openrouter")),
                         "created": item.get("created", 0),
                     }
                 )
@@ -365,7 +363,7 @@ class PersonalModels(ModelAccounts):
                     {"x-goog-api-key": self.credential(owner, "google")},
                 ),
             ]:
-                if not self.credential(owner, provider):
+                if not self.load(owner)['keys'].get(provider):
                     continue
                 data = await fetch(provider, url, headers)
                 for item in data.get("data", data.get("models", [])):
@@ -621,6 +619,8 @@ class PersonalModels(ModelAccounts):
                 raise AccountError("Invalid model role")
             if not selection:
                 continue
+            if selection['provider'] in ('openai','anthropic','google','openrouter') and not self.load(owner)['keys'].get(selection['provider']):
+                raise AccountError('Add your own API key to choose models. App-provided access uses automatic routing only.')
             model = next(
                 (
                     m
@@ -651,6 +651,8 @@ class PersonalModels(ModelAccounts):
         if not selection:
             return None
         provider, model = selection["provider"], selection["model"]
+        if provider in ('openai','anthropic','google','openrouter') and not data['keys'].get(provider):
+            return None  # Legacy shared-key choices become automatic without a paid key.
         expiry = selection.get("expiration_date")
         if expiry and expiry[:10] <= time.strftime("%Y-%m-%d", time.gmtime()):
             raise ModelsUnavailableError(

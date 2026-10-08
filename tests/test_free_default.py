@@ -61,3 +61,17 @@ class FreeDefaultTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.additional_kwargs['routing_model'],model['id'])
         self.service.request.assert_awaited_once()
         self.router.request.assert_not_called()
+
+    async def test_shared_api_credentials_allow_only_automatic_models(self):
+        for provider in ('openrouter','google','openai','anthropic'):
+            self.service.catalog=AsyncMock(return_value={'models':[{'provider':provider,'id':'fixture/free-model','efforts':[],'available':True,'free':True}]})
+            with self.assertRaises(AccountError):
+                await self.service.save_roles(self.owner,{'supervisor':{'provider':provider,'model':'fixture/free-model','effort':''}})
+        self.service.save(self.owner,{'keys':{},'oauth':{},'roles':{'supervisor':{'provider':'openrouter','model':'old/free-model','effort':''}}})
+        self.assertIsNone(await self.service.invoke_selected(self.router,self.owner,'supervisor',[],[]))
+        self.service.claude_state=AsyncMock(return_value={'status':'disconnected'})
+        self.assertEqual((await self.service.settings(self.owner))['roles'],{})
+        self.service.set_key(self.owner,'openrouter','personal-openrouter-fixture-key')
+        self.service.catalog=AsyncMock(return_value={'models':[{'provider':'openrouter','id':'fixture/free-model','efforts':[],'available':True,'free':True}]})
+        await self.service.save_roles(self.owner,{'supervisor':{'provider':'openrouter','model':'fixture/free-model','effort':''}})
+        self.assertEqual(self.service.load(self.owner)['roles']['supervisor']['model'],'fixture/free-model')

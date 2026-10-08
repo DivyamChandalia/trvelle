@@ -57,6 +57,7 @@ class PersonalTests(unittest.IsolatedAsyncioTestCase):
             self.service.set_key(self.owner, "openai", "key with whitespace")
 
     async def test_roles_validated_against_catalog_and_effort(self):
+        self.service.set_key(self.owner,"openai","personal-role-test-key")
         self.service.catalog = AsyncMock(
             return_value={
                 "models": [
